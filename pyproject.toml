@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "Async Python client library for the Chatto webchat GraphQL API"
 requires-python = ">=3.11"
 license = "MIT"
+readme = "README.md"
 authors = [
     { name = "Felix", email = "chatto@f3l1x.it" },
 ]
