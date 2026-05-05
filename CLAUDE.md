@@ -42,12 +42,12 @@ The library uses **httpx** for async HTTP and **websockets** for GraphQL subscri
 
 | Domain | Queries | Mutations | Subscriptions |
 |---|---|---|---|
-| **Spaces** | `spaces`, `space(id)` | `createSpace`, `updateSpace`, `joinSpace`, `leaveSpace`, logo/banner uploads | `mySpaceEvents` |
+| **Spaces** | `spaces`, `space(id)` | `updateSpace`, `joinSpace`, `leaveSpace`, logo/banner uploads | `mySpaceEvents` |
 | **Rooms** | `room`, `roomEvents`, `roomEventByEventId`, `threadEvents`, `roomEventsAround` | `createRoom`, `updateRoom`, `archiveRoom`, `joinRoom`, `leaveRoom`, `markRoomAsRead` | via space events |
 | **Messages** | (via roomEvents) | `postMessage`, `editMessage`, `deleteMessage` | `MessagePostedEvent`, `MessageUpdatedEvent`, `MessageDeletedEvent` |
 | **Reactions** | (on message events) | `addReaction`, `removeReaction` | `ReactionAddedEvent`, `ReactionRemovedEvent` |
 | **Threads** | `threadEvents`, `myFollowedThreads` | `followThread`, `unfollowThread`, `markThreadAsOpened` | `ThreadFollowChangedEvent` |
-| **Users** | `me`, `user(id)`, `userByLogin`, `users` | `updateMyProfile`, `uploadMyAvatar`, `deleteMyAvatar`, `createUser` | `UserProfileUpdatedEvent`, `PresenceChangedEvent` |
+| **Users** | `me`, `user(id)`, `userByLogin`, `users` | `updateMyProfile`, `uploadMyAvatar`, `deleteMyAvatar` | `UserProfileUpdatedEvent`, `PresenceChangedEvent` |
 | **DMs** | (via rooms) | `startDM` | `NewDirectMessageNotificationEvent` |
 | **Notifications** | `notifications`, `hasNotifications` | `dismissNotification`, `dismissAllNotifications` | `NotificationCreatedEvent`, `NotificationDismissedEvent` |
 | **Permissions/Roles** | via `admin` query, `space.roles` | `grantInstancePermission`, `createRole`, `assignInstanceRole`, space-level equivalents | — |
@@ -59,7 +59,7 @@ The library uses **httpx** for async HTTP and **websockets** for GraphQL subscri
 - IDs are opaque strings (`ID` scalar).
 - Large integers use `Int64` scalar (e.g., byte counts) — map to Python `int`.
 - File uploads use a custom `Upload` scalar (multipart form).
-- Pagination uses `limit`/`before`/`after` cursor style on room events; `limit`/`offset` on space members.
+- Pagination uses `limit`/`before`/`after` on room events (`before`/`after` are `Time` scalars, ISO timestamps); `limit`/`offset` on space members.
 - All mutations take a single `input` argument with a corresponding `*Input` type.
 - Subscriptions use `spaceId` scoping (`mySpaceEvents`) or are instance-wide (`myInstanceEvents`).
 - Image URLs accept optional `width`, `height`, `fit` (enum: `CONTAIN`, `COVER`, `EXACT`) for server-side resizing.

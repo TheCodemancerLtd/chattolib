@@ -46,20 +46,3 @@ async def test_list_spaces(client):
     print(f"Found {len(spaces)} spaces")
     for s in spaces:
         print(f"  - {s.name} (id={s.id}, members={s.member_count})")
-
-
-async def test_create_user(client):
-    """Test creating a new user via the createUser mutation (requires admin)."""
-    import random
-    import string
-
-    suffix = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
-    login = f"testbot_{suffix}"
-    display_name = f"Test Bot {suffix}"
-    password = "TestPass123!"
-
-    user = await client.create_user(login, display_name, password)
-    assert user.id
-    assert user.login == login
-    assert user.display_name == display_name
-    print(f"Created user: {user.login} (id={user.id})")

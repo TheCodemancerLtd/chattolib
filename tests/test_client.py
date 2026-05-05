@@ -165,28 +165,6 @@ async def test_login_invalid():
             await ChattoClient.login("bad", "creds")
 
 
-async def test_create_user(mock_api, client):
-    mock_api.post("/api/graphql").mock(
-        return_value=_gql_response(
-            {
-                "createUser": {
-                    "id": "u2",
-                    "login": "newbot",
-                    "displayName": "New Bot",
-                    "createdAt": "2025-01-01T00:00:00Z",
-                    "avatarUrl": None,
-                    "presenceStatus": None,
-                }
-            }
-        )
-    )
-    async with client:
-        user = await client.create_user("newbot", "New Bot", "pass123")
-    assert user.id == "u2"
-    assert user.login == "newbot"
-    assert user.display_name == "New Bot"
-
-
 async def test_edit_message(mock_api, client):
     mock_api.post("/api/graphql").mock(
         return_value=_gql_response({"editMessage": {"id": "e1"}})
@@ -221,18 +199,6 @@ async def test_remove_reaction(mock_api, client):
     async with client:
         result = await client.remove_reaction("s1", "r1", "e1", "👍")
     assert result is True
-
-
-async def test_create_space(mock_api, client):
-    mock_api.post("/api/graphql").mock(
-        return_value=_gql_response(
-            {"createSpace": {"id": "s1", "name": "Test Space", "description": "A test"}}
-        )
-    )
-    async with client:
-        space = await client.create_space("Test Space", description="A test")
-    assert space.id == "s1"
-    assert space.name == "Test Space"
 
 
 async def test_create_room(mock_api, client):
