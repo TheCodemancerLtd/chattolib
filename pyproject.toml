@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "chattolib"
-version = "0.1.0"
+version = "0.0.149a0"
 description = "Async Python client library for the Chatto webchat GraphQL API"
 requires-python = ">=3.11"
 license = "MIT"

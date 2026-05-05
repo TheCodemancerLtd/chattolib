@@ -349,13 +349,6 @@ class ChattoClient:
 
     # --- Mutations ---
 
-    async def create_user(self, login: str, display_name: str, password: str) -> User:
-        data = await self._execute(
-            Q.MUTATION_CREATE_USER,
-            {"input": {"login": login, "displayName": display_name, "password": password}},
-        )
-        return _parse_user(data["createUser"])
-
     async def post_message(
         self,
         space_id: str,
@@ -417,13 +410,6 @@ class ChattoClient:
             {"input": {"spaceId": space_id, "roomId": room_id, "messageEventId": message_event_id, "emoji": emoji}},
         )
         return data["removeReaction"]
-
-    async def create_space(self, name: str, description: str | None = None) -> Space:
-        input_data: dict[str, Any] = {"name": name}
-        if description is not None:
-            input_data["description"] = description
-        data = await self._execute(Q.MUTATION_CREATE_SPACE, {"input": input_data})
-        return _parse_space(data["createSpace"])
 
     async def join_space(self, space_id: str) -> dict[str, Any]:
         data = await self._execute(Q.MUTATION_JOIN_SPACE, {"input": {"spaceId": space_id}})

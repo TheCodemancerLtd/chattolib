@@ -59,7 +59,7 @@ query Room($spaceId: ID!, $roomId: ID!) {
 """
 
 QUERY_ROOM_EVENTS = """
-query RoomEvents($spaceId: ID!, $roomId: ID!, $limit: Int, $before: ID, $after: ID) {
+query RoomEvents($spaceId: ID!, $roomId: ID!, $limit: Int, $before: Time, $after: Time) {
     roomEvents(spaceId: $spaceId, roomId: $roomId, limit: $limit, before: $before, after: $after) {
         events {
             id
@@ -199,19 +199,6 @@ query FollowedThreads($spaceId: ID!) {
 
 # --- Mutations ---
 
-MUTATION_CREATE_USER = """
-mutation CreateUser($input: CreateUserInput!) {
-    createUser(input: $input) {
-        id
-        login
-        displayName
-        createdAt
-        avatarUrl
-        presenceStatus
-    }
-}
-"""
-
 MUTATION_POST_MESSAGE = """
 mutation PostMessage($input: PostMessageInput!) {
     postMessage(input: $input) {
@@ -244,16 +231,6 @@ mutation AddReaction($input: AddReactionInput!) {
 MUTATION_REMOVE_REACTION = """
 mutation RemoveReaction($input: RemoveReactionInput!) {
     removeReaction(input: $input)
-}
-"""
-
-MUTATION_CREATE_SPACE = """
-mutation CreateSpace($input: CreateSpaceInput!) {
-    createSpace(input: $input) {
-        id
-        name
-        description
-    }
 }
 """
 
