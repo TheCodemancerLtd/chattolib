@@ -18,7 +18,7 @@ from chattolib.types import (
     Reaction,
     Room,
     RoomEventsPage,
-    Space,
+    RoomType,
     User,
 )
 
@@ -40,24 +40,11 @@ def _parse_user(data: dict[str, Any]) -> User:
     )
 
 
-def _parse_space(data: dict[str, Any]) -> Space:
-    return Space(
-        id=data["id"],
-        name=data["name"],
-        description=data.get("description"),
-        logo_url=data.get("logoUrl"),
-        banner_url=data.get("bannerUrl"),
-        member_count=data.get("memberCount", 0),
-        room_count=data.get("roomCount", 0),
-        viewer_is_member=data.get("viewerIsMember", False),
-    )
-
-
 def _parse_room(data: dict[str, Any]) -> Room:
     return Room(
         id=data["id"],
-        space_id=data["spaceId"],
         name=data["name"],
+        type=RoomType(data["type"]) if data.get("type") else None,
         description=data.get("description"),
         archived=data.get("archived", False),
         auto_join=data.get("autoJoin", False),
@@ -69,7 +56,6 @@ def _parse_room(data: dict[str, Any]) -> Room:
 def _parse_attachment(data: dict[str, Any]) -> Attachment:
     return Attachment(
         id=data["id"],
-        space_id=data.get("spaceId", ""),
         room_id=data.get("roomId", ""),
         filename=data["filename"],
         content_type=data["contentType"],
@@ -94,7 +80,6 @@ def _parse_message_event(data: dict[str, Any]) -> MessageEvent:
     actor_data = data.get("actor")
     return MessageEvent(
         id=data["id"],
-        space_id=event.get("spaceId", ""),
         room_id=event.get("roomId", ""),
         body=event.get("body"),
         created_at=_parse_datetime(data.get("createdAt")),
@@ -125,9 +110,9 @@ class ChattoClient:
 
     Usage::
 
-        async with ChattoClient.login("user", "pass") as client:
+        async with await ChattoClient.login("user", "pass") as client:
             me = await client.me()
-            spaces = await client.spaces()
+            rooms = await client.rooms()
 
         # Or with a token directly:
         async with ChattoClient(token="cht_...") as client:
@@ -255,11 +240,12 @@ class ChattoClient:
         if response.status_code == 401:
             raise ChattoAuthError("Authentication failed")
 
-        response.raise_for_status()
         body = response.json()
 
         if "errors" in body:
             raise ChattoGraphQLError(body["errors"], data=body.get("data"))
+
+        response.raise_for_status()
 
         return body["data"]
 
@@ -269,28 +255,28 @@ class ChattoClient:
         data = await self._execute(Q.QUERY_ME)
         return _parse_user(data["me"])
 
-    async def spaces(self) -> list[Space]:
-        data = await self._execute(Q.QUERY_SPACES)
-        return [_parse_space(s) for s in data["spaces"]]
+    async def instance(self) -> dict[str, Any]:
+        data = await self._execute(Q.QUERY_INSTANCE)
+        return data["instance"]
 
-    async def space(self, space_id: str) -> Space:
-        data = await self._execute(Q.QUERY_SPACE, {"id": space_id})
-        return _parse_space(data["space"])
+    async def rooms(self) -> list[Room]:
+        """Get all rooms from the instance."""
+        data = await self._execute(Q.QUERY_INSTANCE)
+        return [_parse_room(r) for r in data["instance"]["rooms"]]
 
-    async def room(self, space_id: str, room_id: str) -> Room:
-        data = await self._execute(Q.QUERY_ROOM, {"spaceId": space_id, "roomId": room_id})
+    async def room(self, room_id: str) -> Room:
+        data = await self._execute(Q.QUERY_ROOM, {"roomId": room_id})
         return _parse_room(data["room"])
 
     async def room_events(
         self,
-        space_id: str,
         room_id: str,
         *,
         limit: int | None = None,
         before: str | None = None,
         after: str | None = None,
     ) -> RoomEventsPage:
-        variables: dict[str, Any] = {"spaceId": space_id, "roomId": room_id}
+        variables: dict[str, Any] = {"roomId": room_id}
         if limit is not None:
             variables["limit"] = limit
         if before is not None:
@@ -303,17 +289,18 @@ class ChattoClient:
             events=[_parse_message_event(e) for e in conn["events"]],
             has_older=conn["hasOlder"],
             has_newer=conn["hasNewer"],
+            start_cursor=conn.get("startCursor"),
+            end_cursor=conn.get("endCursor"),
         )
 
     async def thread_events(
         self,
-        space_id: str,
         room_id: str,
         thread_root_event_id: str,
     ) -> list[MessageEvent]:
         data = await self._execute(
             Q.QUERY_THREAD_EVENTS,
-            {"spaceId": space_id, "roomId": room_id, "threadRootEventId": thread_root_event_id},
+            {"roomId": room_id, "threadRootEventId": thread_root_event_id},
         )
         return [_parse_message_event(e) for e in data["threadEvents"]]
 
@@ -333,11 +320,10 @@ class ChattoClient:
         data = await self._execute(Q.QUERY_NOTIFICATIONS)
         return data["notifications"]
 
-    async def followed_threads(self, space_id: str) -> list[FollowedThread]:
-        data = await self._execute(Q.QUERY_FOLLOWED_THREADS, {"spaceId": space_id})
+    async def followed_threads(self) -> list[FollowedThread]:
+        data = await self._execute(Q.QUERY_FOLLOWED_THREADS)
         return [
             FollowedThread(
-                space_id=t["spaceId"],
                 room_id=t["roomId"],
                 thread_root_event_id=t["threadRootEventId"],
                 reply_count=t.get("replyCount", 0),
@@ -351,7 +337,6 @@ class ChattoClient:
 
     async def post_message(
         self,
-        space_id: str,
         room_id: str,
         body: str,
         *,
@@ -360,7 +345,6 @@ class ChattoClient:
         also_send_to_channel: bool | None = None,
     ) -> dict[str, Any]:
         input_data: dict[str, Any] = {
-            "spaceId": space_id,
             "roomId": room_id,
             "body": body,
         }
@@ -375,99 +359,90 @@ class ChattoClient:
 
     async def edit_message(
         self,
-        space_id: str,
         room_id: str,
         event_id: str,
         body: str,
     ) -> dict[str, Any]:
         data = await self._execute(
             Q.MUTATION_EDIT_MESSAGE,
-            {"input": {"spaceId": space_id, "roomId": room_id, "eventId": event_id, "body": body}},
+            {"input": {"roomId": room_id, "eventId": event_id, "body": body}},
         )
         return data["editMessage"]
 
-    async def delete_message(self, space_id: str, room_id: str, event_id: str) -> Any:
+    async def delete_message(self, room_id: str, event_id: str) -> Any:
         data = await self._execute(
             Q.MUTATION_DELETE_MESSAGE,
-            {"input": {"spaceId": space_id, "roomId": room_id, "eventId": event_id}},
+            {"input": {"roomId": room_id, "eventId": event_id}},
         )
         return data["deleteMessage"]
 
     async def add_reaction(
-        self, space_id: str, room_id: str, message_event_id: str, emoji: str
+        self, room_id: str, message_event_id: str, emoji: str
     ) -> Any:
         data = await self._execute(
             Q.MUTATION_ADD_REACTION,
-            {"input": {"spaceId": space_id, "roomId": room_id, "messageEventId": message_event_id, "emoji": emoji}},
+            {"input": {"roomId": room_id, "messageEventId": message_event_id, "emoji": emoji}},
         )
         return data["addReaction"]
 
     async def remove_reaction(
-        self, space_id: str, room_id: str, message_event_id: str, emoji: str
+        self, room_id: str, message_event_id: str, emoji: str
     ) -> Any:
         data = await self._execute(
             Q.MUTATION_REMOVE_REACTION,
-            {"input": {"spaceId": space_id, "roomId": room_id, "messageEventId": message_event_id, "emoji": emoji}},
+            {"input": {"roomId": room_id, "messageEventId": message_event_id, "emoji": emoji}},
         )
         return data["removeReaction"]
 
-    async def join_space(self, space_id: str) -> dict[str, Any]:
-        data = await self._execute(Q.MUTATION_JOIN_SPACE, {"input": {"spaceId": space_id}})
-        return data["joinSpace"]
-
-    async def leave_space(self, space_id: str) -> Any:
-        data = await self._execute(Q.MUTATION_LEAVE_SPACE, {"input": {"spaceId": space_id}})
-        return data["leaveSpace"]
-
     async def create_room(
-        self, space_id: str, name: str, description: str | None = None
+        self, name: str, description: str | None = None
     ) -> Room:
-        input_data: dict[str, Any] = {"spaceId": space_id, "name": name}
+        input_data: dict[str, Any] = {"name": name}
         if description is not None:
             input_data["description"] = description
         data = await self._execute(Q.MUTATION_CREATE_ROOM, {"input": input_data})
         return _parse_room(data["createRoom"])
 
-    async def join_room(self, space_id: str, room_id: str) -> dict[str, Any]:
+    async def join_room(self, room_id: str) -> dict[str, Any]:
         data = await self._execute(
-            Q.MUTATION_JOIN_ROOM, {"input": {"spaceId": space_id, "roomId": room_id}}
+            Q.MUTATION_JOIN_ROOM, {"input": {"roomId": room_id}}
         )
         return data["joinRoom"]
 
-    async def leave_room(self, space_id: str, room_id: str) -> Any:
+    async def leave_room(self, room_id: str) -> Any:
         data = await self._execute(
-            Q.MUTATION_LEAVE_ROOM, {"input": {"spaceId": space_id, "roomId": room_id}}
+            Q.MUTATION_LEAVE_ROOM, {"input": {"roomId": room_id}}
         )
         return data["leaveRoom"]
 
-    async def mark_room_as_read(self, space_id: str, room_id: str) -> dict[str, Any]:
+    async def mark_room_as_read(self, room_id: str) -> dict[str, Any]:
         data = await self._execute(
-            Q.MUTATION_MARK_ROOM_AS_READ, {"input": {"spaceId": space_id, "roomId": room_id}}
+            Q.MUTATION_MARK_ROOM_AS_READ, {"input": {"roomId": room_id}}
         )
         return data["markRoomAsRead"]
 
     async def follow_thread(
-        self, space_id: str, room_id: str, thread_root_event_id: str
+        self, room_id: str, thread_root_event_id: str
     ) -> Any:
         data = await self._execute(
             Q.MUTATION_FOLLOW_THREAD,
-            {"input": {"spaceId": space_id, "roomId": room_id, "threadRootEventId": thread_root_event_id}},
+            {"input": {"roomId": room_id, "threadRootEventId": thread_root_event_id}},
         )
         return data["followThread"]
 
     async def unfollow_thread(
-        self, space_id: str, room_id: str, thread_root_event_id: str
+        self, room_id: str, thread_root_event_id: str
     ) -> Any:
         data = await self._execute(
             Q.MUTATION_UNFOLLOW_THREAD,
-            {"input": {"spaceId": space_id, "roomId": room_id, "threadRootEventId": thread_root_event_id}},
+            {"input": {"roomId": room_id, "threadRootEventId": thread_root_event_id}},
         )
         return data["unfollowThread"]
 
     async def send_typing_indicator(
-        self, space_id: str, room_id: str, thread_root_event_id: str | None = None
+        self, room_id: str, thread_root_event_id: str | None = None
     ) -> Any:
-        input_data: dict[str, Any] = {"spaceId": space_id, "roomId": room_id}
+        input_data: dict[str, Any] = {"roomId": room_id}
         if thread_root_event_id is not None:
             input_data["threadRootEventId"] = thread_root_event_id
         data = await self._execute(Q.MUTATION_SEND_TYPING, {"input": input_data})

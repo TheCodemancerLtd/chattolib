@@ -40,9 +40,9 @@ async def test_invalid_login():
         await ChattoClient.login("nonexistent_user_xyz", "wrongpassword")
 
 
-async def test_list_spaces(client):
-    spaces = await client.spaces()
-    assert isinstance(spaces, list)
-    print(f"Found {len(spaces)} spaces")
-    for s in spaces:
-        print(f"  - {s.name} (id={s.id}, members={s.member_count})")
+async def test_list_rooms(client):
+    rooms = await client.rooms()
+    assert isinstance(rooms, list)
+    print(f"Found {len(rooms)} rooms")
+    for r in rooms:
+        print(f"  - {r.name} (id={r.id}, type={r.type})")

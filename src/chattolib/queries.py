@@ -15,39 +15,29 @@ query Me {
 }
 """
 
-QUERY_SPACES = """
-query Spaces {
-    spaces {
-        id
-        name
-        description
+QUERY_INSTANCE = """
+query Instance {
+    instance {
+        version
+        enabledAuthProviders
+        needsSetup
+        pushNotificationsEnabled
+        livekitUrl
+        directRegistrationEnabled
+        maxUploadSize
+        maxVideoUploadSize
         memberCount
         roomCount
-        viewerIsMember
-    }
-}
-"""
-
-QUERY_SPACE = """
-query Space($id: ID!) {
-    space(id: $id) {
-        id
-        name
-        description
-        logoUrl
-        bannerUrl
-        memberCount
-        roomCount
-        viewerIsMember
+        rooms { id type name description archived autoJoin hasUnread hasMention }
     }
 }
 """
 
 QUERY_ROOM = """
-query Room($spaceId: ID!, $roomId: ID!) {
-    room(spaceId: $spaceId, roomId: $roomId) {
+query Room($roomId: ID!) {
+    room(roomId: $roomId) {
         id
-        spaceId
+        type
         name
         description
         archived
@@ -59,8 +49,8 @@ query Room($spaceId: ID!, $roomId: ID!) {
 """
 
 QUERY_ROOM_EVENTS = """
-query RoomEvents($spaceId: ID!, $roomId: ID!, $limit: Int, $before: Time, $after: Time) {
-    roomEvents(spaceId: $spaceId, roomId: $roomId, limit: $limit, before: $before, after: $after) {
+query RoomEvents($roomId: ID!, $limit: Int, $before: Time, $after: Time) {
+    roomEvents(roomId: $roomId, limit: $limit, before: $before, after: $after) {
         events {
             id
             createdAt
@@ -68,7 +58,6 @@ query RoomEvents($spaceId: ID!, $roomId: ID!, $limit: Int, $before: Time, $after
             actor { id login displayName avatarUrl }
             event {
                 ... on MessagePostedEvent {
-                    spaceId
                     roomId
                     body
                     attachments { id filename contentType size url }
@@ -83,20 +72,21 @@ query RoomEvents($spaceId: ID!, $roomId: ID!, $limit: Int, $before: Time, $after
         }
         hasOlder
         hasNewer
+        startCursor
+        endCursor
     }
 }
 """
 
 QUERY_THREAD_EVENTS = """
-query ThreadEvents($spaceId: ID!, $roomId: ID!, $threadRootEventId: ID!) {
-    threadEvents(spaceId: $spaceId, roomId: $roomId, threadRootEventId: $threadRootEventId) {
+query ThreadEvents($roomId: ID!, $threadRootEventId: ID!) {
+    threadEvents(roomId: $roomId, threadRootEventId: $threadRootEventId) {
         id
         createdAt
         actorId
         actor { id login displayName avatarUrl }
         event {
             ... on MessagePostedEvent {
-                spaceId
                 roomId
                 body
                 attachments { id filename contentType size url }
@@ -154,7 +144,6 @@ query Notifications {
             id
             createdAt
             summary
-            space { id name }
             room { id name }
             eventId
         }
@@ -162,7 +151,6 @@ query Notifications {
             id
             createdAt
             summary
-            space { id name }
             room { id name }
             eventId
         }
@@ -170,7 +158,6 @@ query Notifications {
             id
             createdAt
             summary
-            space { id name }
             room { id name }
             eventId
         }
@@ -185,9 +172,8 @@ query Notifications {
 """
 
 QUERY_FOLLOWED_THREADS = """
-query FollowedThreads($spaceId: ID!) {
-    myFollowedThreads(spaceId: $spaceId) {
-        spaceId
+query FollowedThreads {
+    myFollowedThreads {
         roomId
         threadRootEventId
         replyCount
@@ -234,26 +220,11 @@ mutation RemoveReaction($input: RemoveReactionInput!) {
 }
 """
 
-MUTATION_JOIN_SPACE = """
-mutation JoinSpace($input: JoinSpaceInput!) {
-    joinSpace(input: $input) {
-        id
-        name
-    }
-}
-"""
-
-MUTATION_LEAVE_SPACE = """
-mutation LeaveSpace($input: LeaveSpaceInput!) {
-    leaveSpace(input: $input)
-}
-"""
-
 MUTATION_CREATE_ROOM = """
 mutation CreateRoom($input: CreateRoomInput!) {
     createRoom(input: $input) {
         id
-        spaceId
+        type
         name
         description
     }
@@ -349,31 +320,31 @@ mutation DismissAllNotifications {
 
 # --- Subscriptions ---
 
-SUBSCRIPTION_SPACE_EVENTS = """
-subscription SpaceEvents($spaceId: ID!) {
-    mySpaceEvents(spaceId: $spaceId) {
+SUBSCRIPTION_SERVER_EVENTS = """
+subscription ServerEvents {
+    myServerEvents {
         id
         createdAt
         actorId
         actor { id login displayName avatarUrl }
         event {
-            ... on MessagePostedEvent { spaceId roomId body inThread }
-            ... on MessageUpdatedEvent { spaceId roomId messageEventId }
-            ... on MessageDeletedEvent { spaceId roomId messageEventId }
-            ... on ReactionAddedEvent { spaceId roomId messageEventId emoji }
-            ... on ReactionRemovedEvent { spaceId roomId messageEventId emoji }
-            ... on UserTypingEvent { spaceId roomId threadRootEventId }
+            ... on MessagePostedEvent { roomId body inThread }
+            ... on MessageUpdatedEvent { roomId messageEventId }
+            ... on MessageDeletedEvent { roomId messageEventId }
+            ... on ReactionAddedEvent { roomId messageEventId emoji }
+            ... on ReactionRemovedEvent { roomId messageEventId emoji }
+            ... on UserTypingEvent { roomId threadRootEventId }
             ... on RoomCreatedEvent { roomId name description }
             ... on RoomUpdatedEvent { roomId name description }
             ... on RoomDeletedEvent { roomId }
             ... on RoomArchivedEvent { roomId }
             ... on RoomUnarchivedEvent { roomId }
-            ... on UserJoinedRoomEvent { spaceId roomId }
-            ... on UserLeftRoomEvent { spaceId roomId }
-            ... on SpaceMemberDeletedEvent { spaceId userId }
-            ... on CallParticipantJoinedEvent { spaceId roomId }
-            ... on CallParticipantLeftEvent { spaceId roomId }
-            ... on VideoProcessingCompletedEvent { spaceId roomId attachmentId messageEventId }
+            ... on UserJoinedRoomEvent { roomId }
+            ... on UserLeftRoomEvent { roomId }
+            ... on ServerMemberDeletedEvent { userId }
+            ... on CallParticipantJoinedEvent { roomId }
+            ... on CallParticipantLeftEvent { roomId }
+            ... on VideoProcessingCompletedEvent { roomId attachmentId messageEventId }
             ... on PresenceChangedEvent { status }
         }
     }
@@ -393,20 +364,18 @@ subscription InstanceEvents {
             ... on UserDeletedEvent { userId }
             ... on UserProfileUpdatedEvent { userId displayName avatarUrl login }
             ... on InstanceUserPreferencesUpdatedEvent { timezone timeFormat }
-            ... on NotificationLevelChangedEvent { spaceId roomId level effectiveLevel }
-            ... on UserJoinedSpaceEvent { spaceId }
-            ... on UserLeftSpaceEvent { spaceId }
-            ... on SpaceCreatedEvent { spaceId name description }
-            ... on SpaceUpdatedEvent { spaceId name description }
-            ... on SpaceDeletedEvent { spaceId }
-            ... on MentionNotificationEvent { spaceId roomId }
+            ... on NotificationLevelChangedEvent { roomId level effectiveLevel }
+            ... on UserJoinedServerEvent { userId }
+            ... on UserLeftServerEvent { userId }
+            ... on ServerUpdatedEvent { name description }
+            ... on MentionNotificationEvent { roomId }
             ... on NewDirectMessageNotificationEvent { roomId conversationName }
-            ... on NotificationCreatedEvent { notificationId spaceId roomId eventId inReplyToId }
+            ... on NotificationCreatedEvent { notificationId roomId eventId inReplyToId }
             ... on NotificationDismissedEvent { notificationId }
-            ... on ThreadFollowChangedEvent { spaceId roomId threadRootEventId isFollowing }
-            ... on NewMessageInSpaceEvent { spaceId roomId }
-            ... on RoomMarkedAsReadEvent { spaceId roomId }
-            ... on RoomLayoutUpdatedEvent { spaceId }
+            ... on ThreadFollowChangedEvent { roomId threadRootEventId isFollowing }
+            ... on NewMessageInServerEvent { roomId }
+            ... on RoomMarkedAsReadEvent { roomId }
+            ... on RoomLayoutUpdatedEvent { changed }
             ... on SessionTerminatedEvent { reason }
         }
     }

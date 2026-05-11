@@ -58,16 +58,15 @@ async def _keepalive(ws: ClientConnection) -> None:
         pass
 
 
-async def subscribe_space_events(
+async def subscribe_server_events(
     url: str,
     token: str,
-    space_id: str,
     *,
     subscription_id: str = "1",
 ) -> AsyncIterator[dict[str, Any]]:
-    """Subscribe to real-time events for a space.
+    """Subscribe to real-time server events.
 
-    Yields event dicts from the mySpaceEvents subscription.
+    Yields event dicts from the myServerEvents subscription.
     """
     ws = await _connect(url, token)
     ping_task = asyncio.create_task(_keepalive(ws))
@@ -78,8 +77,7 @@ async def subscribe_space_events(
                     "id": subscription_id,
                     "type": _GQL_SUBSCRIBE,
                     "payload": {
-                        "query": Q.SUBSCRIPTION_SPACE_EVENTS,
-                        "variables": {"spaceId": space_id},
+                        "query": Q.SUBSCRIPTION_SERVER_EVENTS,
                     },
                 }
             )
@@ -88,7 +86,7 @@ async def subscribe_space_events(
             msg = json.loads(raw)
             msg_type = msg.get("type")
             if msg_type == _GQL_NEXT:
-                yield msg["payload"]["data"]["mySpaceEvents"]
+                yield msg["payload"]["data"]["myServerEvents"]
             elif msg_type == _GQL_PING:
                 await ws.send(json.dumps({"type": _GQL_PONG}))
             elif msg_type == _GQL_PONG:

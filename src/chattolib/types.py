@@ -30,6 +30,11 @@ class PresenceStatus(str, Enum):
     DO_NOT_DISTURB = "DO_NOT_DISTURB"
 
 
+class RoomType(str, Enum):
+    CHANNEL = "CHANNEL"
+    DM = "DM"
+
+
 class TimeFormat(str, Enum):
     UNSPECIFIED = "UNSPECIFIED"
     TWELVE_HOUR = "TWELVE_HOUR"
@@ -57,22 +62,10 @@ class User:
 
 
 @dataclass
-class Space:
-    id: str
-    name: str
-    description: str | None = None
-    logo_url: str | None = None
-    banner_url: str | None = None
-    member_count: int = 0
-    room_count: int = 0
-    viewer_is_member: bool = False
-
-
-@dataclass
 class Room:
     id: str
-    space_id: str
     name: str
+    type: RoomType | None = None
     description: str | None = None
     archived: bool = False
     auto_join: bool = False
@@ -83,7 +76,6 @@ class Room:
 @dataclass
 class Attachment:
     id: str
-    space_id: str
     room_id: str
     filename: str
     content_type: str
@@ -117,7 +109,6 @@ class MessageEvent:
     """A message event from roomEvents / threadEvents."""
 
     id: str
-    space_id: str
     room_id: str
     body: str | None = None
     created_at: datetime | None = None
@@ -135,11 +126,12 @@ class RoomEventsPage:
     events: list[MessageEvent]
     has_older: bool = False
     has_newer: bool = False
+    start_cursor: str | None = None
+    end_cursor: str | None = None
 
 
 @dataclass
 class FollowedThread:
-    space_id: str
     room_id: str
     thread_root_event_id: str
     reply_count: int = 0

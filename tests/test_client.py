@@ -46,28 +46,32 @@ async def test_me(mock_api, client):
     assert user.display_name == "Alice"
 
 
-async def test_spaces(mock_api, client):
+async def test_rooms(mock_api, client):
     mock_api.post("/api/graphql").mock(
         return_value=_gql_response(
             {
-                "spaces": [
-                    {
-                        "id": "s1",
-                        "name": "General",
-                        "description": None,
-                        "memberCount": 5,
-                        "roomCount": 3,
-                        "viewerIsMember": True,
-                    }
-                ]
+                "instance": {
+                    "rooms": [
+                        {
+                            "id": "r1",
+                            "type": "CHANNEL",
+                            "name": "general",
+                            "description": None,
+                            "archived": False,
+                            "autoJoin": True,
+                            "hasUnread": False,
+                            "hasMention": False,
+                        }
+                    ]
+                }
             }
         )
     )
     async with client:
-        spaces = await client.spaces()
-    assert len(spaces) == 1
-    assert spaces[0].name == "General"
-    assert spaces[0].viewer_is_member is True
+        rooms = await client.rooms()
+    assert len(rooms) == 1
+    assert rooms[0].name == "general"
+    assert rooms[0].type.value == "CHANNEL"
 
 
 async def test_graphql_error(mock_api, client):
@@ -96,7 +100,7 @@ async def test_post_message(mock_api, client):
         )
     )
     async with client:
-        result = await client.post_message("s1", "r1", "Hello!")
+        result = await client.post_message("r1", "Hello!")
     assert result["id"] == "e1"
 
 
@@ -117,7 +121,6 @@ async def test_room_events(mock_api, client):
                                 "avatarUrl": None,
                             },
                             "event": {
-                                "spaceId": "s1",
                                 "roomId": "r1",
                                 "body": "Hello",
                                 "attachments": [],
@@ -132,12 +135,14 @@ async def test_room_events(mock_api, client):
                     ],
                     "hasOlder": False,
                     "hasNewer": False,
+                    "startCursor": None,
+                    "endCursor": None,
                 }
             }
         )
     )
     async with client:
-        page = await client.room_events("s1", "r1", limit=10)
+        page = await client.room_events("r1", limit=10)
     assert len(page.events) == 1
     assert page.events[0].body == "Hello"
     assert page.events[0].actor.login == "alice"
@@ -170,7 +175,7 @@ async def test_edit_message(mock_api, client):
         return_value=_gql_response({"editMessage": {"id": "e1"}})
     )
     async with client:
-        result = await client.edit_message("s1", "r1", "e1", "edited body")
+        result = await client.edit_message("r1", "e1", "edited body")
     assert result["id"] == "e1"
 
 
@@ -179,7 +184,7 @@ async def test_delete_message(mock_api, client):
         return_value=_gql_response({"deleteMessage": True})
     )
     async with client:
-        result = await client.delete_message("s1", "r1", "e1")
+        result = await client.delete_message("r1", "e1")
     assert result is True
 
 
@@ -188,7 +193,7 @@ async def test_add_reaction(mock_api, client):
         return_value=_gql_response({"addReaction": True})
     )
     async with client:
-        result = await client.add_reaction("s1", "r1", "e1", "👍")
+        result = await client.add_reaction("r1", "e1", "thumbsup")
     assert result is True
 
 
@@ -197,18 +202,18 @@ async def test_remove_reaction(mock_api, client):
         return_value=_gql_response({"removeReaction": True})
     )
     async with client:
-        result = await client.remove_reaction("s1", "r1", "e1", "👍")
+        result = await client.remove_reaction("r1", "e1", "thumbsup")
     assert result is True
 
 
 async def test_create_room(mock_api, client):
     mock_api.post("/api/graphql").mock(
         return_value=_gql_response(
-            {"createRoom": {"id": "r1", "spaceId": "s1", "name": "general", "description": None}}
+            {"createRoom": {"id": "r1", "type": "CHANNEL", "name": "general", "description": None}}
         )
     )
     async with client:
-        room = await client.create_room("s1", "general")
+        room = await client.create_room("general")
     assert room.id == "r1"
     assert room.name == "general"
 
