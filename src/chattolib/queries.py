@@ -4,31 +4,33 @@
 
 QUERY_ME = """
 query Me {
-    me {
-        id
-        login
-        displayName
-        createdAt
-        avatarUrl
-        presenceStatus
+    viewer {
+        user {
+            id
+            login
+            displayName
+            createdAt
+            avatarUrl
+            presenceStatus
+        }
     }
 }
 """
 
-QUERY_INSTANCE = """
-query Instance {
-    instance {
+QUERY_SERVER = """
+query Server {
+    server {
         version
         enabledAuthProviders
-        needsSetup
         pushNotificationsEnabled
         livekitUrl
         directRegistrationEnabled
         maxUploadSize
         maxVideoUploadSize
+        messageEditWindowSeconds
         memberCount
         roomCount
-        rooms { id type name description archived autoJoin hasUnread hasMention }
+        rooms { id type name description archived groupId hasUnread hasMention }
     }
 }
 """
@@ -41,7 +43,7 @@ query Room($roomId: ID!) {
         name
         description
         archived
-        autoJoin
+        groupId
         hasUnread
         hasMention
     }
@@ -50,49 +52,56 @@ query Room($roomId: ID!) {
 
 QUERY_ROOM_EVENTS = """
 query RoomEvents($roomId: ID!, $limit: Int, $before: Time, $after: Time) {
-    roomEvents(roomId: $roomId, limit: $limit, before: $before, after: $after) {
-        events {
-            id
-            createdAt
-            actorId
-            actor { id login displayName avatarUrl }
-            event {
-                ... on MessagePostedEvent {
-                    roomId
-                    body
-                    attachments { id filename contentType size url }
-                    reactions { emoji count hasReacted users { id login displayName } }
-                    inReplyTo
-                    inThread
-                    replyCount
-                    lastReplyAt
-                    linkPreview { url title description siteName }
+    room(roomId: $roomId) {
+        events(limit: $limit, before: $before, after: $after) {
+            events {
+                id
+                createdAt
+                actorId
+                actor { id login displayName avatarUrl }
+                event {
+                    ... on MessagePostedEvent {
+                        roomId
+                        body
+                        attachments { id filename contentType size url }
+                        reactions { emoji count hasReacted users { id login displayName } }
+                        inReplyTo
+                        inThread
+                        replyCount
+                        lastReplyAt
+                        linkPreview { url title description siteName }
+                    }
                 }
             }
+            hasOlder
+            hasNewer
+            startCursor
+            endCursor
         }
-        hasOlder
-        hasNewer
-        startCursor
-        endCursor
     }
 }
 """
 
 QUERY_THREAD_EVENTS = """
-query ThreadEvents($roomId: ID!, $threadRootEventId: ID!) {
-    threadEvents(roomId: $roomId, threadRootEventId: $threadRootEventId) {
-        id
-        createdAt
-        actorId
-        actor { id login displayName avatarUrl }
-        event {
-            ... on MessagePostedEvent {
-                roomId
-                body
-                attachments { id filename contentType size url }
-                reactions { emoji count hasReacted }
-                inReplyTo
-                inThread
+query ThreadEvents($roomId: ID!, $eventId: ID!) {
+    room(roomId: $roomId) {
+        event(eventId: $eventId) {
+            id
+            threadReplies {
+                id
+                createdAt
+                actorId
+                actor { id login displayName avatarUrl }
+                event {
+                    ... on MessagePostedEvent {
+                        roomId
+                        body
+                        attachments { id filename contentType size url }
+                        reactions { emoji count hasReacted }
+                        inReplyTo
+                        inThread
+                    }
+                }
             }
         }
     }
@@ -100,8 +109,8 @@ query ThreadEvents($roomId: ID!, $threadRootEventId: ID!) {
 """
 
 QUERY_USER = """
-query User($id: ID!) {
-    user(id: $id) {
+query User($userId: ID!) {
+    user(userId: $userId) {
         id
         login
         displayName
@@ -139,33 +148,35 @@ query Users {
 
 QUERY_NOTIFICATIONS = """
 query Notifications {
-    notifications {
-        ... on MentionNotificationItem {
-            id
-            createdAt
-            summary
-            room { id name }
-            eventId
-        }
-        ... on ReplyNotificationItem {
-            id
-            createdAt
-            summary
-            room { id name }
-            eventId
-        }
-        ... on RoomMessageNotificationItem {
-            id
-            createdAt
-            summary
-            room { id name }
-            eventId
-        }
-        ... on DMMessageNotificationItem {
-            id
-            createdAt
-            summary
-            room { id name }
+    viewer {
+        notifications {
+            ... on MentionNotificationItem {
+                id
+                createdAt
+                summary
+                room { id name }
+                eventId
+            }
+            ... on ReplyNotificationItem {
+                id
+                createdAt
+                summary
+                room { id name }
+                eventId
+            }
+            ... on RoomMessageNotificationItem {
+                id
+                createdAt
+                summary
+                room { id name }
+                eventId
+            }
+            ... on DMMessageNotificationItem {
+                id
+                createdAt
+                summary
+                room { id name }
+            }
         }
     }
 }
@@ -173,12 +184,14 @@ query Notifications {
 
 QUERY_FOLLOWED_THREADS = """
 query FollowedThreads {
-    myFollowedThreads {
-        roomId
-        threadRootEventId
-        replyCount
-        lastReplyAt
-        hasUnread
+    viewer {
+        followedThreads {
+            roomId
+            threadRootEventId
+            replyCount
+            lastReplyAt
+            hasUnread
+        }
     }
 }
 """
@@ -194,9 +207,9 @@ mutation PostMessage($input: PostMessageInput!) {
 }
 """
 
-MUTATION_EDIT_MESSAGE = """
-mutation EditMessage($input: EditMessageInput!) {
-    editMessage(input: $input) {
+MUTATION_UPDATE_MESSAGE = """
+mutation UpdateMessage($input: UpdateMessageInput!) {
+    updateMessage(input: $input) {
         id
     }
 }
@@ -254,6 +267,14 @@ mutation MarkRoomAsRead($input: MarkRoomAsReadInput!) {
 }
 """
 
+MUTATION_MARK_THREAD_AS_READ = """
+mutation MarkThreadAsRead($input: MarkThreadAsReadInput!) {
+    markThreadAsRead(input: $input) {
+        previousReadAt
+    }
+}
+"""
+
 MUTATION_FOLLOW_THREAD = """
 mutation FollowThread($input: FollowThreadInput!) {
     followThread(input: $input)
@@ -281,9 +302,9 @@ mutation StartDM($input: StartDMInput!) {
 }
 """
 
-MUTATION_UPDATE_MY_PROFILE = """
-mutation UpdateMyProfile($input: UpdateMyProfileInput!) {
-    updateMyProfile(input: $input) {
+MUTATION_UPDATE_PROFILE = """
+mutation UpdateProfile($input: UpdateProfileInput!) {
+    updateProfile(input: $input) {
         id
         login
         displayName
@@ -291,9 +312,9 @@ mutation UpdateMyProfile($input: UpdateMyProfileInput!) {
 }
 """
 
-MUTATION_UPLOAD_MY_AVATAR = """
-mutation UploadMyAvatar($input: UploadMyAvatarInput!) {
-    uploadMyAvatar(input: $input) {
+MUTATION_UPLOAD_AVATAR = """
+mutation UploadAvatar($input: UploadAvatarInput!) {
+    uploadAvatar(input: $input) {
         id
         avatarUrl
     }
@@ -320,9 +341,9 @@ mutation DismissAllNotifications {
 
 # --- Subscriptions ---
 
-SUBSCRIPTION_SERVER_EVENTS = """
-subscription ServerEvents {
-    myServerEvents {
+SUBSCRIPTION_EVENTS = """
+subscription MyEvents {
+    myEvents {
         id
         createdAt
         actorId
@@ -346,37 +367,22 @@ subscription ServerEvents {
             ... on CallParticipantLeftEvent { roomId }
             ... on VideoProcessingCompletedEvent { roomId attachmentId messageEventId }
             ... on PresenceChangedEvent { status }
-        }
-    }
-}
-"""
-
-SUBSCRIPTION_INSTANCE_EVENTS = """
-subscription InstanceEvents {
-    myInstanceEvents {
-        id
-        createdAt
-        actorId
-        actor { id login displayName avatarUrl }
-        event {
-            ... on InstanceConfigUpdatedEvent { instanceName motd welcomeMessage blockedUsernames }
+            ... on ServerConfigUpdatedEvent { serverName motd }
             ... on UserCreatedEvent { userId login displayName }
             ... on UserDeletedEvent { userId }
             ... on UserProfileUpdatedEvent { userId displayName avatarUrl login }
-            ... on InstanceUserPreferencesUpdatedEvent { timezone timeFormat }
+            ... on ServerUserPreferencesUpdatedEvent { timezone timeFormat }
             ... on NotificationLevelChangedEvent { roomId level effectiveLevel }
-            ... on UserJoinedServerEvent { userId }
-            ... on UserLeftServerEvent { userId }
             ... on ServerUpdatedEvent { name description }
             ... on MentionNotificationEvent { roomId }
             ... on NewDirectMessageNotificationEvent { roomId conversationName }
             ... on NotificationCreatedEvent { notificationId roomId eventId inReplyToId }
             ... on NotificationDismissedEvent { notificationId }
             ... on ThreadFollowChangedEvent { roomId threadRootEventId isFollowing }
-            ... on NewMessageInServerEvent { roomId }
             ... on RoomMarkedAsReadEvent { roomId }
             ... on RoomLayoutUpdatedEvent { changed }
             ... on SessionTerminatedEvent { reason }
+            ... on HeartbeatEvent { alive }
         }
     }
 }

@@ -28,13 +28,15 @@ async def test_me(mock_api, client):
     mock_api.post("/api/graphql").mock(
         return_value=_gql_response(
             {
-                "me": {
-                    "id": "u1",
-                    "login": "alice",
-                    "displayName": "Alice",
-                    "createdAt": "2025-01-01T00:00:00Z",
-                    "avatarUrl": None,
-                    "presenceStatus": "ONLINE",
+                "viewer": {
+                    "user": {
+                        "id": "u1",
+                        "login": "alice",
+                        "displayName": "Alice",
+                        "createdAt": "2025-01-01T00:00:00Z",
+                        "avatarUrl": None,
+                        "presenceStatus": "ONLINE",
+                    }
                 }
             }
         )
@@ -50,7 +52,7 @@ async def test_rooms(mock_api, client):
     mock_api.post("/api/graphql").mock(
         return_value=_gql_response(
             {
-                "instance": {
+                "server": {
                     "rooms": [
                         {
                             "id": "r1",
@@ -58,7 +60,7 @@ async def test_rooms(mock_api, client):
                             "name": "general",
                             "description": None,
                             "archived": False,
-                            "autoJoin": True,
+                            "groupId": "g1",
                             "hasUnread": False,
                             "hasMention": False,
                         }
@@ -108,35 +110,37 @@ async def test_room_events(mock_api, client):
     mock_api.post("/api/graphql").mock(
         return_value=_gql_response(
             {
-                "roomEvents": {
-                    "events": [
-                        {
-                            "id": "e1",
-                            "createdAt": "2025-01-01T00:00:00Z",
-                            "actorId": "u1",
-                            "actor": {
-                                "id": "u1",
-                                "login": "alice",
-                                "displayName": "Alice",
-                                "avatarUrl": None,
-                            },
-                            "event": {
-                                "roomId": "r1",
-                                "body": "Hello",
-                                "attachments": [],
-                                "reactions": [],
-                                "inReplyTo": None,
-                                "inThread": None,
-                                "replyCount": 0,
-                                "lastReplyAt": None,
-                                "linkPreview": None,
-                            },
-                        }
-                    ],
-                    "hasOlder": False,
-                    "hasNewer": False,
-                    "startCursor": None,
-                    "endCursor": None,
+                "room": {
+                    "events": {
+                        "events": [
+                            {
+                                "id": "e1",
+                                "createdAt": "2025-01-01T00:00:00Z",
+                                "actorId": "u1",
+                                "actor": {
+                                    "id": "u1",
+                                    "login": "alice",
+                                    "displayName": "Alice",
+                                    "avatarUrl": None,
+                                },
+                                "event": {
+                                    "roomId": "r1",
+                                    "body": "Hello",
+                                    "attachments": [],
+                                    "reactions": [],
+                                    "inReplyTo": None,
+                                    "inThread": None,
+                                    "replyCount": 0,
+                                    "lastReplyAt": None,
+                                    "linkPreview": None,
+                                },
+                            }
+                        ],
+                        "hasOlder": False,
+                        "hasNewer": False,
+                        "startCursor": None,
+                        "endCursor": None,
+                    }
                 }
             }
         )
@@ -170,12 +174,12 @@ async def test_login_invalid():
             await ChattoClient.login("bad", "creds")
 
 
-async def test_edit_message(mock_api, client):
+async def test_update_message(mock_api, client):
     mock_api.post("/api/graphql").mock(
-        return_value=_gql_response({"editMessage": {"id": "e1"}})
+        return_value=_gql_response({"updateMessage": {"id": "e1"}})
     )
     async with client:
-        result = await client.edit_message("r1", "e1", "edited body")
+        result = await client.update_message("r1", "e1", "edited body")
     assert result["id"] == "e1"
 
 
@@ -218,11 +222,11 @@ async def test_create_room(mock_api, client):
     assert room.name == "general"
 
 
-async def test_update_my_profile(mock_api, client):
+async def test_update_profile(mock_api, client):
     mock_api.post("/api/graphql").mock(
         return_value=_gql_response(
             {
-                "updateMyProfile": {
+                "updateProfile": {
                     "id": "u1",
                     "login": "newname",
                     "displayName": "New Name",
@@ -231,7 +235,7 @@ async def test_update_my_profile(mock_api, client):
         )
     )
     async with client:
-        user = await client.update_my_profile(login="newname", display_name="New Name")
+        user = await client.update_profile(login="newname", display_name="New Name")
     assert user.login == "newname"
     assert user.display_name == "New Name"
 
@@ -245,16 +249,16 @@ async def test_update_presence(mock_api, client):
     assert result is True
 
 
-async def test_upload_my_avatar(mock_api, client, tmp_path):
+async def test_upload_avatar(mock_api, client, tmp_path):
     mock_api.post("/api/graphql").mock(
         return_value=_gql_response(
-            {"uploadMyAvatar": {"id": "u1", "avatarUrl": "https://example.com/avatar.jpg"}}
+            {"uploadAvatar": {"id": "u1", "avatarUrl": "https://example.com/avatar.jpg"}}
         )
     )
     avatar = tmp_path / "avatar.jpg"
     avatar.write_bytes(b"\xff\xd8\xff\xe0fake-jpeg")
     async with client:
-        result = await client.upload_my_avatar(str(avatar))
+        result = await client.upload_avatar(str(avatar))
     assert result["avatarUrl"] == "https://example.com/avatar.jpg"
 
 

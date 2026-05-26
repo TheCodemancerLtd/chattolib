@@ -68,7 +68,7 @@ class Room:
     type: RoomType | None = None
     description: str | None = None
     archived: bool = False
-    auto_join: bool = False
+    group_id: str | None = None
     has_unread: bool = False
     has_mention: bool = False
 

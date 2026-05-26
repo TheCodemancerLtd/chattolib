@@ -42,17 +42,17 @@ The library uses **httpx** for async HTTP and **websockets** for GraphQL subscri
 
 | Domain | Queries | Mutations | Subscriptions |
 |---|---|---|---|
-| **Instance** | `instance` | `updateInstance`, logo/banner uploads | `myInstanceEvents` |
-| **Rooms** | `room`, `roomEvents`, `roomEventByEventId`, `threadEvents`, `roomEventsAround` | `createRoom`, `updateRoom`, `archiveRoom`, `joinRoom`, `leaveRoom`, `markRoomAsRead` | `myServerEvents` |
-| **Messages** | (via roomEvents) | `postMessage`, `editMessage`, `deleteMessage` | `MessagePostedEvent`, `MessageUpdatedEvent`, `MessageDeletedEvent` |
+| **Server** | `server` | `updateServer`, logo/banner uploads | `myEvents` |
+| **Rooms** | `room`, `room.events`, `room.event`, `room.eventsAround` | `createRoom`, `updateRoom`, `archiveRoom`, `joinRoom`, `leaveRoom`, `markRoomAsRead` | `myEvents` |
+| **Messages** | (via room.events) | `postMessage`, `editMessage`, `deleteMessage` | `MessagePostedEvent`, `MessageUpdatedEvent`, `MessageDeletedEvent` |
 | **Reactions** | (on message events) | `addReaction`, `removeReaction` | `ReactionAddedEvent`, `ReactionRemovedEvent` |
-| **Threads** | `threadEvents`, `myFollowedThreads` | `followThread`, `unfollowThread`, `markThreadAsOpened` | `ThreadFollowChangedEvent` |
-| **Users** | `me`, `user(id)`, `userByLogin`, `users` | `updateMyProfile`, `uploadMyAvatar`, `deleteMyAvatar` | `UserProfileUpdatedEvent`, `PresenceChangedEvent` |
+| **Threads** | `room.event.threadReplies`, `viewer.followedThreads` | `followThread`, `unfollowThread`, `markThreadAsRead` | `ThreadFollowChangedEvent` |
+| **Users** | `viewer.user`, `user(id)`, `userByLogin`, `users` | `updateProfile`, `uploadAvatar`, `deleteAvatar` | `UserProfileUpdatedEvent`, `PresenceChangedEvent` |
 | **DMs** | (via rooms) | `startDM` | `NewDirectMessageNotificationEvent` |
-| **Notifications** | `notifications`, `hasNotifications` | `dismissNotification`, `dismissAllNotifications` | `NotificationCreatedEvent`, `NotificationDismissedEvent` |
-| **Permissions/Roles** | via `admin` query, `instance.roles` | `grantInstancePermission`, `createRole`, `assignInstanceRole` | — |
-| **Voice calls** | `voiceCallToken`, `activeCallRoomIds`, `callParticipants` | — | `CallParticipantJoinedEvent`, `CallParticipantLeftEvent` |
-| **Admin** | `admin.systemInfo`, `admin.instanceConfig`, `admin.roles` | `admin.updateInstanceConfig`, `admin.resetInstanceConfig` | `myInstanceEvents` |
+| **Notifications** | `viewer.notifications`, `viewer.hasNotifications` | `dismissNotification`, `dismissAllNotifications` | `NotificationCreatedEvent`, `NotificationDismissedEvent` |
+| **Permissions/Roles** | via `admin` query, `server.roles` | `grantPermission`, `createRole`, `assignRole` | — |
+| **Voice calls** | `room.voiceCallToken`, `activeCallRoomIds`, `room.callParticipants` | — | `CallParticipantJoinedEvent`, `CallParticipantLeftEvent` |
+| **Admin** | `admin.systemInfo`, `admin.serverConfig`, `admin.roles` | `admin.updateServerConfig`, `admin.resetServerConfig` | via `myEvents` |
 
 ### GraphQL conventions
 
@@ -61,7 +61,7 @@ The library uses **httpx** for async HTTP and **websockets** for GraphQL subscri
 - File uploads use a custom `Upload` scalar (multipart form).
 - Pagination uses `limit`/`before`/`after` on room events (`before`/`after` are `Time` scalars, ISO timestamps).
 - All mutations take a single `input` argument with a corresponding `*Input` type.
-- Subscriptions: `myServerEvents` for room/message events, `myInstanceEvents` for instance-wide events.
+- Single unified subscription: `myEvents` for all server, room, and instance events.
 - Rooms have a `type` field: `CHANNEL` or `DM`.
 - Image URLs accept optional `width`, `height`, `fit` (enum: `CONTAIN`, `COVER`, `EXACT`) for server-side resizing.
 

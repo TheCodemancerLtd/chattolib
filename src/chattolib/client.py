@@ -47,7 +47,7 @@ def _parse_room(data: dict[str, Any]) -> Room:
         type=RoomType(data["type"]) if data.get("type") else None,
         description=data.get("description"),
         archived=data.get("archived", False),
-        auto_join=data.get("autoJoin", False),
+        group_id=data.get("groupId"),
         has_unread=data.get("hasUnread", False),
         has_mention=data.get("hasMention", False),
     )
@@ -199,7 +199,6 @@ class ChattoClient:
         if response.status_code == 401:
             raise ChattoAuthError("Authentication failed")
 
-        # Chatto returns 422 with a JSON body for GraphQL validation errors
         body = response.json()
 
         if "errors" in body:
@@ -253,16 +252,15 @@ class ChattoClient:
 
     async def me(self) -> User:
         data = await self._execute(Q.QUERY_ME)
-        return _parse_user(data["me"])
+        return _parse_user(data["viewer"]["user"])
 
-    async def instance(self) -> dict[str, Any]:
-        data = await self._execute(Q.QUERY_INSTANCE)
-        return data["instance"]
+    async def server(self) -> dict[str, Any]:
+        data = await self._execute(Q.QUERY_SERVER)
+        return data["server"]
 
     async def rooms(self) -> list[Room]:
-        """Get all rooms from the instance."""
-        data = await self._execute(Q.QUERY_INSTANCE)
-        return [_parse_room(r) for r in data["instance"]["rooms"]]
+        data = await self._execute(Q.QUERY_SERVER)
+        return [_parse_room(r) for r in data["server"]["rooms"]]
 
     async def room(self, room_id: str) -> Room:
         data = await self._execute(Q.QUERY_ROOM, {"roomId": room_id})
@@ -284,7 +282,7 @@ class ChattoClient:
         if after is not None:
             variables["after"] = after
         data = await self._execute(Q.QUERY_ROOM_EVENTS, variables)
-        conn = data["roomEvents"]
+        conn = data["room"]["events"]
         return RoomEventsPage(
             events=[_parse_message_event(e) for e in conn["events"]],
             has_older=conn["hasOlder"],
@@ -300,12 +298,12 @@ class ChattoClient:
     ) -> list[MessageEvent]:
         data = await self._execute(
             Q.QUERY_THREAD_EVENTS,
-            {"roomId": room_id, "threadRootEventId": thread_root_event_id},
+            {"roomId": room_id, "eventId": thread_root_event_id},
         )
-        return [_parse_message_event(e) for e in data["threadEvents"]]
+        return [_parse_message_event(e) for e in data["room"]["event"]["threadReplies"]]
 
     async def user(self, user_id: str) -> User:
-        data = await self._execute(Q.QUERY_USER, {"id": user_id})
+        data = await self._execute(Q.QUERY_USER, {"userId": user_id})
         return _parse_user(data["user"])
 
     async def user_by_login(self, login: str) -> User:
@@ -318,7 +316,7 @@ class ChattoClient:
 
     async def notifications(self) -> list[dict[str, Any]]:
         data = await self._execute(Q.QUERY_NOTIFICATIONS)
-        return data["notifications"]
+        return data["viewer"]["notifications"]
 
     async def followed_threads(self) -> list[FollowedThread]:
         data = await self._execute(Q.QUERY_FOLLOWED_THREADS)
@@ -330,7 +328,7 @@ class ChattoClient:
                 last_reply_at=_parse_datetime(t.get("lastReplyAt")),
                 has_unread=t.get("hasUnread", False),
             )
-            for t in data["myFollowedThreads"]
+            for t in data["viewer"]["followedThreads"]
         ]
 
     # --- Mutations ---
@@ -357,17 +355,19 @@ class ChattoClient:
         data = await self._execute(Q.MUTATION_POST_MESSAGE, {"input": input_data})
         return data["postMessage"]
 
-    async def edit_message(
+    async def update_message(
         self,
         room_id: str,
         event_id: str,
         body: str,
     ) -> dict[str, Any]:
         data = await self._execute(
-            Q.MUTATION_EDIT_MESSAGE,
+            Q.MUTATION_UPDATE_MESSAGE,
             {"input": {"roomId": room_id, "eventId": event_id, "body": body}},
         )
-        return data["editMessage"]
+        return data["updateMessage"]
+
+    edit_message = update_message
 
     async def delete_message(self, room_id: str, event_id: str) -> Any:
         data = await self._execute(
@@ -421,6 +421,15 @@ class ChattoClient:
         )
         return data["markRoomAsRead"]
 
+    async def mark_thread_as_read(
+        self, room_id: str, thread_root_event_id: str
+    ) -> dict[str, Any]:
+        data = await self._execute(
+            Q.MUTATION_MARK_THREAD_AS_READ,
+            {"input": {"roomId": room_id, "threadRootEventId": thread_root_event_id}},
+        )
+        return data["markThreadAsRead"]
+
     async def follow_thread(
         self, room_id: str, thread_root_event_id: str
     ) -> Any:
@@ -454,27 +463,33 @@ class ChattoClient:
         )
         return data["startDM"]
 
-    async def update_my_profile(
+    async def update_profile(
         self,
         *,
+        user_id: str | None = None,
         display_name: str | None = None,
         login: str | None = None,
     ) -> User:
         input_data: dict[str, Any] = {}
+        if user_id is not None:
+            input_data["userId"] = user_id
         if display_name is not None:
             input_data["displayName"] = display_name
         if login is not None:
             input_data["login"] = login
-        data = await self._execute(Q.MUTATION_UPDATE_MY_PROFILE, {"input": input_data})
-        return _parse_user(data["updateMyProfile"])
+        data = await self._execute(Q.MUTATION_UPDATE_PROFILE, {"input": input_data})
+        return _parse_user(data["updateProfile"])
 
-    async def upload_my_avatar(self, file_path: str) -> dict[str, Any]:
+    async def upload_avatar(self, file_path: str, user_id: str | None = None) -> dict[str, Any]:
+        variables: dict[str, Any] = {"input": {"file": None}}
+        if user_id is not None:
+            variables["input"]["userId"] = user_id
         data = await self._execute_upload(
-            Q.MUTATION_UPLOAD_MY_AVATAR,
-            {"input": {"file": None}},
+            Q.MUTATION_UPLOAD_AVATAR,
+            variables,
             file_path,
         )
-        return data["uploadMyAvatar"]
+        return data["uploadAvatar"]
 
     async def update_presence(self, status: PresenceStatus) -> Any:
         data = await self._execute(

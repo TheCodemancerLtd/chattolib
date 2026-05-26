@@ -38,9 +38,7 @@ async def _connect(url: str, token: str) -> ClientConnection:
         ping_interval=20,
         ping_timeout=20,
     )
-    # Send connection_init
     await ws.send(json.dumps({"type": _GQL_CONNECTION_INIT}))
-    # Wait for connection_ack
     ack = json.loads(await ws.recv())
     if ack.get("type") != _GQL_CONNECTION_ACK:
         await ws.close()
@@ -58,15 +56,15 @@ async def _keepalive(ws: ClientConnection) -> None:
         pass
 
 
-async def subscribe_server_events(
+async def subscribe_events(
     url: str,
     token: str,
     *,
     subscription_id: str = "1",
 ) -> AsyncIterator[dict[str, Any]]:
-    """Subscribe to real-time server events.
+    """Subscribe to all real-time events.
 
-    Yields event dicts from the myServerEvents subscription.
+    Yields event dicts from the unified myEvents subscription.
     """
     ws = await _connect(url, token)
     ping_task = asyncio.create_task(_keepalive(ws))
@@ -77,7 +75,7 @@ async def subscribe_server_events(
                     "id": subscription_id,
                     "type": _GQL_SUBSCRIBE,
                     "payload": {
-                        "query": Q.SUBSCRIPTION_SERVER_EVENTS,
+                        "query": Q.SUBSCRIPTION_EVENTS,
                     },
                 }
             )
@@ -86,47 +84,7 @@ async def subscribe_server_events(
             msg = json.loads(raw)
             msg_type = msg.get("type")
             if msg_type == _GQL_NEXT:
-                yield msg["payload"]["data"]["myServerEvents"]
-            elif msg_type == _GQL_PING:
-                await ws.send(json.dumps({"type": _GQL_PONG}))
-            elif msg_type == _GQL_PONG:
-                pass
-            elif msg_type == _GQL_ERROR:
-                raise ConnectionError(f"Subscription error: {msg.get('payload')}")
-            elif msg_type == _GQL_COMPLETE:
-                break
-    finally:
-        ping_task.cancel()
-        await ws.close()
-
-
-async def subscribe_instance_events(
-    url: str,
-    token: str,
-    *,
-    subscription_id: str = "1",
-) -> AsyncIterator[dict[str, Any]]:
-    """Subscribe to real-time instance-wide events.
-
-    Yields event dicts from the myInstanceEvents subscription.
-    """
-    ws = await _connect(url, token)
-    ping_task = asyncio.create_task(_keepalive(ws))
-    try:
-        await ws.send(
-            json.dumps(
-                {
-                    "id": subscription_id,
-                    "type": _GQL_SUBSCRIBE,
-                    "payload": {"query": Q.SUBSCRIPTION_INSTANCE_EVENTS},
-                }
-            )
-        )
-        async for raw in ws:
-            msg = json.loads(raw)
-            msg_type = msg.get("type")
-            if msg_type == _GQL_NEXT:
-                yield msg["payload"]["data"]["myInstanceEvents"]
+                yield msg["payload"]["data"]["myEvents"]
             elif msg_type == _GQL_PING:
                 await ws.send(json.dumps({"type": _GQL_PONG}))
             elif msg_type == _GQL_PONG:
