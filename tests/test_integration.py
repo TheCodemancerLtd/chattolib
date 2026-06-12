@@ -11,7 +11,6 @@ import pytest
 from chattolib.client import ChattoClient
 from chattolib.exceptions import ChattoAuthError
 
-
 pytestmark = pytest.mark.skipif(
     not os.environ.get("CHATTO_LOGIN") or not os.environ.get("CHATTO_PASSWORD"),
     reason="CHATTO_LOGIN and CHATTO_PASSWORD env vars required",

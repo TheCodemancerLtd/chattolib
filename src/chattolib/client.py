@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, AsyncIterator
+from typing import Any
 
 import httpx
 
@@ -12,14 +12,22 @@ from chattolib.exceptions import ChattoAuthError, ChattoGraphQLError
 from chattolib.types import (
     Attachment,
     FollowedThread,
+    FollowedThreadsPage,
     LinkPreview,
     MessageEvent,
+    NotificationLevel,
+    NotificationsPage,
     PresenceStatus,
-    Reaction,
+    PresenceStatusInput,
+    ReactionSummary,
     Room,
     RoomEventsPage,
+    RoomGroup,
     RoomType,
+    ServerProfile,
+    TimeFormat,
     User,
+    UserSettings,
 )
 
 
@@ -29,14 +37,27 @@ def _parse_datetime(value: str | None) -> datetime | None:
     return datetime.fromisoformat(value)
 
 
+def _parse_user_settings(data: dict[str, Any] | None) -> UserSettings | None:
+    if data is None:
+        return None
+    return UserSettings(
+        timezone=data.get("timezone"),
+        time_format=TimeFormat(data["timeFormat"])
+        if data.get("timeFormat")
+        else TimeFormat.UNSPECIFIED,
+    )
+
+
 def _parse_user(data: dict[str, Any]) -> User:
+    status_raw = data.get("presenceStatus")
     return User(
         id=data["id"],
         login=data["login"],
         display_name=data["displayName"],
+        presence_status=PresenceStatus(status_raw) if status_raw else PresenceStatus.OFFLINE,
         created_at=_parse_datetime(data.get("createdAt")),
         avatar_url=data.get("avatarUrl"),
-        presence_status=PresenceStatus(data["presenceStatus"]) if data.get("presenceStatus") else None,
+        settings=_parse_user_settings(data.get("settings")),
     )
 
 
@@ -49,7 +70,26 @@ def _parse_room(data: dict[str, Any]) -> Room:
         archived=data.get("archived", False),
         group_id=data.get("groupId"),
         has_unread=data.get("hasUnread", False),
-        has_mention=data.get("hasMention", False),
+    )
+
+
+def _parse_room_group(data: dict[str, Any]) -> RoomGroup:
+    return RoomGroup(
+        id=data["id"],
+        name=data["name"],
+        description=data.get("description", ""),
+        room_ids=[r["id"] for r in data.get("rooms", [])],
+    )
+
+
+def _parse_server_profile(data: dict[str, Any]) -> ServerProfile:
+    return ServerProfile(
+        name=data["name"],
+        logo_url=data.get("logoUrl"),
+        banner_url=data.get("bannerUrl"),
+        welcome_message=data.get("welcomeMessage"),
+        motd=data.get("motd"),
+        description=data.get("description"),
     )
 
 
@@ -60,36 +100,19 @@ def _parse_attachment(data: dict[str, Any]) -> Attachment:
         filename=data["filename"],
         content_type=data["contentType"],
         size=data["size"],
-        url=data.get("url"),
-        width=data.get("width"),
-        height=data.get("height"),
+        width=data.get("width", 0),
+        height=data.get("height", 0),
+        url=data.get("url", ""),
+        thumbnail_url=data.get("thumbnailUrl"),
     )
 
 
-def _parse_reaction(data: dict[str, Any]) -> Reaction:
-    return Reaction(
+def _parse_reaction(data: dict[str, Any]) -> ReactionSummary:
+    return ReactionSummary(
         emoji=data["emoji"],
         count=data["count"],
         has_reacted=data.get("hasReacted", False),
         users=[_parse_user(u) for u in data.get("users", [])],
-    )
-
-
-def _parse_message_event(data: dict[str, Any]) -> MessageEvent:
-    event = data.get("event", {})
-    actor_data = data.get("actor")
-    return MessageEvent(
-        id=data["id"],
-        room_id=event.get("roomId", ""),
-        body=event.get("body"),
-        created_at=_parse_datetime(data.get("createdAt")),
-        actor=_parse_user(actor_data) if actor_data else None,
-        attachments=[_parse_attachment(a) for a in event.get("attachments", [])],
-        reactions=[_parse_reaction(r) for r in event.get("reactions", [])],
-        in_reply_to=event.get("inReplyTo"),
-        in_thread=event.get("inThread"),
-        reply_count=event.get("replyCount", 0),
-        link_preview=_parse_link_preview(event["linkPreview"]) if event.get("linkPreview") else None,
     )
 
 
@@ -99,9 +122,35 @@ def _parse_link_preview(data: dict[str, Any]) -> LinkPreview:
         title=data.get("title"),
         description=data.get("description"),
         image_url=data.get("imageUrl"),
+        image_asset_id=data.get("imageAssetId"),
         site_name=data.get("siteName"),
         embed_type=data.get("embedType"),
         embed_id=data.get("embedId"),
+    )
+
+
+def _parse_message_event(data: dict[str, Any]) -> MessageEvent:
+    event = data.get("event") or {}
+    actor_data = data.get("actor")
+    return MessageEvent(
+        id=data["id"],
+        room_id=event.get("roomId", ""),
+        body=event.get("body"),
+        created_at=_parse_datetime(data.get("createdAt")),
+        updated_at=_parse_datetime(event.get("updatedAt")),
+        actor=_parse_user(actor_data) if actor_data else None,
+        attachments=[_parse_attachment(a) for a in event.get("attachments", [])],
+        reactions=[_parse_reaction(r) for r in event.get("reactions", [])],
+        in_reply_to=event.get("inReplyTo"),
+        thread_root_event_id=event.get("threadRootEventId"),
+        reply_count=event.get("replyCount", 0),
+        last_reply_at=_parse_datetime(event.get("lastReplyAt")),
+        link_preview=_parse_link_preview(event["linkPreview"])
+        if event.get("linkPreview")
+        else None,
+        echo_of_event_id=event.get("echoOfEventId"),
+        echo_from_thread_root_event_id=event.get("echoFromThreadRootEventId"),
+        viewer_is_following_thread=event.get("viewerIsFollowingThread"),
     )
 
 
@@ -258,9 +307,17 @@ class ChattoClient:
         data = await self._execute(Q.QUERY_SERVER)
         return data["server"]
 
+    async def server_profile(self) -> ServerProfile:
+        data = await self._execute(Q.QUERY_SERVER)
+        return _parse_server_profile(data["server"]["profile"])
+
     async def rooms(self) -> list[Room]:
         data = await self._execute(Q.QUERY_SERVER)
         return [_parse_room(r) for r in data["server"]["rooms"]]
+
+    async def room_groups(self) -> list[RoomGroup]:
+        data = await self._execute(Q.QUERY_SERVER)
+        return [_parse_room_group(g) for g in data["server"]["roomGroups"]]
 
     async def room(self, room_id: str) -> Room:
         data = await self._execute(Q.QUERY_ROOM, {"roomId": room_id})
@@ -300,7 +357,10 @@ class ChattoClient:
             Q.QUERY_THREAD_EVENTS,
             {"roomId": room_id, "eventId": thread_root_event_id},
         )
-        return [_parse_message_event(e) for e in data["room"]["event"]["threadReplies"]]
+        root = data["room"]["event"] or {}
+        event = root.get("event") or {}
+        thread = event.get("threadReplies") or {}
+        return [_parse_message_event(e) for e in thread.get("events", [])]
 
     async def user(self, user_id: str) -> User:
         data = await self._execute(Q.QUERY_USER, {"userId": user_id})
@@ -310,48 +370,69 @@ class ChattoClient:
         data = await self._execute(Q.QUERY_USER_BY_LOGIN, {"login": login})
         return _parse_user(data["userByLogin"])
 
-    async def users(self) -> list[User]:
-        data = await self._execute(Q.QUERY_USERS)
-        return [_parse_user(u) for u in data["users"]]
+    async def server_members(self) -> list[User]:
+        data = await self._execute(Q.QUERY_SERVER_MEMBERS)
+        return [_parse_user(u) for u in data["server"]["members"]["users"]]
 
-    async def notifications(self) -> list[dict[str, Any]]:
+    async def notifications(self) -> NotificationsPage:
         data = await self._execute(Q.QUERY_NOTIFICATIONS)
-        return data["viewer"]["notifications"]
+        conn = data["viewer"]["notifications"]
+        return NotificationsPage(
+            items=conn["items"],
+            total_count=conn.get("totalCount", 0),
+            has_more=conn.get("hasMore", False),
+        )
 
-    async def followed_threads(self) -> list[FollowedThread]:
+    async def followed_threads(self) -> FollowedThreadsPage:
         data = await self._execute(Q.QUERY_FOLLOWED_THREADS)
-        return [
-            FollowedThread(
-                room_id=t["roomId"],
-                thread_root_event_id=t["threadRootEventId"],
-                reply_count=t.get("replyCount", 0),
-                last_reply_at=_parse_datetime(t.get("lastReplyAt")),
-                has_unread=t.get("hasUnread", False),
-            )
-            for t in data["viewer"]["followedThreads"]
-        ]
+        conn = data["viewer"]["followedThreads"]
+        return FollowedThreadsPage(
+            threads=[
+                FollowedThread(
+                    room_id=t["roomId"],
+                    thread_root_event_id=t["threadRootEventId"],
+                    reply_count=t.get("replyCount", 0),
+                    last_reply_at=_parse_datetime(t.get("lastReplyAt")),
+                    has_unread=t.get("hasUnread", False),
+                )
+                for t in conn["threads"]
+            ],
+            total_count=conn.get("totalCount", 0),
+            has_more=conn.get("hasMore", False),
+        )
 
-    # --- Mutations ---
+    async def link_preview(self, url: str) -> LinkPreview | None:
+        data = await self._execute(Q.QUERY_LINK_PREVIEW, {"url": url})
+        lp = data.get("linkPreview")
+        return _parse_link_preview(lp) if lp else None
+
+    async def active_call_room_ids(self) -> list[str]:
+        data = await self._execute(Q.QUERY_ACTIVE_CALL_ROOM_IDS)
+        return data["activeCallRoomIds"]
+
+    # --- Message mutations ---
 
     async def post_message(
         self,
         room_id: str,
-        body: str,
+        body: str | None = None,
         *,
-        in_thread: str | None = None,
+        thread_root_event_id: str | None = None,
         in_reply_to: str | None = None,
         also_send_to_channel: bool | None = None,
+        link_preview: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        input_data: dict[str, Any] = {
-            "roomId": room_id,
-            "body": body,
-        }
-        if in_thread is not None:
-            input_data["inThread"] = in_thread
+        input_data: dict[str, Any] = {"roomId": room_id}
+        if body is not None:
+            input_data["body"] = body
+        if thread_root_event_id is not None:
+            input_data["threadRootEventId"] = thread_root_event_id
         if in_reply_to is not None:
             input_data["inReplyTo"] = in_reply_to
         if also_send_to_channel is not None:
             input_data["alsoSendToChannel"] = also_send_to_channel
+        if link_preview is not None:
+            input_data["linkPreview"] = link_preview
         data = await self._execute(Q.MUTATION_POST_MESSAGE, {"input": input_data})
         return data["postMessage"]
 
@@ -376,72 +457,144 @@ class ChattoClient:
         )
         return data["deleteMessage"]
 
-    async def add_reaction(
-        self, room_id: str, message_event_id: str, emoji: str
-    ) -> Any:
+    async def delete_attachment(self, room_id: str, event_id: str, attachment_id: str) -> Any:
+        data = await self._execute(
+            Q.MUTATION_DELETE_ATTACHMENT,
+            {
+                "input": {
+                    "roomId": room_id,
+                    "eventId": event_id,
+                    "attachmentId": attachment_id,
+                }
+            },
+        )
+        return data["deleteAttachment"]
+
+    async def delete_link_preview(self, room_id: str, event_id: str, url: str) -> Any:
+        data = await self._execute(
+            Q.MUTATION_DELETE_LINK_PREVIEW,
+            {"input": {"roomId": room_id, "eventId": event_id, "url": url}},
+        )
+        return data["deleteLinkPreview"]
+
+    # --- Reactions ---
+
+    async def add_reaction(self, room_id: str, message_event_id: str, emoji: str) -> Any:
         data = await self._execute(
             Q.MUTATION_ADD_REACTION,
             {"input": {"roomId": room_id, "messageEventId": message_event_id, "emoji": emoji}},
         )
         return data["addReaction"]
 
-    async def remove_reaction(
-        self, room_id: str, message_event_id: str, emoji: str
-    ) -> Any:
+    async def remove_reaction(self, room_id: str, message_event_id: str, emoji: str) -> Any:
         data = await self._execute(
             Q.MUTATION_REMOVE_REACTION,
             {"input": {"roomId": room_id, "messageEventId": message_event_id, "emoji": emoji}},
         )
         return data["removeReaction"]
 
+    # --- Rooms ---
+
     async def create_room(
-        self, name: str, description: str | None = None
+        self,
+        name: str,
+        group_id: str,
+        description: str | None = None,
     ) -> Room:
-        input_data: dict[str, Any] = {"name": name}
+        input_data: dict[str, Any] = {"name": name, "groupId": group_id}
         if description is not None:
             input_data["description"] = description
         data = await self._execute(Q.MUTATION_CREATE_ROOM, {"input": input_data})
         return _parse_room(data["createRoom"])
 
+    async def update_room(
+        self,
+        room_id: str,
+        name: str,
+        description: str | None = None,
+    ) -> Room:
+        input_data: dict[str, Any] = {"roomId": room_id, "name": name}
+        if description is not None:
+            input_data["description"] = description
+        data = await self._execute(Q.MUTATION_UPDATE_ROOM, {"input": input_data})
+        return _parse_room(data["updateRoom"])
+
+    async def archive_room(self, room_id: str) -> Any:
+        data = await self._execute(Q.MUTATION_ARCHIVE_ROOM, {"input": {"roomId": room_id}})
+        return data["archiveRoom"]
+
+    async def unarchive_room(self, room_id: str) -> Any:
+        data = await self._execute(Q.MUTATION_UNARCHIVE_ROOM, {"input": {"roomId": room_id}})
+        return data["unarchiveRoom"]
+
     async def join_room(self, room_id: str) -> dict[str, Any]:
-        data = await self._execute(
-            Q.MUTATION_JOIN_ROOM, {"input": {"roomId": room_id}}
-        )
+        data = await self._execute(Q.MUTATION_JOIN_ROOM, {"input": {"roomId": room_id}})
         return data["joinRoom"]
 
     async def leave_room(self, room_id: str) -> Any:
-        data = await self._execute(
-            Q.MUTATION_LEAVE_ROOM, {"input": {"roomId": room_id}}
-        )
+        data = await self._execute(Q.MUTATION_LEAVE_ROOM, {"input": {"roomId": room_id}})
         return data["leaveRoom"]
 
-    async def mark_room_as_read(self, room_id: str) -> dict[str, Any]:
+    async def join_group(self, group_id: str) -> Any:
+        data = await self._execute(Q.MUTATION_JOIN_GROUP, {"input": {"groupId": group_id}})
+        return data["joinGroup"]
+
+    async def ban_room_member(
+        self,
+        room_id: str,
+        user_id: str,
+        reason: str,
+        expires_at: str | None = None,
+    ) -> Any:
+        input_data: dict[str, Any] = {
+            "roomId": room_id,
+            "userId": user_id,
+            "reason": reason,
+        }
+        if expires_at is not None:
+            input_data["expiresAt"] = expires_at
+        data = await self._execute(Q.MUTATION_BAN_ROOM_MEMBER, {"input": input_data})
+        return data["banRoomMember"]
+
+    async def unban_room_member(self, room_id: str, user_id: str, reason: str) -> Any:
         data = await self._execute(
-            Q.MUTATION_MARK_ROOM_AS_READ, {"input": {"roomId": room_id}}
+            Q.MUTATION_UNBAN_ROOM_MEMBER,
+            {"input": {"roomId": room_id, "userId": user_id, "reason": reason}},
         )
+        return data["unbanRoomMember"]
+
+    async def mark_room_as_read(
+        self, room_id: str, up_to_event_id: str | None = None
+    ) -> dict[str, Any]:
+        input_data: dict[str, Any] = {"roomId": room_id}
+        if up_to_event_id is not None:
+            input_data["upToEventId"] = up_to_event_id
+        data = await self._execute(Q.MUTATION_MARK_ROOM_AS_READ, {"input": input_data})
         return data["markRoomAsRead"]
 
     async def mark_thread_as_read(
-        self, room_id: str, thread_root_event_id: str
+        self,
+        room_id: str,
+        thread_root_event_id: str,
+        up_to_event_id: str | None = None,
     ) -> dict[str, Any]:
-        data = await self._execute(
-            Q.MUTATION_MARK_THREAD_AS_READ,
-            {"input": {"roomId": room_id, "threadRootEventId": thread_root_event_id}},
-        )
+        input_data: dict[str, Any] = {
+            "roomId": room_id,
+            "threadRootEventId": thread_root_event_id,
+        }
+        if up_to_event_id is not None:
+            input_data["upToEventId"] = up_to_event_id
+        data = await self._execute(Q.MUTATION_MARK_THREAD_AS_READ, {"input": input_data})
         return data["markThreadAsRead"]
 
-    async def follow_thread(
-        self, room_id: str, thread_root_event_id: str
-    ) -> Any:
+    async def follow_thread(self, room_id: str, thread_root_event_id: str) -> Any:
         data = await self._execute(
             Q.MUTATION_FOLLOW_THREAD,
             {"input": {"roomId": room_id, "threadRootEventId": thread_root_event_id}},
         )
         return data["followThread"]
 
-    async def unfollow_thread(
-        self, room_id: str, thread_root_event_id: str
-    ) -> Any:
+    async def unfollow_thread(self, room_id: str, thread_root_event_id: str) -> Any:
         data = await self._execute(
             Q.MUTATION_UNFOLLOW_THREAD,
             {"input": {"roomId": room_id, "threadRootEventId": thread_root_event_id}},
@@ -463,16 +616,16 @@ class ChattoClient:
         )
         return data["startDM"]
 
+    # --- Profile / account ---
+
     async def update_profile(
         self,
+        user_id: str,
         *,
-        user_id: str | None = None,
         display_name: str | None = None,
         login: str | None = None,
     ) -> User:
-        input_data: dict[str, Any] = {}
-        if user_id is not None:
-            input_data["userId"] = user_id
+        input_data: dict[str, Any] = {"userId": user_id}
         if display_name is not None:
             input_data["displayName"] = display_name
         if login is not None:
@@ -480,10 +633,8 @@ class ChattoClient:
         data = await self._execute(Q.MUTATION_UPDATE_PROFILE, {"input": input_data})
         return _parse_user(data["updateProfile"])
 
-    async def upload_avatar(self, file_path: str, user_id: str | None = None) -> dict[str, Any]:
-        variables: dict[str, Any] = {"input": {"file": None}}
-        if user_id is not None:
-            variables["input"]["userId"] = user_id
+    async def upload_avatar(self, file_path: str, user_id: str) -> dict[str, Any]:
+        variables: dict[str, Any] = {"input": {"userId": user_id, "file": None}}
         data = await self._execute_upload(
             Q.MUTATION_UPLOAD_AVATAR,
             variables,
@@ -491,18 +642,179 @@ class ChattoClient:
         )
         return data["uploadAvatar"]
 
-    async def update_presence(self, status: PresenceStatus) -> Any:
-        data = await self._execute(
-            Q.MUTATION_UPDATE_PRESENCE, {"input": {"status": status.value}}
-        )
+    async def delete_avatar(self, user_id: str) -> dict[str, Any]:
+        data = await self._execute(Q.MUTATION_DELETE_AVATAR, {"input": {"userId": user_id}})
+        return data["deleteAvatar"]
+
+    async def update_presence(self, status: PresenceStatusInput | PresenceStatus) -> Any:
+        # The server's UpdateMyPresenceInput uses PresenceStatusInput, which omits OFFLINE.
+        if isinstance(status, PresenceStatus) and status == PresenceStatus.OFFLINE:
+            raise ValueError("OFFLINE is not a settable presence status")
+        data = await self._execute(Q.MUTATION_UPDATE_PRESENCE, {"input": {"status": status.value}})
         return data["updateMyPresence"]
+
+    async def update_settings(
+        self,
+        user_id: str,
+        *,
+        timezone: str | None = None,
+        time_format: TimeFormat | None = None,
+    ) -> UserSettings:
+        input_data: dict[str, Any] = {"userId": user_id}
+        if timezone is not None:
+            input_data["timezone"] = timezone
+        if time_format is not None:
+            input_data["timeFormat"] = time_format.value
+        data = await self._execute(Q.MUTATION_UPDATE_SETTINGS, {"input": input_data})
+        return _parse_user_settings(data["updateSettings"]) or UserSettings()
+
+    async def request_account_deletion(self) -> Any:
+        data = await self._execute(Q.MUTATION_REQUEST_ACCOUNT_DELETION)
+        return data["requestAccountDeletion"]
+
+    async def delete_my_account(self, confirmation_token: str) -> Any:
+        data = await self._execute(
+            Q.MUTATION_DELETE_MY_ACCOUNT,
+            {"input": {"confirmationToken": confirmation_token}},
+        )
+        return data["deleteMyAccount"]
+
+    # --- Notifications & push ---
+
+    async def set_server_notification_level(self, level: NotificationLevel) -> Any:
+        data = await self._execute(
+            Q.MUTATION_SET_SERVER_NOTIFICATION_LEVEL,
+            {"input": {"level": level.value}},
+        )
+        return data["setServerNotificationLevel"]
+
+    async def set_room_notification_level(self, room_id: str, level: NotificationLevel) -> Any:
+        data = await self._execute(
+            Q.MUTATION_SET_ROOM_NOTIFICATION_LEVEL,
+            {"input": {"roomId": room_id, "level": level.value}},
+        )
+        return data["setRoomNotificationLevel"]
 
     async def dismiss_notification(self, notification_id: str) -> Any:
         data = await self._execute(
-            Q.MUTATION_DISMISS_NOTIFICATION, {"input": {"notificationId": notification_id}}
+            Q.MUTATION_DISMISS_NOTIFICATION,
+            {"input": {"notificationId": notification_id}},
         )
         return data["dismissNotification"]
 
     async def dismiss_all_notifications(self) -> Any:
         data = await self._execute(Q.MUTATION_DISMISS_ALL_NOTIFICATIONS)
         return data["dismissAllNotifications"]
+
+    async def subscribe_to_push(
+        self,
+        endpoint: str,
+        p256dh: str,
+        auth: str,
+        user_agent: str | None = None,
+    ) -> Any:
+        input_data: dict[str, Any] = {
+            "endpoint": endpoint,
+            "p256dh": p256dh,
+            "auth": auth,
+        }
+        if user_agent is not None:
+            input_data["userAgent"] = user_agent
+        data = await self._execute(Q.MUTATION_SUBSCRIBE_TO_PUSH, {"input": input_data})
+        return data["subscribeToPush"]
+
+    async def unsubscribe_from_push(self, endpoint: str) -> Any:
+        data = await self._execute(
+            Q.MUTATION_UNSUBSCRIBE_FROM_PUSH, {"input": {"endpoint": endpoint}}
+        )
+        return data["unsubscribeFromPush"]
+
+    # --- Room groups ---
+
+    async def create_room_group(self, name: str, description: str | None = None) -> RoomGroup:
+        input_data: dict[str, Any] = {"name": name}
+        if description is not None:
+            input_data["description"] = description
+        data = await self._execute(Q.MUTATION_CREATE_ROOM_GROUP, {"input": input_data})
+        g = data["createRoomGroup"]
+        return RoomGroup(id=g["id"], name=g["name"], description=g.get("description", ""))
+
+    async def update_room_group(
+        self, group_id: str, name: str, description: str | None = None
+    ) -> RoomGroup:
+        input_data: dict[str, Any] = {"id": group_id, "name": name}
+        if description is not None:
+            input_data["description"] = description
+        data = await self._execute(Q.MUTATION_UPDATE_ROOM_GROUP, {"input": input_data})
+        g = data["updateRoomGroup"]
+        return RoomGroup(id=g["id"], name=g["name"], description=g.get("description", ""))
+
+    async def delete_room_group(self, group_id: str) -> Any:
+        data = await self._execute(Q.MUTATION_DELETE_ROOM_GROUP, {"input": {"id": group_id}})
+        return data["deleteRoomGroup"]
+
+    async def reorder_room_groups(self, ordered_ids: list[str]) -> Any:
+        data = await self._execute(
+            Q.MUTATION_REORDER_ROOM_GROUPS, {"input": {"orderedIds": ordered_ids}}
+        )
+        return data["reorderRoomGroups"]
+
+    async def move_room_to_group(self, room_id: str, group_id: str) -> Any:
+        data = await self._execute(
+            Q.MUTATION_MOVE_ROOM_TO_GROUP,
+            {"input": {"roomId": room_id, "groupId": group_id}},
+        )
+        return data["moveRoomToGroup"]
+
+    async def reorder_rooms_in_group(self, group_id: str, ordered_room_ids: list[str]) -> Any:
+        data = await self._execute(
+            Q.MUTATION_REORDER_ROOMS_IN_GROUP,
+            {"input": {"groupId": group_id, "orderedRoomIds": ordered_room_ids}},
+        )
+        return data["reorderRoomsInGroup"]
+
+    # --- Server admin (logo/banner/config) ---
+
+    async def upload_server_logo(self, file_path: str) -> dict[str, Any]:
+        data = await self._execute_upload(
+            Q.MUTATION_UPLOAD_SERVER_LOGO,
+            {"input": {"file": None}},
+            file_path,
+        )
+        return data["uploadServerLogo"]
+
+    async def delete_server_logo(self) -> dict[str, Any]:
+        data = await self._execute(Q.MUTATION_DELETE_SERVER_LOGO)
+        return data["deleteServerLogo"]
+
+    async def upload_server_banner(self, file_path: str) -> dict[str, Any]:
+        data = await self._execute_upload(
+            Q.MUTATION_UPLOAD_SERVER_BANNER,
+            {"input": {"file": None}},
+            file_path,
+        )
+        return data["uploadServerBanner"]
+
+    async def delete_server_banner(self) -> dict[str, Any]:
+        data = await self._execute(Q.MUTATION_DELETE_SERVER_BANNER)
+        return data["deleteServerBanner"]
+
+    async def update_server_config(
+        self,
+        *,
+        server_name: str | None = None,
+        welcome_message: str | None = None,
+        motd: str | None = None,
+        description: str | None = None,
+    ) -> dict[str, Any]:
+        input_data: dict[str, Any] = {}
+        if server_name is not None:
+            input_data["serverName"] = server_name
+        if welcome_message is not None:
+            input_data["welcomeMessage"] = welcome_message
+        if motd is not None:
+            input_data["motd"] = motd
+        if description is not None:
+            input_data["description"] = description
+        data = await self._execute(Q.MUTATION_UPDATE_SERVER_CONFIG, {"input": input_data})
+        return data["updateServerConfig"]

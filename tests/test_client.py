@@ -1,12 +1,12 @@
 """Tests for ChattoClient using respx to mock HTTP."""
 
+import httpx
 import pytest
 import respx
-import httpx
 
 from chattolib.client import ChattoClient
-from chattolib.exceptions import ChattoGraphQLError, ChattoAuthError
-from chattolib.types import PresenceStatus
+from chattolib.exceptions import ChattoAuthError, ChattoGraphQLError
+from chattolib.types import PresenceStatusInput
 
 
 @pytest.fixture
@@ -33,9 +33,10 @@ async def test_me(mock_api, client):
                         "id": "u1",
                         "login": "alice",
                         "displayName": "Alice",
-                        "createdAt": "2025-01-01T00:00:00Z",
+                        "createdAt": "2025-01-01T00:00:00",
                         "avatarUrl": None,
                         "presenceStatus": "ONLINE",
+                        "settings": None,
                     }
                 }
             }
@@ -62,7 +63,6 @@ async def test_rooms(mock_api, client):
                             "archived": False,
                             "groupId": "g1",
                             "hasUnread": False,
-                            "hasMention": False,
                         }
                     ]
                 }
@@ -98,7 +98,7 @@ async def test_auth_error(mock_api, client):
 async def test_post_message(mock_api, client):
     mock_api.post("/api/graphql").mock(
         return_value=_gql_response(
-            {"postMessage": {"id": "e1", "createdAt": "2025-01-01T00:00:00Z"}}
+            {"postMessage": {"id": "e1", "createdAt": "2025-01-01T00:00:00"}}
         )
     )
     async with client:
@@ -115,23 +115,28 @@ async def test_room_events(mock_api, client):
                         "events": [
                             {
                                 "id": "e1",
-                                "createdAt": "2025-01-01T00:00:00Z",
+                                "createdAt": "2025-01-01T00:00:00",
                                 "actorId": "u1",
                                 "actor": {
                                     "id": "u1",
                                     "login": "alice",
                                     "displayName": "Alice",
                                     "avatarUrl": None,
+                                    "presenceStatus": "ONLINE",
                                 },
                                 "event": {
                                     "roomId": "r1",
                                     "body": "Hello",
+                                    "updatedAt": None,
                                     "attachments": [],
                                     "reactions": [],
                                     "inReplyTo": None,
-                                    "inThread": None,
+                                    "threadRootEventId": None,
                                     "replyCount": 0,
                                     "lastReplyAt": None,
+                                    "echoOfEventId": None,
+                                    "echoFromThreadRootEventId": None,
+                                    "viewerIsFollowingThread": None,
                                     "linkPreview": None,
                                 },
                             }
@@ -150,6 +155,7 @@ async def test_room_events(mock_api, client):
     assert len(page.events) == 1
     assert page.events[0].body == "Hello"
     assert page.events[0].actor.login == "alice"
+    assert page.events[0].thread_root_event_id is None
 
 
 async def test_login():
@@ -157,7 +163,11 @@ async def test_login():
         api.post("/auth/login").mock(
             return_value=httpx.Response(
                 200,
-                json={"success": True, "token": "cht_abc123", "user": {"id": "u1", "login": "alice"}},
+                json={
+                    "success": True,
+                    "token": "cht_abc123",
+                    "user": {"id": "u1", "login": "alice"},
+                },
                 headers={"set-cookie": "chatto_session=xyz; Path=/; HttpOnly"},
             )
         )
@@ -169,42 +179,36 @@ async def test_login():
 
 async def test_login_invalid():
     with respx.mock(base_url="https://chat.chatto.run") as api:
-        api.post("/auth/login").mock(return_value=httpx.Response(401, json={"error": "Invalid credentials"}))
+        api.post("/auth/login").mock(
+            return_value=httpx.Response(401, json={"error": "Invalid credentials"})
+        )
         with pytest.raises(ChattoAuthError, match="Invalid credentials"):
             await ChattoClient.login("bad", "creds")
 
 
 async def test_update_message(mock_api, client):
-    mock_api.post("/api/graphql").mock(
-        return_value=_gql_response({"updateMessage": {"id": "e1"}})
-    )
+    mock_api.post("/api/graphql").mock(return_value=_gql_response({"updateMessage": {"id": "e1"}}))
     async with client:
         result = await client.update_message("r1", "e1", "edited body")
     assert result["id"] == "e1"
 
 
 async def test_delete_message(mock_api, client):
-    mock_api.post("/api/graphql").mock(
-        return_value=_gql_response({"deleteMessage": True})
-    )
+    mock_api.post("/api/graphql").mock(return_value=_gql_response({"deleteMessage": True}))
     async with client:
         result = await client.delete_message("r1", "e1")
     assert result is True
 
 
 async def test_add_reaction(mock_api, client):
-    mock_api.post("/api/graphql").mock(
-        return_value=_gql_response({"addReaction": True})
-    )
+    mock_api.post("/api/graphql").mock(return_value=_gql_response({"addReaction": True}))
     async with client:
         result = await client.add_reaction("r1", "e1", "thumbsup")
     assert result is True
 
 
 async def test_remove_reaction(mock_api, client):
-    mock_api.post("/api/graphql").mock(
-        return_value=_gql_response({"removeReaction": True})
-    )
+    mock_api.post("/api/graphql").mock(return_value=_gql_response({"removeReaction": True}))
     async with client:
         result = await client.remove_reaction("r1", "e1", "thumbsup")
     assert result is True
@@ -213,13 +217,22 @@ async def test_remove_reaction(mock_api, client):
 async def test_create_room(mock_api, client):
     mock_api.post("/api/graphql").mock(
         return_value=_gql_response(
-            {"createRoom": {"id": "r1", "type": "CHANNEL", "name": "general", "description": None}}
+            {
+                "createRoom": {
+                    "id": "r1",
+                    "type": "CHANNEL",
+                    "name": "general",
+                    "description": None,
+                    "groupId": "g1",
+                }
+            }
         )
     )
     async with client:
-        room = await client.create_room("general")
+        room = await client.create_room("general", "g1")
     assert room.id == "r1"
     assert room.name == "general"
+    assert room.group_id == "g1"
 
 
 async def test_update_profile(mock_api, client):
@@ -230,22 +243,22 @@ async def test_update_profile(mock_api, client):
                     "id": "u1",
                     "login": "newname",
                     "displayName": "New Name",
+                    "avatarUrl": None,
+                    "presenceStatus": "ONLINE",
                 }
             }
         )
     )
     async with client:
-        user = await client.update_profile(login="newname", display_name="New Name")
+        user = await client.update_profile("u1", login="newname", display_name="New Name")
     assert user.login == "newname"
     assert user.display_name == "New Name"
 
 
 async def test_update_presence(mock_api, client):
-    mock_api.post("/api/graphql").mock(
-        return_value=_gql_response({"updateMyPresence": True})
-    )
+    mock_api.post("/api/graphql").mock(return_value=_gql_response({"updateMyPresence": True}))
     async with client:
-        result = await client.update_presence(PresenceStatus.ONLINE)
+        result = await client.update_presence(PresenceStatusInput.ONLINE)
     assert result is True
 
 
@@ -258,7 +271,7 @@ async def test_upload_avatar(mock_api, client, tmp_path):
     avatar = tmp_path / "avatar.jpg"
     avatar.write_bytes(b"\xff\xd8\xff\xe0fake-jpeg")
     async with client:
-        result = await client.upload_avatar(str(avatar))
+        result = await client.upload_avatar(str(avatar), "u1")
     assert result["avatarUrl"] == "https://example.com/avatar.jpg"
 
 
@@ -270,7 +283,7 @@ async def test_user(mock_api, client):
                     "id": "u1",
                     "login": "alice",
                     "displayName": "Alice",
-                    "createdAt": "2025-01-01T00:00:00Z",
+                    "createdAt": "2025-01-01T00:00:00",
                     "avatarUrl": None,
                     "presenceStatus": "ONLINE",
                 }
@@ -293,7 +306,7 @@ async def test_user_by_login(mock_api, client):
                     "displayName": "Alice",
                     "createdAt": None,
                     "avatarUrl": None,
-                    "presenceStatus": None,
+                    "presenceStatus": "OFFLINE",
                 }
             }
         )
@@ -313,9 +326,7 @@ async def test_start_dm(mock_api, client):
 
 
 async def test_dismiss_notification(mock_api, client):
-    mock_api.post("/api/graphql").mock(
-        return_value=_gql_response({"dismissNotification": True})
-    )
+    mock_api.post("/api/graphql").mock(return_value=_gql_response({"dismissNotification": True}))
     async with client:
         result = await client.dismiss_notification("n1")
     assert result is True
@@ -328,3 +339,97 @@ async def test_dismiss_all_notifications(mock_api, client):
     async with client:
         result = await client.dismiss_all_notifications()
     assert result is True
+
+
+async def test_followed_threads(mock_api, client):
+    mock_api.post("/api/graphql").mock(
+        return_value=_gql_response(
+            {
+                "viewer": {
+                    "followedThreads": {
+                        "threads": [
+                            {
+                                "roomId": "r1",
+                                "threadRootEventId": "e1",
+                                "replyCount": 3,
+                                "lastReplyAt": "2025-01-01T00:00:00",
+                                "hasUnread": True,
+                            }
+                        ],
+                        "totalCount": 1,
+                        "hasMore": False,
+                    },
+                    "hasUnreadFollowedThreads": True,
+                }
+            }
+        )
+    )
+    async with client:
+        page = await client.followed_threads()
+    assert page.total_count == 1
+    assert page.threads[0].room_id == "r1"
+    assert page.threads[0].has_unread is True
+
+
+async def test_notifications(mock_api, client):
+    mock_api.post("/api/graphql").mock(
+        return_value=_gql_response(
+            {
+                "viewer": {
+                    "notifications": {
+                        "items": [
+                            {
+                                "id": "n1",
+                                "createdAt": "2025-01-01T00:00:00",
+                                "summary": "Mention",
+                                "actor": None,
+                                "room": {"id": "r1", "name": "general"},
+                                "eventId": "e1",
+                                "threadRootEventId": None,
+                            }
+                        ],
+                        "totalCount": 1,
+                        "hasMore": False,
+                    },
+                    "hasNotifications": True,
+                }
+            }
+        )
+    )
+    async with client:
+        page = await client.notifications()
+    assert page.total_count == 1
+    assert page.items[0]["id"] == "n1"
+
+
+async def test_archive_unarchive_room(mock_api, client):
+    mock_api.post("/api/graphql").mock(return_value=_gql_response({"archiveRoom": True}))
+    async with client:
+        assert await client.archive_room("r1") is True
+
+
+async def test_create_room_group(mock_api, client):
+    mock_api.post("/api/graphql").mock(
+        return_value=_gql_response(
+            {"createRoomGroup": {"id": "g1", "name": "Team", "description": ""}}
+        )
+    )
+    async with client:
+        group = await client.create_room_group("Team")
+    assert group.id == "g1"
+    assert group.name == "Team"
+
+
+async def test_ban_room_member(mock_api, client):
+    mock_api.post("/api/graphql").mock(return_value=_gql_response({"banRoomMember": True}))
+    async with client:
+        result = await client.ban_room_member("r1", "u2", "spam")
+    assert result is True
+
+
+async def test_update_presence_offline_rejected(client):
+    from chattolib.types import PresenceStatus
+
+    async with client:
+        with pytest.raises(ValueError):
+            await client.update_presence(PresenceStatus.OFFLINE)

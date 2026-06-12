@@ -1,11 +1,51 @@
 """Async Python client library for the Chatto webchat GraphQL API."""
 
 from chattolib.client import ChattoClient
-from chattolib.exceptions import ChattoError, ChattoGraphQLError, ChattoAuthError
+from chattolib.exceptions import ChattoAuthError, ChattoError, ChattoGraphQLError
+from chattolib.types import (
+    Attachment,
+    FollowedThread,
+    FollowedThreadsPage,
+    LinkPreview,
+    MessageEvent,
+    NotificationLevel,
+    NotificationsPage,
+    PresenceStatus,
+    PresenceStatusInput,
+    Reaction,
+    ReactionSummary,
+    Room,
+    RoomEventsPage,
+    RoomGroup,
+    RoomType,
+    ServerProfile,
+    TimeFormat,
+    User,
+    UserSettings,
+)
 
 __all__ = [
     "ChattoClient",
     "ChattoError",
     "ChattoGraphQLError",
     "ChattoAuthError",
+    "Attachment",
+    "FollowedThread",
+    "FollowedThreadsPage",
+    "LinkPreview",
+    "MessageEvent",
+    "NotificationLevel",
+    "NotificationsPage",
+    "PresenceStatus",
+    "PresenceStatusInput",
+    "Reaction",
+    "ReactionSummary",
+    "Room",
+    "RoomEventsPage",
+    "RoomGroup",
+    "RoomType",
+    "ServerProfile",
+    "TimeFormat",
+    "User",
+    "UserSettings",
 ]
