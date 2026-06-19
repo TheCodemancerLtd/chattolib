@@ -22,7 +22,7 @@ QUERY_SERVER = """
 query Server {
     server {
         version
-        enabledAuthProviders
+        authProviders { id type label }
         pushNotificationsEnabled
         vapidPublicKey
         livekitUrl
@@ -56,7 +56,7 @@ query Room($roomId: ID!) {
 """
 
 QUERY_ROOM_EVENTS = """
-query RoomEvents($roomId: ID!, $limit: Int, $before: Time, $after: Time) {
+query RoomEvents($roomId: ID!, $limit: Int, $before: String, $after: String) {
     room(roomId: $roomId) {
         events(limit: $limit, before: $before, after: $after) {
             events {
@@ -263,9 +263,7 @@ mutation PostMessage($input: PostMessageInput!) {
 
 MUTATION_UPDATE_MESSAGE = """
 mutation UpdateMessage($input: UpdateMessageInput!) {
-    updateMessage(input: $input) {
-        id
-    }
+    updateMessage(input: $input)
 }
 """
 
@@ -323,13 +321,21 @@ mutation UpdateRoom($input: UpdateRoomInput!) {
 
 MUTATION_ARCHIVE_ROOM = """
 mutation ArchiveRoom($input: ArchiveRoomInput!) {
-    archiveRoom(input: $input)
+    archiveRoom(input: $input) {
+        id
+        name
+        archived
+    }
 }
 """
 
 MUTATION_UNARCHIVE_ROOM = """
 mutation UnarchiveRoom($input: UnarchiveRoomInput!) {
-    unarchiveRoom(input: $input)
+    unarchiveRoom(input: $input) {
+        id
+        name
+        archived
+    }
 }
 """
 
@@ -456,13 +462,19 @@ mutation UpdateSettings($input: UpdateSettingsInput!) {
 
 MUTATION_SET_SERVER_NOTIFICATION_LEVEL = """
 mutation SetServerNotificationLevel($input: SetServerNotificationLevelInput!) {
-    setServerNotificationLevel(input: $input)
+    setServerNotificationLevel(input: $input) {
+        level
+        effectiveLevel
+    }
 }
 """
 
 MUTATION_SET_ROOM_NOTIFICATION_LEVEL = """
 mutation SetRoomNotificationLevel($input: SetRoomNotificationLevelInput!) {
-    setRoomNotificationLevel(input: $input)
+    setRoomNotificationLevel(input: $input) {
+        level
+        effectiveLevel
+    }
 }
 """
 
@@ -530,19 +542,28 @@ mutation DeleteRoomGroup($input: DeleteRoomGroupInput!) {
 
 MUTATION_REORDER_ROOM_GROUPS = """
 mutation ReorderRoomGroups($input: ReorderRoomGroupsInput!) {
-    reorderRoomGroups(input: $input)
+    reorderRoomGroups(input: $input) {
+        id
+        name
+    }
 }
 """
 
 MUTATION_MOVE_ROOM_TO_GROUP = """
 mutation MoveRoomToGroup($input: MoveRoomToGroupInput!) {
-    moveRoomToGroup(input: $input)
+    moveRoomToGroup(input: $input) {
+        id
+        groupId
+    }
 }
 """
 
 MUTATION_REORDER_ROOMS_IN_GROUP = """
 mutation ReorderRoomsInGroup($input: ReorderRoomsInGroupInput!) {
-    reorderRoomsInGroup(input: $input)
+    reorderRoomsInGroup(input: $input) {
+        id
+        name
+    }
 }
 """
 
@@ -581,7 +602,10 @@ mutation DeleteServerBanner {
 MUTATION_UPDATE_SERVER_CONFIG = """
 mutation UpdateServerConfig($input: UpdateServerConfigInput!) {
     updateServerConfig(input: $input) {
-        profile { name welcomeMessage motd description }
+        name
+        welcomeMessage
+        motd
+        description
     }
 }
 """
@@ -600,7 +624,7 @@ subscription MyEvents {
                 roomId
                 body
                 inReplyTo
-                threadRootEventId
+                messageThreadRootEventId: threadRootEventId
                 updatedAt
                 attachments { id filename contentType size width height url thumbnailUrl }
                 linkPreview { url title description imageUrl siteName }
@@ -613,10 +637,17 @@ subscription MyEvents {
                 attachments { id filename contentType size width height url thumbnailUrl }
                 linkPreview { url title description imageUrl siteName }
             }
-            ... on MessageRetractedEvent { roomId messageEventId reason }
+            ... on MessageRetractedEvent {
+                roomId
+                messageEventId
+                retractionReason: reason
+            }
             ... on ReactionAddedEvent { roomId messageEventId emoji }
             ... on ReactionRemovedEvent { roomId messageEventId emoji }
-            ... on UserTypingEvent { roomId threadRootEventId }
+            ... on UserTypingEvent {
+                roomId
+                typingThreadRootEventId: threadRootEventId
+            }
             ... on RoomCreatedEvent { roomId name description }
             ... on RoomUpdatedEvent { roomId name description }
             ... on RoomDeletedEvent { roomId }
@@ -628,10 +659,28 @@ subscription MyEvents {
             ... on RoomMemberUnbannedEvent { roomId userId }
             ... on ServerMemberDeletedEvent { userId }
             ... on ThreadCreatedEvent { roomId threadRootEventId }
-            ... on AssetProcessingStartedEvent { roomId assetId messageEventId }
-            ... on AssetProcessingSucceededEvent { roomId assetId messageEventId }
-            ... on AssetProcessingFailedEvent { roomId assetId messageEventId reasonCode }
-            ... on AssetDeletedEvent { roomId assetId }
+            ... on AssetProcessingStartedEvent {
+                assetRoomId: roomId
+                assetId
+                assetMessageEventId: messageEventId
+            }
+            ... on AssetProcessingSucceededEvent {
+                assetRoomId: roomId
+                assetId
+                assetMessageEventId: messageEventId
+            }
+            ... on AssetProcessingFailedEvent {
+                assetRoomId: roomId
+                assetId
+                assetMessageEventId: messageEventId
+                reasonCode
+            }
+            ... on AssetDeletedEvent {
+                assetRoomId: roomId
+                assetId
+            }
+            ... on CallStartedEvent { roomId callId }
+            ... on CallEndedEvent { roomId callId }
             ... on CallParticipantJoinedEvent { roomId }
             ... on CallParticipantLeftEvent { roomId }
             ... on PresenceChangedEvent { status }
@@ -639,7 +688,11 @@ subscription MyEvents {
             ... on UserDeletedEvent { userId }
             ... on UserProfileUpdatedEvent { userId displayName avatarUrl login }
             ... on ServerUserPreferencesUpdatedEvent { timezone timeFormat }
-            ... on NotificationLevelChangedEvent { roomId level effectiveLevel }
+            ... on NotificationLevelChangedEvent {
+                notifRoomId: roomId
+                level
+                effectiveLevel
+            }
             ... on ServerUpdatedEvent { name description logoUrl bannerUrl }
             ... on MentionNotificationEvent { roomId }
             ... on MentionStatusClearedEvent { roomId }
