@@ -421,6 +421,7 @@ class ChattoClient:
         in_reply_to: str | None = None,
         also_send_to_channel: bool | None = None,
         link_preview: dict[str, Any] | None = None,
+        mention_confirmation_token: str | None = None,
     ) -> dict[str, Any]:
         input_data: dict[str, Any] = {"roomId": room_id}
         if body is not None:
@@ -433,6 +434,8 @@ class ChattoClient:
             input_data["alsoSendToChannel"] = also_send_to_channel
         if link_preview is not None:
             input_data["linkPreview"] = link_preview
+        if mention_confirmation_token is not None:
+            input_data["mentionConfirmationToken"] = mention_confirmation_token
         data = await self._execute(Q.MUTATION_POST_MESSAGE, {"input": input_data})
         return data["postMessage"]
 
@@ -441,12 +444,18 @@ class ChattoClient:
         room_id: str,
         event_id: str,
         body: str,
-    ) -> dict[str, Any]:
-        data = await self._execute(
-            Q.MUTATION_UPDATE_MESSAGE,
-            {"input": {"roomId": room_id, "eventId": event_id, "body": body}},
-        )
-        return data["updateMessage"]
+        *,
+        also_send_to_channel: bool | None = None,
+    ) -> bool:
+        input_data: dict[str, Any] = {
+            "roomId": room_id,
+            "eventId": event_id,
+            "body": body,
+        }
+        if also_send_to_channel is not None:
+            input_data["alsoSendToChannel"] = also_send_to_channel
+        data = await self._execute(Q.MUTATION_UPDATE_MESSAGE, {"input": input_data})
+        return bool(data["updateMessage"])
 
     edit_message = update_message
 
@@ -519,13 +528,13 @@ class ChattoClient:
         data = await self._execute(Q.MUTATION_UPDATE_ROOM, {"input": input_data})
         return _parse_room(data["updateRoom"])
 
-    async def archive_room(self, room_id: str) -> Any:
+    async def archive_room(self, room_id: str) -> Room:
         data = await self._execute(Q.MUTATION_ARCHIVE_ROOM, {"input": {"roomId": room_id}})
-        return data["archiveRoom"]
+        return _parse_room(data["archiveRoom"])
 
-    async def unarchive_room(self, room_id: str) -> Any:
+    async def unarchive_room(self, room_id: str) -> Room:
         data = await self._execute(Q.MUTATION_UNARCHIVE_ROOM, {"input": {"roomId": room_id}})
-        return data["unarchiveRoom"]
+        return _parse_room(data["unarchiveRoom"])
 
     async def join_room(self, room_id: str) -> dict[str, Any]:
         data = await self._execute(Q.MUTATION_JOIN_ROOM, {"input": {"roomId": room_id}})
@@ -806,7 +815,7 @@ class ChattoClient:
         welcome_message: str | None = None,
         motd: str | None = None,
         description: str | None = None,
-    ) -> dict[str, Any]:
+    ) -> ServerProfile:
         input_data: dict[str, Any] = {}
         if server_name is not None:
             input_data["serverName"] = server_name
@@ -817,4 +826,4 @@ class ChattoClient:
         if description is not None:
             input_data["description"] = description
         data = await self._execute(Q.MUTATION_UPDATE_SERVER_CONFIG, {"input": input_data})
-        return data["updateServerConfig"]
+        return _parse_server_profile(data["updateServerConfig"])

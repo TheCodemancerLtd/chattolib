@@ -187,10 +187,10 @@ async def test_login_invalid():
 
 
 async def test_update_message(mock_api, client):
-    mock_api.post("/api/graphql").mock(return_value=_gql_response({"updateMessage": {"id": "e1"}}))
+    mock_api.post("/api/graphql").mock(return_value=_gql_response({"updateMessage": True}))
     async with client:
         result = await client.update_message("r1", "e1", "edited body")
-    assert result["id"] == "e1"
+    assert result is True
 
 
 async def test_delete_message(mock_api, client):
@@ -403,9 +403,15 @@ async def test_notifications(mock_api, client):
 
 
 async def test_archive_unarchive_room(mock_api, client):
-    mock_api.post("/api/graphql").mock(return_value=_gql_response({"archiveRoom": True}))
+    mock_api.post("/api/graphql").mock(
+        return_value=_gql_response(
+            {"archiveRoom": {"id": "r1", "name": "general", "archived": True}}
+        )
+    )
     async with client:
-        assert await client.archive_room("r1") is True
+        room = await client.archive_room("r1")
+    assert room.id == "r1"
+    assert room.archived is True
 
 
 async def test_create_room_group(mock_api, client):
