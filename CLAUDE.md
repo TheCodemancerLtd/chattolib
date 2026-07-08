@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**chattolib** is an async Python client library for the [Chatto](https://chat.chatto.run) webchat GraphQL API (`https://chat.chatto.run/api/graphql`). It wraps the full Chatto GraphQL schema — queries, mutations, and subscriptions — into a typed, Pythonic async interface.
+**chattolib** is an async Python client library for the [Chatto](https://chat.chatto.run) webchat Connect API (`https://chat.chatto.run/api/connect/…`). Chatto migrated from GraphQL to protobuf-first ConnectRPC in v0.4.x (see [ADR-042](https://github.com/chattocorp/chatto/blob/main/docs/adr/ADR-042-protobuf-first-public-api.md), which supersedes ADR-003). This library speaks Connect JSON over HTTP for all request/response operations.
 
 ## Build & Development
 
@@ -14,11 +14,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Install in development mode
 pip install -e ".[dev]"
 
-# Run all tests
-pytest
+# Run all tests (mocked)
+pytest tests/test_client.py
 
-# Run a single test
-pytest tests/test_foo.py::test_bar -v
+# Run integration tests (require CHATTO_LOGIN / CHATTO_PASSWORD)
+pytest tests/test_integration.py -v
 
 # Lint & format
 ruff check .
@@ -30,50 +30,69 @@ mypy src/chattolib
 
 ## Architecture
 
-The library uses **httpx** for async HTTP and **websockets** for GraphQL subscriptions (real-time events via WebSocket).
+The library uses **httpx** for async HTTP. Realtime events are a separate
+protobuf WebSocket protocol (`chatto.realtime.v1`); the current release ships
+only a stub for that channel.
 
 ### Package layout: `src/chattolib/`
 
-- **client.py** — Main `ChattoClient` async class. Holds the httpx session, auth token, and base URL. All API methods live here or are mixed in from domain modules.
-- **types.py** — Dataclasses mirroring GraphQL object types (Room, User, Message, Attachment, etc.). Field names are snake_case translations of the schema's camelCase.
-- **queries.py** — Raw GraphQL query/mutation/subscription strings as constants.
-- **subscriptions.py** — WebSocket subscription handling for real-time events (server events, instance events, typing indicators, presence changes, etc.).
-- **exceptions.py** — Library-specific exception hierarchy wrapping GraphQL error responses.
+- **client.py** — `ChattoClient` async class. Wraps every Connect service the client currently supports; the low-level `call(service, method, request)` method is a public escape hatch.
+- **_transport.py** — Connect JSON transport helpers (URL building, headers, error decoding).
+- **types.py** — Dataclasses and `StrEnum` types mirroring the protobuf messages, with `.parse(dict)` classmethods that consume Connect JSON.
+- **exceptions.py** — `ChattoError`, `ChattoConnectError` (wraps Connect protocol errors), `ChattoAuthError`.
+- **realtime.py** — Placeholder for the future protobuf realtime WebSocket client.
 
-### Key API domains (from the Chatto GraphQL schema)
+### Connect protocol conventions
 
-| Domain | Queries | Mutations | Subscriptions |
-|---|---|---|---|
-| **Server** | `server`, `server.profile` | `updateServerConfig`, `uploadServerLogo`, `deleteServerLogo`, `uploadServerBanner`, `deleteServerBanner` | `ServerUpdatedEvent`, `RoomGroupsUpdatedEvent` |
-| **Rooms** | `room`, `room.events`, `room.event`, `room.eventsAround` | `createRoom`, `updateRoom`, `archiveRoom`, `unarchiveRoom`, `joinRoom`, `leaveRoom`, `banRoomMember`, `unbanRoomMember`, `markRoomAsRead` | `myEvents` |
-| **Room groups** | `server.roomGroups` | `createRoomGroup`, `updateRoomGroup`, `deleteRoomGroup`, `reorderRoomGroups`, `moveRoomToGroup`, `reorderRoomsInGroup`, `joinGroup` | `RoomGroupsUpdatedEvent` |
-| **Messages** | (via room.events) | `postMessage`, `updateMessage`, `deleteMessage`, `deleteAttachment`, `deleteLinkPreview` | `MessagePostedEvent`, `MessageEditedEvent`, `MessageRetractedEvent` |
-| **Assets** | (via attachment IDs) | (server-driven) | `AssetProcessingStartedEvent`, `AssetProcessingSucceededEvent`, `AssetProcessingFailedEvent`, `AssetDeletedEvent` |
-| **Reactions** | (on message events) | `addReaction`, `removeReaction` | `ReactionAddedEvent`, `ReactionRemovedEvent` |
-| **Threads** | `room.event.threadReplies` (via `MessagePostedEvent`), `viewer.followedThreads` | `followThread`, `unfollowThread`, `markThreadAsRead` | `ThreadCreatedEvent`, `ThreadFollowChangedEvent` |
-| **Users** | `viewer.user`, `user(id)`, `userByLogin`, `server.members` | `updateProfile`, `uploadAvatar`, `deleteAvatar`, `updateSettings`, `requestAccountDeletion`, `deleteMyAccount` | `UserCreatedEvent`, `UserDeletedEvent`, `UserProfileUpdatedEvent`, `PresenceChangedEvent` |
-| **DMs** | (via rooms) | `startDM` | `NewDirectMessageNotificationEvent` |
-| **Notifications** | `viewer.notifications` (connection), `viewer.hasNotifications` | `dismissNotification`, `dismissAllNotifications`, `setServerNotificationLevel`, `setRoomNotificationLevel` | `NotificationCreatedEvent`, `NotificationDismissedEvent`, `NotificationLevelChangedEvent`, `MentionStatusClearedEvent` |
-| **Push** | — | `subscribeToPush`, `unsubscribeFromPush` | — |
-| **Permissions/Roles** | `admin.rbac`, `server.roles` | `grantPermission`, `revokePermission`, `createRole`, `updateRole`, `deleteRole`, `assignRole`, plus room/user/group variants | — |
-| **Voice calls** | `room.voiceCallToken`, `activeCallRoomIds`, `room.callParticipants` | — | `CallParticipantJoinedEvent`, `CallParticipantLeftEvent` |
-| **Admin** | `admin.systemInfo`, `admin.serverConfig`, `admin.eventLog`, `admin.roomBans`, `admin.projections` | `admin.updateUser`, `admin.updateBlockedUsernames`, `admin.clearUsernameCooldown` | via `myEvents` |
+- Endpoint: `POST https://<host>/api/connect/<fully.qualified.Service>/<Method>` with a JSON body.
+- Empty request messages send `{}`.
+- Field names on the wire are **camelCase** (proto → JSON mapping). Python dataclass fields are `snake_case`.
+- Enums on the wire are the **full enum value name** as a string, e.g. `"PRESENCE_STATUS_ONLINE"`. `types._parse_enum` also accepts the short tail (`"ONLINE"`) for robustness.
+- Timestamps are RFC 3339 strings (usually `Z`-suffixed). Use `types.parse_datetime` / `types.format_datetime` helpers.
+- `optional` scalars: absent from JSON when unset. A present empty string is distinct.
+- `bytes`: base64-encoded strings (used by `MyAccountService.UploadAvatar` via the `ImageUpload` message).
+- Errors: non-2xx HTTP status with a JSON body of `{"code": "...", "message": "...", "details": [...]}`. `ChattoConnectError` surfaces `code`, `message`, `status_code`, `details`.
 
-### GraphQL conventions
+### Auth
 
-- IDs are opaque strings (`ID` scalar).
-- Large integers use `Int64` scalar (e.g., byte counts) — map to Python `int`.
-- File uploads use a custom `Upload` scalar (multipart form).
-- Pagination uses `limit`/`before`/`after` on room events (`before`/`after` are `Time` scalars, ISO timestamps).
-- All mutations take a single `input` argument with a corresponding `*Input` type.
-- Single unified subscription: `myEvents` for all server, room, and instance events.
-- Rooms have a `type` field: `CHANNEL` or `DM`. Channels live inside a `RoomGroup` (`groupId` is required at creation).
-- Threads are addressed by `threadRootEventId` (no separate `inThread` field on messages).
-- Presence: `PresenceStatus` (OFFLINE/ONLINE/AWAY/DO_NOT_DISTURB) is the observable type; `PresenceStatusInput` (no OFFLINE) is what callers can set via `updateMyPresence`.
-- Image URLs accept optional `width`, `height`, `fit` (enum: `CONTAIN`, `COVER`, `EXACT`) for server-side resizing.
+`ChattoClient.login(login, password, base_url=…)` still uses Chatto's non-Connect `/auth/login` HTTP endpoint. It captures both the returned bearer token and any `chatto_session` cookie, and every subsequent Connect call sends both.
+
+### Key services exposed by the client
+
+| Domain | Service (`chatto.api.v1.…` unless noted) | Notable RPCs |
+|---|---|---|
+| Discovery | `chatto.discovery.v1.ServerDiscoveryService` | `GetServer` (public) |
+| Server | `ServerService` | `GetMotd`, `GetRuntimeConfig` |
+| Viewer | `ViewerService` | `GetViewer` |
+| My account | `MyAccountService` | `UpdateProfile`, `UploadAvatar`, `DeleteAvatar`, `UpdatePassword`, `UpdateSettings`, `UpdatePresence`, `UpdateCustomStatus`, `DeleteCustomStatus`, `RequestAccountDeletion`, `DeleteMyAccount` |
+| Users | `UserService` | `ListUsers`, `GetUser`, `BatchGetUsers` |
+| Room directory | `RoomDirectoryService` | `ListRooms`, `ListRoomGroups`, `GetRoomGroup`, `BatchGetRoomGroups`, `GetRoom`, `BatchGetRooms` |
+| Rooms | `RoomService` | `CreateRoom`, `UpdateRoom`, `ArchiveRoom`, `UnarchiveRoom`, `JoinRoom`, `JoinRoomGroup`, `StartDM`, `LeaveRoom`, `AddMember`, `RemoveMember`, `ListMembers`, `GetMember`, `BatchGetMembers`, `BanMember`, `UnbanMember`, `ListBans`, `UpdateTypingIndicator`, `GetRoomEvents`, `GetRoomEventsAround`, `MarkRoomAsRead`, `ListRoomAttachments` |
+| Messages | `MessageService` | `FetchLinkPreview`, `CreateMessage`, `UpdateMessage`, `DeleteMessage`, `DeleteAttachment`, `DeleteLinkPreview`, `GetMessage`, `BatchGetMessages`, `AddReaction`, `RemoveReaction` |
+| Threads | `ThreadService` | `FollowThread`, `UnfollowThread`, `ListFollowedThreads`, `GetThreadEvents`, `GetThreadEventsAround`, `MarkThreadAsRead` |
+| Notifications | `NotificationService` | `ListNotifications`, `GetNotification`, `BatchGetNotifications`, `ListRoomNotifications`, `ListRoomNotificationCounts`, `HasNotifications`, `DismissNotification`, `DismissAllNotifications` |
+| Notification prefs | `NotificationPreferencesService` | `Get`/`Update` × `Server`/`Room` |
+| Push | `PushNotificationService` | `Subscribe`, `Unsubscribe` |
+| Assets | `AssetService` | `GetAsset`, `BatchGetAssets` |
+| Voice calls | `VoiceCallService` | `ListActiveCalls`, `GetActiveCall`, `BatchGetActiveCalls`, `JoinCall`, `LeaveCall`, `GetCallToken` |
+| Realtime (WS) | `chatto.realtime.v1` protobuf WS | Not yet implemented in Python — see `realtime.py` and the follow-up bean |
 
 ### Naming conventions
 
-- Python field/method names: `snake_case` (translated from GraphQL `camelCase`)
-- Type classes: `PascalCase` matching the GraphQL type names
-- Query/mutation method names on the client: `verb_noun` style (e.g., `create_room`, `post_message`, `mark_room_as_read`)
+- Python method names: `verb_noun` style (`create_room`, `post_message`, `mark_room_as_read`); most method names mirror the Connect method with the service name dropped.
+- Python field names: `snake_case`; wire JSON uses `camelCase` and parsers translate.
+- Enum classes: `PascalCase` (`PresenceStatus`, `RoomKind`, `NotificationLevel`, `TimeFormat`, `ImageFitMode`, `RoomDirectoryScope`, `VideoProcessingStatus`). Their `value` is the full protobuf enum-name string (e.g. `"ROOM_KIND_CHANNEL"`).
+- Dataclasses: `PascalCase` matching the protobuf message names (`Room`, `Message`, `Notification`, `RoomWithViewerState`, etc.).
+
+### Gotchas from the migration
+
+- The old `RoomType` enum is now `RoomKind` (`ROOM_KIND_CHANNEL` / `ROOM_KIND_DM`).
+- `Room` no longer carries viewer-scoped state (`hasUnread`, etc.). The directory service returns `RoomWithViewerState { room, viewerState }` for that.
+- `PresenceStatus` now includes `UNSPECIFIED`. `UpdatePresence` still rejects both `OFFLINE` and `UNSPECIFIED`.
+- `TimeFormat` values changed: `HOUR_12` / `HOUR_24` / `AUTO` (was `TWELVE_HOUR` / `TWENTY_FOUR_HOUR`).
+- Notifications are strongly typed via a `oneof` (`direct_message`, `mention`, `reply`, `room_message`); `Notification.kind` carries the tag.
+- Timeline events (`RoomTimelineEvent`) are also a `oneof`; `TimelineEvent.kind` names the case (`message_posted`, `room_created`, …). Only `message_posted` populates a `Message` payload.
+- File uploads (avatar) use the `ImageUpload` message with base64-encoded bytes, not multipart. `upload_avatar(path)` handles the base64 encoding.
+- Server profile fields are no longer inside `server.profile`; the shape is now `ServerPublicProfile` returned by `ServerDiscoveryService.GetServer`.
+- No more `motd` on the public profile; it is a separate authenticated RPC (`ServerService.GetMotd`).
+- Room groups can contain `SidebarLink` items (not just rooms). `RoomGroup.sidebar_links` exposes them.
