@@ -2,11 +2,11 @@
 
 **Unofficial** async Python client library for the [Chatto](https://chat.chatto.run) webchat API.
 
-> **Pre-alpha (1.0.0a1)** — targets Chatto 0.4.x's ConnectRPC API. The
-> upstream server dropped GraphQL in favour of a protobuf-first Connect API
-> (see ADR-042 in chattocorp/chatto), and this release is a full rewrite for
-> that transport. The library speaks Connect JSON over HTTP; realtime
-> WebSocket support is a follow-up.
+> Chattolib versions track the Chatto server version they target. **0.4.2**
+> targets Chatto 0.4.2's ConnectRPC API. The upstream server dropped GraphQL
+> in favour of a protobuf-first Connect API (see ADR-042 in chattocorp/chatto),
+> and this release is a full rewrite for that transport. The library speaks
+> Connect JSON over HTTP; realtime WebSocket support is a follow-up.
 
 ## Install
 

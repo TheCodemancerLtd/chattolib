@@ -8,6 +8,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **chattolib** is an async Python client library for the [Chatto](https://chat.chatto.run) webchat Connect API (`https://chat.chatto.run/api/connect/…`). Chatto migrated from GraphQL to protobuf-first ConnectRPC in v0.4.x (see [ADR-042](https://github.com/chattocorp/chatto/blob/main/docs/adr/ADR-042-protobuf-first-public-api.md), which supersedes ADR-003). This library speaks Connect JSON over HTTP for all request/response operations.
 
+## Versioning
+
+**chattolib's version tracks the Chatto server version it targets.** A new Chatto release triggers a matching chattolib release (e.g. Chatto `0.4.2` → chattolib `0.4.2`). If a chattolib-only fix is needed between server releases, use a post-release suffix (`0.4.2.post1`) rather than bumping the base number ahead of Chatto.
+
 ## Build & Development
 
 ```bash
