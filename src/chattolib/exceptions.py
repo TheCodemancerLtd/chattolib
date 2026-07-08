@@ -9,15 +9,29 @@ class ChattoError(Exception):
     """Base exception for all chattolib errors."""
 
 
-class ChattoGraphQLError(ChattoError):
-    """One or more GraphQL errors were returned by the API."""
+class ChattoConnectError(ChattoError):
+    """A ConnectRPC call returned a protocol error.
 
-    def __init__(self, errors: list[dict[str, Any]], data: Any = None) -> None:
-        self.errors = errors
-        self.data = data
-        messages = "; ".join(e.get("message", str(e)) for e in errors)
-        super().__init__(messages)
+    The Chatto Connect API returns errors as JSON bodies of the shape
+    ``{"code": "<code>", "message": "<message>", "details": [...]}`` alongside a
+    non-2xx HTTP status. See https://connectrpc.com/docs/protocol#error-codes for
+    the canonical code list.
+    """
+
+    def __init__(
+        self,
+        code: str,
+        message: str,
+        *,
+        status_code: int | None = None,
+        details: list[dict[str, Any]] | None = None,
+    ) -> None:
+        self.code = code
+        self.message = message
+        self.status_code = status_code
+        self.details = details or []
+        super().__init__(f"{code}: {message}")
 
 
 class ChattoAuthError(ChattoError):
-    """Authentication failed (missing token, expired session, etc.)."""
+    """Authentication failed (missing token, expired session, or bad credentials)."""

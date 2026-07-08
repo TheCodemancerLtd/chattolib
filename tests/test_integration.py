@@ -1,4 +1,4 @@
-"""Integration tests against the live Chatto API.
+"""Integration tests against the live Chatto Connect API.
 
 Run with:  pytest tests/test_integration.py -v
 Requires: CHATTO_LOGIN and CHATTO_PASSWORD environment variables.
@@ -40,8 +40,19 @@ async def test_invalid_login():
 
 
 async def test_list_rooms(client):
-    rooms = await client.rooms()
+    rooms = await client.list_rooms()
     assert isinstance(rooms, list)
     print(f"Found {len(rooms)} rooms")
     for r in rooms:
-        print(f"  - {r.name} (id={r.id}, type={r.type})")
+        if r.room is None:
+            continue
+        print(f"  - {r.room.name} (id={r.room.id}, kind={r.room.kind.name})")
+
+
+async def test_public_server_metadata():
+    async with ChattoClient() as anonymous:
+        profile, login = await anonymous.get_server()
+    assert profile.name
+    assert profile.version
+    print(f"Chatto {profile.version} — {profile.name}")
+    print(f"Direct registration: {login.direct_registration_enabled}")
