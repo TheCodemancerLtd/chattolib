@@ -2,6 +2,14 @@
 
 from chattolib.client import ChattoClient
 from chattolib.exceptions import ChattoAuthError, ChattoConnectError, ChattoError
+from chattolib.realtime import (
+    ChattoRealtimeCloseError,
+    ChattoRealtimeError,
+    RealtimeConnection,
+    RealtimeEvent,
+    ServerHello,
+    stream_events,
+)
 from chattolib.types import (
     ActiveCall,
     Asset,
@@ -52,6 +60,12 @@ __all__ = [
     "ChattoError",
     "ChattoConnectError",
     "ChattoAuthError",
+    "ChattoRealtimeCloseError",
+    "ChattoRealtimeError",
+    "RealtimeConnection",
+    "RealtimeEvent",
+    "ServerHello",
+    "stream_events",
     "ActiveCall",
     "Asset",
     "AssetUrl",

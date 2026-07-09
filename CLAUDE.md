@@ -34,9 +34,10 @@ mypy src/chattolib
 
 ## Architecture
 
-The library uses **httpx** for async HTTP. Realtime events are a separate
-protobuf WebSocket protocol (`chatto.realtime.v1`); the current release ships
-only a stub for that channel.
+The library uses **httpx** for async HTTP. Realtime events use a separate
+binary-protobuf WebSocket protocol (`chatto.realtime.v1`) served at
+`/api/realtime`, implemented in `realtime.py` on top of `websockets` and
+generated protobuf bindings.
 
 ### Package layout: `src/chattolib/`
 
@@ -44,7 +45,14 @@ only a stub for that channel.
 - **_transport.py** — Connect JSON transport helpers (URL building, headers, error decoding).
 - **types.py** — Dataclasses and `StrEnum` types mirroring the protobuf messages, with `.parse(dict)` classmethods that consume Connect JSON.
 - **exceptions.py** — `ChattoError`, `ChattoConnectError` (wraps Connect protocol errors), `ChattoAuthError`.
-- **realtime.py** — Placeholder for the future protobuf realtime WebSocket client.
+- **realtime.py** — Protobuf realtime WebSocket client. `stream_events(client)` yields `RealtimeEvent(kind, payload, ...)` values. Errors surface as `ChattoRealtimeError` / `ChattoRealtimeCloseError`.
+- **_pb/** — Vendored, generated Python protobuf bindings for
+  `chatto.realtime.v1` and its transitive imports. Regenerate with
+  `scripts/generate_pb.sh` (needs `protoc` on PATH); the script fetches the
+  latest `.proto` sources from `chattocorp/chatto` and rewrites the bindings.
+  The `_pb/__init__.py` inserts its own directory onto `sys.path` so the
+  generated `from chatto.api.v1 import ...` imports resolve without polluting
+  the top-level namespace of dependent projects.
 
 ### Connect protocol conventions
 
@@ -79,7 +87,7 @@ only a stub for that channel.
 | Push | `PushNotificationService` | `Subscribe`, `Unsubscribe` |
 | Assets | `AssetService` | `GetAsset`, `BatchGetAssets` |
 | Voice calls | `VoiceCallService` | `ListActiveCalls`, `GetActiveCall`, `BatchGetActiveCalls`, `JoinCall`, `LeaveCall`, `GetCallToken` |
-| Realtime (WS) | `chatto.realtime.v1` protobuf WS | Not yet implemented in Python — see `realtime.py` and the follow-up bean |
+| Realtime (WS) | `chatto.realtime.v1` protobuf WS | `stream_events(client)` / `RealtimeConnection` — full frame set: hello, subscribe, event, heartbeat, ping/pong, error, close |
 
 ### Naming conventions
 

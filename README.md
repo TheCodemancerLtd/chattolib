@@ -5,8 +5,9 @@
 > Chattolib versions track the Chatto server version they target. **0.4.2**
 > targets Chatto 0.4.2's ConnectRPC API. The upstream server dropped GraphQL
 > in favour of a protobuf-first Connect API (see ADR-042 in chattocorp/chatto),
-> and this release is a full rewrite for that transport. The library speaks
-> Connect JSON over HTTP; realtime WebSocket support is a follow-up.
+> and this release is a full rewrite for that transport. Request/response
+> traffic uses Connect JSON over HTTP; the realtime channel is a binary
+> protobuf WebSocket at `/api/realtime` (needs the ``[realtime]`` extra).
 
 ## Install
 
@@ -37,6 +38,31 @@ async def main():
 
 asyncio.run(main())
 ```
+
+## Realtime
+
+Install with the extra:
+
+```bash
+pip install 'chattolib[realtime]'
+```
+
+Then stream live events:
+
+```python
+from chattolib import stream_events
+
+async with await ChattoClient.login("username", "password") as client:
+    async for event in stream_events(client):
+        print(event.kind, event.actor_id, event.payload)
+```
+
+`event.kind` names the protobuf ``oneof`` case (`message_posted`,
+`reaction_added`, `presence_changed`, `notification_created`, …).
+`event.payload` is the concrete protobuf sub-message — access its fields
+directly (e.g. `event.payload.room_id`). Realtime events are invalidation
+signals; use the corresponding Connect RPC (`GetRoomEventsAround`,
+`GetNotification`, `GetUser`, …) to hydrate the referenced resource.
 
 ## Escape hatch
 

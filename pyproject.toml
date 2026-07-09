@@ -33,6 +33,7 @@ Homepage = "https://chat.chatto.run"
 [project.optional-dependencies]
 realtime = [
     "websockets>=13.0",
+    "protobuf>=5.28",
 ]
 dev = [
     "pytest>=8.0",
@@ -52,6 +53,7 @@ testpaths = ["tests"]
 [tool.ruff]
 target-version = "py311"
 line-length = 100
+extend-exclude = ["src/chattolib/_pb"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
@@ -61,3 +63,9 @@ python_version = "3.11"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
+exclude = ["src/chattolib/_pb"]
+
+[[tool.mypy.overrides]]
+module = ["chattolib._pb.*", "websockets.*"]
+follow_imports = "skip"
+ignore_missing_imports = true
