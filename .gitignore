@@ -2,5 +2,11 @@ __pycache__/
 *.egg-info/
 .venv/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
 dist/
 build/
+
+# Local bot state / credentials — must not be tracked
+robochatto.env
+robochatto.db
