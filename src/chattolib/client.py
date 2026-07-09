@@ -8,6 +8,7 @@ request/response operations; realtime events live in ``chattolib.realtime``.
 from __future__ import annotations
 
 import base64
+import hashlib
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -15,14 +16,21 @@ from typing import Any
 import httpx
 
 from chattolib import _transport
-from chattolib.exceptions import ChattoAuthError
+from chattolib.exceptions import ChattoAuthError, ChattoError
 from chattolib.types import (
     ActiveCall,
+    AdminMember,
+    AdminRole,
+    AdminRoomLayoutGroup,
+    AdminRoomLayoutItemKind,
     Asset,
+    AssetUpload,
     DirectoryMember,
+    ExternalIdentityProvider,
     FollowedThread,
     FollowedThreadsPage,
     ImageTransformOptions,
+    LinkedExternalIdentity,
     LinkPreview,
     Message,
     Notification,
@@ -31,11 +39,13 @@ from chattolib.types import (
     NotificationsPage,
     Page,
     PresenceStatus,
+    Role,
     Room,
     RoomBan,
     RoomDirectoryScope,
     RoomGroup,
     RoomWithViewerState,
+    ServerConfig,
     ServerLogin,
     ServerProfile,
     ServerRuntimeConfig,
@@ -49,6 +59,7 @@ from chattolib.types import (
 )
 
 API_V1 = "chatto.api.v1"
+ADMIN_V1 = "chatto.admin.v1"
 AUTH_V1 = "chatto.auth.v1"
 DISCOVERY_V1 = "chatto.discovery.v1"
 
@@ -1157,3 +1168,751 @@ class ChattoClient:
             f"{API_V1}.VoiceCallService", "GetCallToken", {"roomId": room_id}
         )
         return str(data.get("token", ""))
+
+    # --- Roles (public) -----------------------------------------------
+
+    async def list_roles(self) -> list[Role]:
+        data = await self.call(f"{API_V1}.RoleService", "ListRoles")
+        return [
+            r for r in (Role.parse(row) for row in data.get("roles") or []) if r is not None
+        ]
+
+    async def get_role(self, name: str) -> Role | None:
+        data = await self.call(f"{API_V1}.RoleService", "GetRole", {"name": name})
+        return Role.parse(data.get("role"))
+
+    async def batch_get_roles(self, names: list[str]) -> list[Role]:
+        data = await self.call(
+            f"{API_V1}.RoleService", "BatchGetRoles", {"names": names}
+        )
+        return [
+            r for r in (Role.parse(row) for row in data.get("roles") or []) if r is not None
+        ]
+
+    # --- Asset uploads ------------------------------------------------
+
+    async def create_upload(
+        self,
+        room_id: str,
+        filename: str,
+        size: int,
+        sha256: str,
+        *,
+        content_type: str = "",
+    ) -> AssetUpload:
+        data = await self.call(
+            f"{API_V1}.AssetUploadService",
+            "CreateUpload",
+            {
+                "roomId": room_id,
+                "filename": filename,
+                "contentType": content_type,
+                "size": size,
+                "sha256": sha256,
+            },
+        )
+        upload = AssetUpload.parse(data.get("upload"))
+        assert upload is not None
+        return upload
+
+    async def upload_chunk(
+        self,
+        upload_id: str,
+        offset: int,
+        content: bytes,
+        chunk_sha256: str,
+    ) -> AssetUpload:
+        data = await self.call(
+            f"{API_V1}.AssetUploadService",
+            "UploadChunk",
+            {
+                "uploadId": upload_id,
+                "offset": offset,
+                "content": base64.b64encode(content).decode("ascii"),
+                "chunkSha256": chunk_sha256,
+            },
+        )
+        upload = AssetUpload.parse(data.get("upload"))
+        assert upload is not None
+        return upload
+
+    async def get_upload(self, upload_id: str) -> AssetUpload:
+        data = await self.call(
+            f"{API_V1}.AssetUploadService", "GetUpload", {"uploadId": upload_id}
+        )
+        upload = AssetUpload.parse(data.get("upload"))
+        assert upload is not None
+        return upload
+
+    async def complete_upload(self, upload_id: str) -> tuple[AssetUpload, Asset | None]:
+        data = await self.call(
+            f"{API_V1}.AssetUploadService",
+            "CompleteUpload",
+            {"uploadId": upload_id},
+        )
+        upload = AssetUpload.parse(data.get("upload"))
+        assert upload is not None
+        return upload, Asset.parse(data.get("asset"))
+
+    async def cancel_upload(self, upload_id: str) -> AssetUpload:
+        data = await self.call(
+            f"{API_V1}.AssetUploadService",
+            "CancelUpload",
+            {"uploadId": upload_id},
+        )
+        upload = AssetUpload.parse(data.get("upload"))
+        assert upload is not None
+        return upload
+
+    async def upload_attachment(
+        self,
+        room_id: str,
+        file_path: str | Path,
+        *,
+        content_type: str = "",
+        filename: str | None = None,
+    ) -> Asset:
+        """Upload a file as a room attachment and return the resulting Asset.
+
+        Convenience wrapper that computes the file's SHA-256, calls
+        ``CreateUpload``, streams chunks respecting the server's
+        ``max_chunk_size``, and finishes with ``CompleteUpload``. Use the
+        returned ``Asset.id`` in ``post_message(attachment_asset_ids=[...])``
+        to attach the file to a message.
+        """
+        path = Path(file_path)
+        data = path.read_bytes()
+        size = len(data)
+        sha = hashlib.sha256(data).hexdigest()
+        upload = await self.create_upload(
+            room_id,
+            filename or path.name,
+            size,
+            sha,
+            content_type=content_type,
+        )
+        chunk_size = upload.max_chunk_size or 512 * 1024
+        offset = upload.committed_offset
+        while offset < size:
+            end = min(offset + chunk_size, size)
+            chunk = data[offset:end]
+            chunk_sha = hashlib.sha256(chunk).hexdigest()
+            upload = await self.upload_chunk(upload.upload_id, offset, chunk, chunk_sha)
+            if upload.committed_offset <= offset:
+                raise ChattoError(
+                    f"upload stalled at offset {offset} (server reported "
+                    f"committed_offset={upload.committed_offset})"
+                )
+            offset = upload.committed_offset
+        upload, asset = await self.complete_upload(upload.upload_id)
+        if asset is None:
+            raise ChattoError("upload completed but server returned no asset")
+        return asset
+
+    # --- MyAccount external identities --------------------------------
+
+    async def list_external_identities(
+        self,
+    ) -> tuple[list[ExternalIdentityProvider], list[LinkedExternalIdentity]]:
+        data = await self.call(
+            f"{API_V1}.MyAccountService", "ListExternalIdentities"
+        )
+        providers = [ExternalIdentityProvider.parse(p) for p in data.get("providers") or []]
+        linked = [
+            LinkedExternalIdentity.parse(li) for li in data.get("linkedIdentities") or []
+        ]
+        return providers, linked
+
+    async def start_external_identity_link(
+        self,
+        provider_id: str,
+        *,
+        redirect_path: str = "",
+        current_password: str = "",
+    ) -> str:
+        data = await self.call(
+            f"{API_V1}.MyAccountService",
+            "StartExternalIdentityLink",
+            {
+                "providerId": provider_id,
+                "redirectPath": redirect_path,
+                "currentPassword": current_password,
+            },
+        )
+        return str(data.get("startUrl", ""))
+
+    async def disconnect_external_identity(
+        self, subject_hash: str, *, current_password: str = ""
+    ) -> bool:
+        data = await self.call(
+            f"{API_V1}.MyAccountService",
+            "DisconnectExternalIdentity",
+            {"subjectHash": subject_hash, "currentPassword": current_password},
+        )
+        return bool(data.get("disconnected", False))
+
+    # --- ExternalIdentityAuthService (public OAuth handoff) -----------
+
+    async def get_pending_external_identity(self, token: str) -> dict[str, Any]:
+        return await self.call(
+            f"{AUTH_V1}.ExternalIdentityAuthService",
+            "GetPendingExternalIdentity",
+            {"token": token},
+        )
+
+    async def create_external_identity_account(
+        self, token: str, login: str
+    ) -> dict[str, Any]:
+        return await self.call(
+            f"{AUTH_V1}.ExternalIdentityAuthService",
+            "CreateExternalIdentityAccount",
+            {"token": token, "login": login},
+        )
+
+    async def confirm_external_identity_link(
+        self, token: str
+    ) -> LinkedExternalIdentity | None:
+        data = await self.call(
+            f"{AUTH_V1}.ExternalIdentityAuthService",
+            "ConfirmExternalIdentityLink",
+            {"token": token},
+        )
+        linked = data.get("linkedIdentity")
+        return LinkedExternalIdentity.parse(linked) if linked else None
+
+    async def cancel_external_identity_flow(self, token: str) -> bool:
+        data = await self.call(
+            f"{AUTH_V1}.ExternalIdentityAuthService",
+            "CancelExternalIdentityFlow",
+            {"token": token},
+        )
+        return bool(data.get("cancelled", False))
+
+    # --- Admin: server --------------------------------------------------
+
+    async def admin_get_server_config(self) -> tuple[ServerConfig, ServerProfile]:
+        data = await self.call(f"{ADMIN_V1}.AdminServerService", "GetServerConfig")
+        return (
+            ServerConfig.parse(data.get("config")),
+            ServerProfile.parse(data.get("publicProfile")),
+        )
+
+    async def admin_update_server_config(
+        self,
+        *,
+        server_name: str | None = None,
+        description: str | None = None,
+        motd: str | None = None,
+        welcome_message: str | None = None,
+    ) -> tuple[ServerConfig, ServerProfile]:
+        request: dict[str, Any] = {}
+        if server_name is not None:
+            request["serverName"] = server_name
+        if description is not None:
+            request["description"] = description
+        if motd is not None:
+            request["motd"] = motd
+        if welcome_message is not None:
+            request["welcomeMessage"] = welcome_message
+        data = await self.call(
+            f"{ADMIN_V1}.AdminServerService", "UpdateServerConfig", request
+        )
+        return (
+            ServerConfig.parse(data.get("config")),
+            ServerProfile.parse(data.get("publicProfile")),
+        )
+
+    async def admin_upload_server_logo(
+        self,
+        file_path: str | Path,
+        *,
+        content_type: str = "image/png",
+    ) -> ServerProfile:
+        p = Path(file_path)
+        payload = {
+            "image": {
+                "image": base64.b64encode(p.read_bytes()).decode("ascii"),
+                "filename": p.name,
+                "contentType": content_type,
+            }
+        }
+        data = await self.call(
+            f"{ADMIN_V1}.AdminServerService", "UploadServerLogo", payload
+        )
+        return ServerProfile.parse(data.get("publicProfile"))
+
+    async def admin_delete_server_logo(self) -> ServerProfile:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminServerService", "DeleteServerLogo"
+        )
+        return ServerProfile.parse(data.get("publicProfile"))
+
+    async def admin_upload_server_banner(
+        self,
+        file_path: str | Path,
+        *,
+        content_type: str = "image/png",
+    ) -> ServerProfile:
+        p = Path(file_path)
+        payload = {
+            "image": {
+                "image": base64.b64encode(p.read_bytes()).decode("ascii"),
+                "filename": p.name,
+                "contentType": content_type,
+            }
+        }
+        data = await self.call(
+            f"{ADMIN_V1}.AdminServerService", "UploadServerBanner", payload
+        )
+        return ServerProfile.parse(data.get("publicProfile"))
+
+    async def admin_delete_server_banner(self) -> ServerProfile:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminServerService", "DeleteServerBanner"
+        )
+        return ServerProfile.parse(data.get("publicProfile"))
+
+    async def admin_get_server_security_config(self) -> list[str]:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminServerService", "GetServerSecurityConfig"
+        )
+        return list(data.get("blockedUsernames") or [])
+
+    async def admin_update_blocked_usernames(self, usernames: list[str]) -> list[str]:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminServerService",
+            "UpdateBlockedUsernames",
+            {"blockedUsernames": usernames},
+        )
+        return list(data.get("blockedUsernames") or [])
+
+    # --- Admin: room layout & sidebar links ---------------------------
+
+    async def admin_list_room_groups(self) -> list[AdminRoomLayoutGroup]:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminRoomLayoutService", "ListRoomGroups"
+        )
+        return [
+            g
+            for g in (
+                AdminRoomLayoutGroup.parse(row) for row in data.get("groups") or []
+            )
+            if g is not None
+        ]
+
+    async def admin_create_room_group(
+        self, name: str, description: str = ""
+    ) -> AdminRoomLayoutGroup:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminRoomLayoutService",
+            "CreateRoomGroup",
+            {"name": name, "description": description},
+        )
+        group = AdminRoomLayoutGroup.parse(data.get("group"))
+        assert group is not None
+        return group
+
+    async def admin_update_room_group(
+        self,
+        group_id: str,
+        *,
+        name: str | None = None,
+        description: str | None = None,
+    ) -> AdminRoomLayoutGroup:
+        request: dict[str, Any] = {"groupId": group_id}
+        if name is not None:
+            request["name"] = name
+        if description is not None:
+            request["description"] = description
+        data = await self.call(
+            f"{ADMIN_V1}.AdminRoomLayoutService", "UpdateRoomGroup", request
+        )
+        group = AdminRoomLayoutGroup.parse(data.get("group"))
+        assert group is not None
+        return group
+
+    async def admin_delete_room_group(self, group_id: str) -> bool:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminRoomLayoutService",
+            "DeleteRoomGroup",
+            {"groupId": group_id},
+        )
+        return bool(data.get("deleted", False))
+
+    async def admin_reorder_room_groups(
+        self, ordered_group_ids: list[str]
+    ) -> list[AdminRoomLayoutGroup]:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminRoomLayoutService",
+            "ReorderRoomGroups",
+            {"orderedGroupIds": ordered_group_ids},
+        )
+        return [
+            g
+            for g in (
+                AdminRoomLayoutGroup.parse(row) for row in data.get("groups") or []
+            )
+            if g is not None
+        ]
+
+    async def admin_move_room_to_group(self, room_id: str, group_id: str) -> Room:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminRoomLayoutService",
+            "MoveRoomToGroup",
+            {"roomId": room_id, "groupId": group_id},
+        )
+        room = Room.parse(data.get("room"))
+        assert room is not None
+        return room
+
+    async def admin_reorder_sidebar_items_in_group(
+        self,
+        group_id: str,
+        items: list[tuple[AdminRoomLayoutItemKind, str]],
+    ) -> AdminRoomLayoutGroup:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminRoomLayoutService",
+            "ReorderSidebarItemsInGroup",
+            {
+                "groupId": group_id,
+                "items": [{"kind": k.value, "id": i} for k, i in items],
+            },
+        )
+        group = AdminRoomLayoutGroup.parse(data.get("group"))
+        assert group is not None
+        return group
+
+    async def admin_create_sidebar_link(
+        self, group_id: str, label: str, url: str
+    ) -> dict[str, Any]:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminRoomLayoutService",
+            "CreateSidebarLink",
+            {"groupId": group_id, "label": label, "url": url},
+        )
+        sl = data.get("sidebarLink") or {}
+        return {"id": sl.get("id", ""), "label": sl.get("label", ""), "url": sl.get("url", "")}
+
+    async def admin_update_sidebar_link(
+        self,
+        link_id: str,
+        *,
+        label: str | None = None,
+        url: str | None = None,
+    ) -> dict[str, Any]:
+        request: dict[str, Any] = {"linkId": link_id}
+        if label is not None:
+            request["label"] = label
+        if url is not None:
+            request["url"] = url
+        data = await self.call(
+            f"{ADMIN_V1}.AdminRoomLayoutService", "UpdateSidebarLink", request
+        )
+        sl = data.get("sidebarLink") or {}
+        return {"id": sl.get("id", ""), "label": sl.get("label", ""), "url": sl.get("url", "")}
+
+    async def admin_delete_sidebar_link(self, link_id: str) -> bool:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminRoomLayoutService",
+            "DeleteSidebarLink",
+            {"linkId": link_id},
+        )
+        return bool(data.get("deleted", False))
+
+    async def admin_move_sidebar_link_to_group(
+        self, link_id: str, group_id: str
+    ) -> dict[str, Any]:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminRoomLayoutService",
+            "MoveSidebarLinkToGroup",
+            {"linkId": link_id, "groupId": group_id},
+        )
+        sl = data.get("sidebarLink") or {}
+        return {"id": sl.get("id", ""), "label": sl.get("label", ""), "url": sl.get("url", "")}
+
+    # --- Admin: users --------------------------------------------------
+
+    async def admin_list_members(
+        self,
+        *,
+        search: str = "",
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> tuple[list[AdminMember], list[Role], Page]:
+        request: dict[str, Any] = {}
+        if search:
+            request["search"] = search
+        page = _page_arg(limit, offset)
+        if page is not None:
+            request["page"] = page
+        data = await self.call(
+            f"{ADMIN_V1}.AdminUserService", "ListMembers", request
+        )
+        members = [
+            m
+            for m in (AdminMember.parse(row) for row in data.get("members") or [])
+            if m is not None
+        ]
+        roles = [
+            r for r in (Role.parse(row) for row in data.get("roles") or []) if r is not None
+        ]
+        return members, roles, Page.parse(data.get("page"))
+
+    async def admin_get_member(
+        self,
+        *,
+        user_id: str | None = None,
+        login: str | None = None,
+    ) -> dict[str, Any]:
+        if bool(user_id) == bool(login):
+            raise ValueError("admin_get_member requires exactly one of user_id or login")
+        request: dict[str, Any] = {"userId": user_id} if user_id else {"login": login}
+        return await self.call(
+            f"{ADMIN_V1}.AdminUserService", "GetMember", request
+        )
+
+    async def admin_batch_get_members(
+        self, user_ids: list[str]
+    ) -> list[AdminMember]:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminUserService",
+            "BatchGetMembers",
+            {"userIds": user_ids},
+        )
+        return [
+            m
+            for m in (AdminMember.parse(row) for row in data.get("members") or [])
+            if m is not None
+        ]
+
+    async def admin_assign_role(
+        self, user_id: str, role_name: str
+    ) -> AdminMember | None:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminUserService",
+            "AssignRole",
+            {"userId": user_id, "roleName": role_name},
+        )
+        return AdminMember.parse(data.get("member"))
+
+    async def admin_revoke_role(
+        self, user_id: str, role_name: str
+    ) -> AdminMember | None:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminUserService",
+            "RevokeRole",
+            {"userId": user_id, "roleName": role_name},
+        )
+        return AdminMember.parse(data.get("member"))
+
+    async def admin_update_user(
+        self,
+        user_id: str,
+        *,
+        display_name: str | None = None,
+        login: str | None = None,
+    ) -> tuple[User | None, AdminMember | None]:
+        request: dict[str, Any] = {"userId": user_id}
+        if display_name is not None:
+            request["displayName"] = display_name
+        if login is not None:
+            request["login"] = login
+        data = await self.call(
+            f"{ADMIN_V1}.AdminUserService", "UpdateUser", request
+        )
+        return User.parse(data.get("user")), AdminMember.parse(data.get("member"))
+
+    async def admin_update_user_password(
+        self, user_id: str, password: str
+    ) -> AdminMember | None:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminUserService",
+            "UpdateUserPassword",
+            {"userId": user_id, "password": password},
+        )
+        return AdminMember.parse(data.get("member"))
+
+    async def admin_clear_username_cooldown(self, user_id: str) -> bool:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminUserService",
+            "ClearUsernameCooldown",
+            {"userId": user_id},
+        )
+        return bool(data.get("cleared", False))
+
+    async def admin_delete_user(
+        self, user_id: str, *, current_password: str = ""
+    ) -> bool:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminUserService",
+            "DeleteUser",
+            {"userId": user_id, "currentPassword": current_password},
+        )
+        return bool(data.get("deleted", False))
+
+    # --- Admin: roles --------------------------------------------------
+
+    async def admin_list_roles(self) -> list[AdminRole]:
+        data = await self.call(f"{ADMIN_V1}.AdminRoleService", "ListRoles")
+        return [
+            r
+            for r in (AdminRole.parse(row) for row in data.get("roles") or [])
+            if r is not None
+        ]
+
+    async def admin_get_role(self, name: str) -> dict[str, Any]:
+        return await self.call(
+            f"{ADMIN_V1}.AdminRoleService", "GetRole", {"name": name}
+        )
+
+    async def admin_create_role(
+        self,
+        name: str,
+        *,
+        display_name: str = "",
+        description: str = "",
+        pingable: bool = False,
+    ) -> AdminRole | None:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminRoleService",
+            "CreateRole",
+            {
+                "name": name,
+                "displayName": display_name,
+                "description": description,
+                "pingable": pingable,
+            },
+        )
+        return AdminRole.parse(data.get("role"))
+
+    async def admin_update_role(
+        self,
+        name: str,
+        *,
+        display_name: str | None = None,
+        description: str | None = None,
+        pingable: bool | None = None,
+    ) -> AdminRole | None:
+        request: dict[str, Any] = {"name": name}
+        if display_name is not None:
+            request["displayName"] = display_name
+        if description is not None:
+            request["description"] = description
+        if pingable is not None:
+            request["pingable"] = pingable
+        data = await self.call(
+            f"{ADMIN_V1}.AdminRoleService", "UpdateRole", request
+        )
+        return AdminRole.parse(data.get("role"))
+
+    async def admin_delete_role(self, name: str) -> bool:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminRoleService", "DeleteRole", {"name": name}
+        )
+        return bool(data.get("deleted", False))
+
+    async def admin_reorder_roles(self, role_names: list[str]) -> list[AdminRole]:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminRoleService",
+            "ReorderRoles",
+            {"roleNames": role_names},
+        )
+        return [
+            r
+            for r in (AdminRole.parse(row) for row in data.get("roles") or [])
+            if r is not None
+        ]
+
+    # --- Admin: event log / diagnostics / permissions (raw) ----------
+
+    async def admin_list_events(
+        self,
+        *,
+        event_types: list[str] | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> dict[str, Any]:
+        request: dict[str, Any] = {}
+        if event_types:
+            request["eventTypes"] = event_types
+        page = _page_arg(limit, offset)
+        if page is not None:
+            request["page"] = page
+        return await self.call(
+            f"{ADMIN_V1}.AdminEventLogService", "ListEvents", request
+        )
+
+    async def admin_list_event_types(self) -> list[str]:
+        data = await self.call(
+            f"{ADMIN_V1}.AdminEventLogService", "ListEventTypes"
+        )
+        return list(data.get("eventTypes") or [])
+
+    async def admin_get_event(self, event_id: str) -> dict[str, Any]:
+        return await self.call(
+            f"{ADMIN_V1}.AdminEventLogService", "GetEvent", {"eventId": event_id}
+        )
+
+    async def admin_get_system_info(self) -> dict[str, Any]:
+        return await self.call(
+            f"{ADMIN_V1}.AdminDiagnosticsService", "GetSystemInfo"
+        )
+
+    async def admin_get_role_permission_tier_matrix(self) -> dict[str, Any]:
+        return await self.call(
+            f"{ADMIN_V1}.AdminPermissionService", "GetRolePermissionTierMatrix"
+        )
+
+    async def admin_get_role_permission_matrix(self) -> dict[str, Any]:
+        return await self.call(
+            f"{ADMIN_V1}.AdminPermissionService", "GetRolePermissionMatrix"
+        )
+
+    async def admin_list_role_permission_decisions(
+        self, role_name: str
+    ) -> dict[str, Any]:
+        return await self.call(
+            f"{ADMIN_V1}.AdminPermissionService",
+            "ListRolePermissionDecisions",
+            {"roleName": role_name},
+        )
+
+    async def admin_get_user_permission_matrix(self, user_id: str) -> dict[str, Any]:
+        return await self.call(
+            f"{ADMIN_V1}.AdminPermissionService",
+            "GetUserPermissionMatrix",
+            {"userId": user_id},
+        )
+
+    async def admin_list_user_permission_decisions(
+        self, user_id: str
+    ) -> dict[str, Any]:
+        return await self.call(
+            f"{ADMIN_V1}.AdminPermissionService",
+            "ListUserPermissionDecisions",
+            {"userId": user_id},
+        )
+
+    async def admin_explain_permissions(self, request: dict[str, Any]) -> dict[str, Any]:
+        """Raw ExplainPermissions call. Request shape depends on server version."""
+        return await self.call(
+            f"{ADMIN_V1}.AdminPermissionService", "ExplainPermissions", request
+        )
+
+    async def admin_set_role_permission(
+        self, role_name: str, permission: str, *, granted: bool
+    ) -> dict[str, Any]:
+        return await self.call(
+            f"{ADMIN_V1}.AdminPermissionService",
+            "SetRolePermission",
+            {"roleName": role_name, "permission": permission, "granted": granted},
+        )
+
+    async def admin_set_user_permission(
+        self, user_id: str, permission: str, *, granted: bool
+    ) -> dict[str, Any]:
+        return await self.call(
+            f"{ADMIN_V1}.AdminPermissionService",
+            "SetUserPermission",
+            {"userId": user_id, "permission": permission, "granted": granted},
+        )

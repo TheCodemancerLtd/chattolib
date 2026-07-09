@@ -88,6 +88,19 @@ class VideoProcessingStatus(StrEnum):
     FAILED = "MESSAGE_VIDEO_PROCESSING_STATUS_FAILED"
 
 
+class AssetUploadStatus(StrEnum):
+    UNSPECIFIED = "ASSET_UPLOAD_STATUS_UNSPECIFIED"
+    OPEN = "ASSET_UPLOAD_STATUS_OPEN"
+    COMPLETED = "ASSET_UPLOAD_STATUS_COMPLETED"
+    CANCELLED = "ASSET_UPLOAD_STATUS_CANCELLED"
+
+
+class AdminRoomLayoutItemKind(StrEnum):
+    UNSPECIFIED = "ADMIN_ROOM_LAYOUT_ITEM_KIND_UNSPECIFIED"
+    ROOM = "ADMIN_ROOM_LAYOUT_ITEM_KIND_ROOM"
+    SIDEBAR_LINK = "ADMIN_ROOM_LAYOUT_ITEM_KIND_SIDEBAR_LINK"
+
+
 # --- Time helpers --------------------------------------------------------
 
 
@@ -896,4 +909,209 @@ class ActiveCall:
             participants=[
                 ActiveCallParticipant.parse(p) for p in data.get("participants") or []
             ],
+        )
+
+
+# --- Roles ----------------------------------------------------------------
+
+
+@dataclass
+class Role:
+    name: str
+    display_name: str = ""
+    description: str = ""
+    is_system: bool = False
+    position: int = 0
+    pingable: bool = False
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> Role | None:
+        if not data:
+            return None
+        return cls(
+            name=data.get("name", ""),
+            display_name=data.get("displayName", ""),
+            description=data.get("description", ""),
+            is_system=bool(data.get("isSystem", False)),
+            position=int(data.get("position", 0)),
+            pingable=bool(data.get("pingable", False)),
+        )
+
+
+@dataclass
+class AdminRole:
+    role: Role | None
+    permissions: list[str] = field(default_factory=list)
+    permission_denials: list[str] = field(default_factory=list)
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> AdminRole | None:
+        if not data:
+            return None
+        return cls(
+            role=Role.parse(data.get("role")),
+            permissions=list(data.get("permissions") or []),
+            permission_denials=list(data.get("permissionDenials") or []),
+        )
+
+
+# --- Asset uploads --------------------------------------------------------
+
+
+@dataclass
+class AssetUpload:
+    upload_id: str
+    room_id: str
+    status: AssetUploadStatus = AssetUploadStatus.UNSPECIFIED
+    committed_offset: int = 0
+    size: int = 0
+    max_chunk_size: int = 0
+    sha256: str = ""
+    expires_at: datetime | None = None
+    asset_id: str = ""
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> AssetUpload | None:
+        if not data:
+            return None
+        return cls(
+            upload_id=data.get("uploadId", ""),
+            room_id=data.get("roomId", ""),
+            status=_parse_enum(
+                AssetUploadStatus,
+                data.get("status"),
+                AssetUploadStatus.UNSPECIFIED,
+            ),  # type: ignore[arg-type]
+            committed_offset=int(data.get("committedOffset", 0)),
+            size=int(data.get("size", 0)),
+            max_chunk_size=int(data.get("maxChunkSize", 0)),
+            sha256=data.get("sha256", ""),
+            expires_at=parse_datetime(data.get("expiresAt")),
+            asset_id=data.get("assetId", ""),
+        )
+
+
+# --- External identity ----------------------------------------------------
+
+
+@dataclass
+class ExternalIdentityProvider:
+    provider: ProviderMetadata | None
+    link_url: str = ""
+    linked: bool = False
+    linked_identity_subject_hash: str = ""
+
+    @classmethod
+    def parse(cls, data: dict[str, Any]) -> ExternalIdentityProvider:
+        provider_data = data.get("provider")
+        provider = ProviderMetadata.parse(provider_data) if provider_data else None
+        return cls(
+            provider=provider,
+            link_url=data.get("linkUrl", ""),
+            linked=bool(data.get("linked", False)),
+            linked_identity_subject_hash=data.get("linkedIdentitySubjectHash", ""),
+        )
+
+
+@dataclass
+class LinkedExternalIdentity:
+    provider_id: str
+    provider_type: str = ""
+    provider_label: str = ""
+    subject_hash: str = ""
+
+    @classmethod
+    def parse(cls, data: dict[str, Any]) -> LinkedExternalIdentity:
+        return cls(
+            provider_id=data.get("providerId", ""),
+            provider_type=data.get("providerType", ""),
+            provider_label=data.get("providerLabel", ""),
+            subject_hash=data.get("subjectHash", ""),
+        )
+
+
+# --- Admin: server / members ---------------------------------------------
+
+
+@dataclass
+class ServerConfig:
+    server_name: str = ""
+    description: str = ""
+    motd: str = ""
+    welcome_message: str = ""
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> ServerConfig:
+        data = data or {}
+        return cls(
+            server_name=data.get("serverName", ""),
+            description=data.get("description", ""),
+            motd=data.get("motd", ""),
+            welcome_message=data.get("welcomeMessage", ""),
+        )
+
+
+@dataclass
+class AdminMember:
+    user: User | None
+    roles: list[str] = field(default_factory=list)
+    created_at: datetime | None = None
+    has_verified_email: bool = False
+    verified_emails: list[str] = field(default_factory=list)
+    viewer_can_delete_account: bool = False
+    last_login_change: datetime | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> AdminMember | None:
+        if not data:
+            return None
+        return cls(
+            user=User.parse(data.get("user")),
+            roles=list(data.get("roles") or []),
+            created_at=parse_datetime(data.get("createdAt")),
+            has_verified_email=bool(data.get("hasVerifiedEmail", False)),
+            verified_emails=list(data.get("verifiedEmails") or []),
+            viewer_can_delete_account=bool(data.get("viewerCanDeleteAccount", False)),
+            last_login_change=parse_datetime(data.get("lastLoginChange")),
+        )
+
+
+# --- Admin: room layout --------------------------------------------------
+
+
+@dataclass
+class AdminRoomLayoutGroup:
+    id: str
+    name: str
+    description: str = ""
+    rooms: list[Room] = field(default_factory=list)
+    sidebar_links: list[SidebarLink] = field(default_factory=list)
+    can_create_room: bool = False
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> AdminRoomLayoutGroup | None:
+        if not data:
+            return None
+        rooms: list[Room] = []
+        links: list[SidebarLink] = []
+        for item in data.get("items") or []:
+            room = Room.parse(item.get("room"))
+            if room is not None:
+                rooms.append(room)
+            sl = item.get("sidebarLink")
+            if sl:
+                links.append(
+                    SidebarLink(
+                        id=sl.get("id", ""),
+                        label=sl.get("label", ""),
+                        url=sl.get("url", ""),
+                    )
+                )
+        return cls(
+            id=data.get("id", ""),
+            name=data.get("name", ""),
+            description=data.get("description", ""),
+            rooms=rooms,
+            sidebar_links=links,
+            can_create_room=bool(data.get("canCreateRoom", False)),
         )

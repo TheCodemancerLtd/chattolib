@@ -76,8 +76,10 @@ generated protobuf bindings.
 | Discovery | `chatto.discovery.v1.ServerDiscoveryService` | `GetServer` (public) |
 | Server | `ServerService` | `GetMotd`, `GetRuntimeConfig` |
 | Viewer | `ViewerService` | `GetViewer` |
-| My account | `MyAccountService` | `UpdateProfile`, `UploadAvatar`, `DeleteAvatar`, `UpdatePassword`, `UpdateSettings`, `UpdatePresence`, `UpdateCustomStatus`, `DeleteCustomStatus`, `RequestAccountDeletion`, `DeleteMyAccount` |
+| My account | `MyAccountService` | `UpdateProfile`, `UploadAvatar`, `DeleteAvatar`, `UpdatePassword`, `UpdateSettings`, `UpdatePresence`, `UpdateCustomStatus`, `DeleteCustomStatus`, `RequestAccountDeletion`, `DeleteMyAccount`, `ListExternalIdentities`, `StartExternalIdentityLink`, `DisconnectExternalIdentity` |
 | Users | `UserService` | `ListUsers`, `GetUser`, `BatchGetUsers` |
+| Roles | `RoleService` | `ListRoles`, `GetRole`, `BatchGetRoles` |
+| External identity auth (public) | `chatto.auth.v1.ExternalIdentityAuthService` | `GetPendingExternalIdentity`, `CreateExternalIdentityAccount`, `ConfirmExternalIdentityLink`, `CancelExternalIdentityFlow` |
 | Room directory | `RoomDirectoryService` | `ListRooms`, `ListRoomGroups`, `GetRoomGroup`, `BatchGetRoomGroups`, `GetRoom`, `BatchGetRooms` |
 | Rooms | `RoomService` | `CreateRoom`, `UpdateRoom`, `ArchiveRoom`, `UnarchiveRoom`, `JoinRoom`, `JoinRoomGroup`, `StartDM`, `LeaveRoom`, `AddMember`, `RemoveMember`, `ListMembers`, `GetMember`, `BatchGetMembers`, `BanMember`, `UnbanMember`, `ListBans`, `UpdateTypingIndicator`, `GetRoomEvents`, `GetRoomEventsAround`, `MarkRoomAsRead`, `ListRoomAttachments` |
 | Messages | `MessageService` | `FetchLinkPreview`, `CreateMessage`, `UpdateMessage`, `DeleteMessage`, `DeleteAttachment`, `DeleteLinkPreview`, `GetMessage`, `BatchGetMessages`, `AddReaction`, `RemoveReaction` |
@@ -86,6 +88,14 @@ generated protobuf bindings.
 | Notification prefs | `NotificationPreferencesService` | `Get`/`Update` × `Server`/`Room` |
 | Push | `PushNotificationService` | `Subscribe`, `Unsubscribe` |
 | Assets | `AssetService` | `GetAsset`, `BatchGetAssets` |
+| Asset uploads | `AssetUploadService` | `CreateUpload`, `UploadChunk`, `GetUpload`, `CompleteUpload`, `CancelUpload`. `upload_attachment(room, path)` helper computes SHA-256, chunks, and completes in one call. |
+| Admin: server | `chatto.admin.v1.AdminServerService` | `GetServerConfig`, `UpdateServerConfig`, `UploadServerLogo`, `DeleteServerLogo`, `UploadServerBanner`, `DeleteServerBanner`, `GetServerSecurityConfig`, `UpdateBlockedUsernames` |
+| Admin: room layout | `chatto.admin.v1.AdminRoomLayoutService` | `ListRoomGroups`, `Create/Update/Delete/ReorderRoomGroup(s)`, `MoveRoomToGroup`, `ReorderSidebarItemsInGroup`, `Create/Update/Delete/MoveSidebarLink(ToGroup)` |
+| Admin: users | `chatto.admin.v1.AdminUserService` | `ListMembers`, `GetMember`, `BatchGetMembers`, `AssignRole`, `RevokeRole`, `UpdateUser`, `UpdateUserPassword`, `ClearUsernameCooldown`, `DeleteUser` |
+| Admin: roles | `chatto.admin.v1.AdminRoleService` | `ListRoles`, `GetRole`, `CreateRole`, `UpdateRole`, `DeleteRole`, `ReorderRoles` |
+| Admin: event log | `chatto.admin.v1.AdminEventLogService` | `ListEvents`, `ListEventTypes`, `GetEvent` (raw response) |
+| Admin: diagnostics | `chatto.admin.v1.AdminDiagnosticsService` | `GetSystemInfo` (raw response) |
+| Admin: permissions | `chatto.admin.v1.AdminPermissionService` | `GetRole/UserPermissionMatrix`, `ListRole/UserPermissionDecisions`, `ExplainPermissions`, `SetRolePermission`, `SetUserPermission` (raw responses where the permission shape is server-version-dependent) |
 | Voice calls | `VoiceCallService` | `ListActiveCalls`, `GetActiveCall`, `BatchGetActiveCalls`, `JoinCall`, `LeaveCall`, `GetCallToken` |
 | Realtime (WS) | `chatto.realtime.v1` protobuf WS | `stream_events(client)` / `RealtimeConnection` — full frame set: hello, subscribe, event, heartbeat, ping/pong, error, close |
 
