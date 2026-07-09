@@ -20,6 +20,7 @@ from chattolib.types import (
 BASE = "https://chat.chatto.run"
 CONNECT = "/api/connect"
 API_V1 = "chatto.api.v1"
+ADMIN_V1 = "chatto.admin.v1"
 DISCOVERY_V1 = "chatto.discovery.v1"
 
 
@@ -669,3 +670,208 @@ async def test_get_asset_with_thumbnail(mock_api, client):
     # ensure the request encoded thumbnail options with the wire enum
     body = route.calls.last.request.content
     assert b'"IMAGE_FIT_MODE_COVER"' in body
+
+
+# --- Roles ------------------------------------------------------------
+
+
+async def test_list_roles(mock_api, client):
+    _mount(mock_api, f"{API_V1}.RoleService", "ListRoles").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "roles": [
+                    {
+                        "name": "everyone",
+                        "displayName": "Everyone",
+                        "isSystem": True,
+                        "position": 0,
+                    },
+                    {"name": "admin", "displayName": "Admin", "position": 10},
+                ]
+            },
+        )
+    )
+    async with client:
+        roles = await client.list_roles()
+    assert [r.name for r in roles] == ["everyone", "admin"]
+    assert roles[0].is_system is True
+
+
+# --- Asset uploads ---------------------------------------------------
+
+
+async def test_asset_upload_end_to_end(mock_api, client, tmp_path):
+    import hashlib
+
+    payload = b"hello world" * 100  # 1100 bytes; well under the mock chunk size
+    file = tmp_path / "greet.txt"
+    file.write_bytes(payload)
+    sha = hashlib.sha256(payload).hexdigest()
+
+    create = _mount(mock_api, f"{API_V1}.AssetUploadService", "CreateUpload").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "upload": {
+                    "uploadId": "up1",
+                    "roomId": "r1",
+                    "status": "ASSET_UPLOAD_STATUS_OPEN",
+                    "committedOffset": 0,
+                    "size": len(payload),
+                    "maxChunkSize": 4096,
+                    "sha256": sha,
+                }
+            },
+        )
+    )
+    _mount(mock_api, f"{API_V1}.AssetUploadService", "UploadChunk").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "upload": {
+                    "uploadId": "up1",
+                    "roomId": "r1",
+                    "status": "ASSET_UPLOAD_STATUS_OPEN",
+                    "committedOffset": len(payload),
+                    "size": len(payload),
+                    "maxChunkSize": 4096,
+                    "sha256": sha,
+                }
+            },
+        )
+    )
+    _mount(mock_api, f"{API_V1}.AssetUploadService", "CompleteUpload").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "upload": {
+                    "uploadId": "up1",
+                    "roomId": "r1",
+                    "status": "ASSET_UPLOAD_STATUS_COMPLETED",
+                    "committedOffset": len(payload),
+                    "size": len(payload),
+                    "sha256": sha,
+                    "assetId": "a1",
+                },
+                "asset": {
+                    "id": "a1",
+                    "filename": "greet.txt",
+                    "contentType": "text/plain",
+                    "size": len(payload),
+                },
+            },
+        )
+    )
+    async with client:
+        asset = await client.upload_attachment(
+            "r1", file, content_type="text/plain"
+        )
+    assert asset.id == "a1"
+    assert asset.filename == "greet.txt"
+
+    # CreateUpload should have carried the correct sha and size.
+    body = create.calls.last.request.content
+    assert sha.encode() in body
+    assert str(len(payload)).encode() in body
+
+
+# --- External identities --------------------------------------------
+
+
+async def test_list_external_identities(mock_api, client):
+    _mount(mock_api, f"{API_V1}.MyAccountService", "ListExternalIdentities").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "providers": [
+                    {
+                        "provider": {
+                            "id": "github",
+                            "type": "github",
+                            "label": "GitHub",
+                            "loginUrl": "/auth/github/login",
+                        },
+                        "linkUrl": "/auth/github/link",
+                        "linked": True,
+                        "linkedIdentitySubjectHash": "sha_xyz",
+                    }
+                ],
+                "linkedIdentities": [
+                    {
+                        "providerId": "github",
+                        "providerType": "github",
+                        "providerLabel": "GitHub",
+                        "subjectHash": "sha_xyz",
+                    }
+                ],
+            },
+        )
+    )
+    async with client:
+        providers, linked = await client.list_external_identities()
+    assert providers[0].linked is True
+    assert providers[0].provider is not None
+    assert providers[0].provider.id == "github"
+    assert linked[0].subject_hash == "sha_xyz"
+
+
+# --- Admin (structural smoke tests) ----------------------------------
+
+
+async def test_admin_list_room_groups(mock_api, client):
+    _mount(mock_api, f"{ADMIN_V1}.AdminRoomLayoutService", "ListRoomGroups").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "groups": [
+                    {
+                        "id": "g1",
+                        "name": "General",
+                        "items": [
+                            {"room": {"id": "r1", "kind": "ROOM_KIND_CHANNEL", "name": "chat"}},
+                            {"sidebarLink": {"id": "sl1", "label": "Docs", "url": "https://x"}},
+                        ],
+                        "canCreateRoom": True,
+                    }
+                ]
+            },
+        )
+    )
+    async with client:
+        groups = await client.admin_list_room_groups()
+    assert len(groups) == 1
+    assert groups[0].name == "General"
+    assert groups[0].rooms[0].id == "r1"
+    assert groups[0].sidebar_links[0].label == "Docs"
+    assert groups[0].can_create_room is True
+
+
+async def test_admin_create_sidebar_link(mock_api, client):
+    _mount(mock_api, f"{ADMIN_V1}.AdminRoomLayoutService", "CreateSidebarLink").mock(
+        return_value=httpx.Response(
+            200,
+            json={"sidebarLink": {"id": "sl1", "label": "Docs", "url": "https://x"}},
+        )
+    )
+    async with client:
+        result = await client.admin_create_sidebar_link("g1", "Docs", "https://x")
+    assert result == {"id": "sl1", "label": "Docs", "url": "https://x"}
+
+
+async def test_admin_update_server_config(mock_api, client):
+    _mount(mock_api, f"{ADMIN_V1}.AdminServerService", "UpdateServerConfig").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "config": {"serverName": "MyServer", "motd": "hi"},
+                "publicProfile": {"name": "MyServer", "version": "0.4.2"},
+            },
+        )
+    )
+    async with client:
+        config, profile = await client.admin_update_server_config(
+            server_name="MyServer", motd="hi"
+        )
+    assert config.server_name == "MyServer"
+    assert profile.version == "0.4.2"
