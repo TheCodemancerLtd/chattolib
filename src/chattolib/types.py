@@ -884,14 +884,16 @@ class ImageTransformOptions:
 
 @dataclass
 class ActiveCallParticipant:
-    user_id: str = ""
+    user: User | None = None
     joined_at: datetime | None = None
+    call_id: str = ""
 
     @classmethod
     def parse(cls, data: dict[str, Any]) -> ActiveCallParticipant:
         return cls(
-            user_id=data.get("userId", ""),
+            user=User.parse(data.get("user")),
             joined_at=parse_datetime(data.get("joinedAt")),
+            call_id=data.get("callId", ""),
         )
 
 

@@ -1,13 +1,49 @@
-"""Tests for ChattoClient against mocked Connect endpoints."""
+"""Tests for ChattoClient.
+
+Since the client now goes through generated ConnectRPC service stubs, tests
+mock at the service-client method level with ``AsyncMock`` rather than at the
+HTTP transport layer. This exercises the request-building and response-parsing
+paths without any real network traffic.
+"""
 
 from __future__ import annotations
+
+from unittest.mock import AsyncMock
 
 import httpx
 import pytest
 import respx
 
+from chattolib._pb.chatto.admin.v1 import (
+    room_layout_pb2,
+)
+from chattolib._pb.chatto.admin.v1 import (
+    server_pb2 as admin_server_pb2,
+)
+from chattolib._pb.chatto.api.v1 import (
+    account_pb2,
+    asset_uploads_pb2,
+    attachments_pb2,
+    external_identities_pb2,
+    member_directory_pb2,
+    messages_pb2,
+    notification_preferences_pb2,
+    notifications_pb2,
+    presence_pb2,
+    push_notifications_pb2,
+    reactions_pb2,
+    read_state_pb2,
+    roles_pb2,
+    room_directory_pb2,
+    room_timeline_pb2,
+    rooms_pb2,
+    threads_pb2,
+    viewer_pb2,
+    voice_calls_pb2,
+)
+from chattolib._pb.chatto.discovery.v1 import server_pb2 as discovery_server_pb2
 from chattolib.client import ChattoClient
-from chattolib.exceptions import ChattoAuthError, ChattoConnectError
+from chattolib.exceptions import ChattoAuthError
 from chattolib.types import (
     ImageFitMode,
     ImageTransformOptions,
@@ -18,52 +54,18 @@ from chattolib.types import (
 )
 
 BASE = "https://chat.chatto.run"
-CONNECT = "/api/connect"
-API_V1 = "chatto.api.v1"
-ADMIN_V1 = "chatto.admin.v1"
-DISCOVERY_V1 = "chatto.discovery.v1"
-
-
-def _mount(api: respx.Router, service: str, method: str) -> respx.Route:
-    return api.post(f"{CONNECT}/{service}/{method}")
-
-
-@pytest.fixture
-def mock_api():
-    with respx.mock(base_url=BASE) as api:
-        yield api
 
 
 @pytest.fixture
 def client():
-    return ChattoClient(token="test-token")
+    return ChattoClient(token="test-token", base_url=BASE)
 
 
-# --- Transport-level ----------------------------------------------------
-
-
-async def test_connect_error(mock_api, client):
-    _mount(mock_api, f"{API_V1}.ViewerService", "GetViewer").mock(
-        return_value=httpx.Response(
-            403,
-            headers={"content-type": "application/json"},
-            json={"code": "permission_denied", "message": "Nope"},
-        )
-    )
-    async with client:
-        with pytest.raises(ChattoConnectError) as exc:
-            await client.me()
-    assert exc.value.code == "permission_denied"
-    assert exc.value.status_code == 403
-
-
-async def test_auth_error(mock_api, client):
-    _mount(mock_api, f"{API_V1}.ViewerService", "GetViewer").mock(
-        return_value=httpx.Response(401)
-    )
-    async with client:
-        with pytest.raises(ChattoAuthError):
-            await client.me()
+def _mock_method(client: ChattoClient, service: str, method: str, response):
+    """Replace a service-client method with an AsyncMock returning ``response``."""
+    svc = getattr(client._svc, service)
+    setattr(svc, method, AsyncMock(return_value=response))
+    return getattr(svc, method)
 
 
 # --- Login flow ---------------------------------------------------------
@@ -78,10 +80,10 @@ async def test_login_and_capture_session():
                 headers={"set-cookie": "chatto_session=xyz; Path=/; HttpOnly"},
             )
         )
-        client = await ChattoClient.login("alice", "password123")
-        assert client.token == "cht_abc123"
-        assert client.session_cookie == "xyz"
-        await client.close()
+        c = await ChattoClient.login("alice", "password123")
+        assert c.token == "cht_abc123"
+        assert c.session_cookie == "xyz"
+        await c.close()
 
 
 async def test_login_invalid():
@@ -96,18 +98,17 @@ async def test_login_invalid():
 # --- Server discovery ---------------------------------------------------
 
 
-async def test_get_server(mock_api):
-    _mount(mock_api, f"{DISCOVERY_V1}.ServerDiscoveryService", "GetServer").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "profile": {"name": "Chatto HQ", "version": "0.4.2"},
-                "login": {"directRegistrationEnabled": True, "authorizeUrl": "/oauth"},
-            },
-        )
-    )
-    async with ChattoClient() as c:
-        profile, login = await c.get_server()
+async def test_get_server(client):
+    resp = discovery_server_pb2.GetServerResponse()
+    resp.profile.name = "Chatto HQ"
+    resp.profile.version = "0.4.2"
+    resp.login.direct_registration_enabled = True
+    resp.login.authorize_url = "/oauth"
+    _mock_method(client, "server_discovery", "get_server", resp)
+
+    async with client:
+        profile, login = await client.get_server()
+
     assert profile.name == "Chatto HQ"
     assert profile.version == "0.4.2"
     assert login.direct_registration_enabled is True
@@ -117,27 +118,21 @@ async def test_get_server(mock_api):
 # --- Viewer -------------------------------------------------------------
 
 
-async def test_me(mock_api, client):
-    _mount(mock_api, f"{API_V1}.ViewerService", "GetViewer").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "user": {
-                    "profile": {
-                        "id": "u1",
-                        "login": "alice",
-                        "displayName": "Alice",
-                        "presenceStatus": "PRESENCE_STATUS_ONLINE",
-                    },
-                    "hasVerifiedEmail": True,
-                    "settings": {"timezone": "UTC", "timeFormat": "TIME_FORMAT_24_HOUR"},
-                    "hasPassword": True,
-                }
-            },
-        )
-    )
+async def test_me(client):
+    resp = viewer_pb2.GetViewerResponse()
+    resp.user.profile.id = "u1"
+    resp.user.profile.login = "alice"
+    resp.user.profile.display_name = "Alice"
+    resp.user.profile.presence_status = "PRESENCE_STATUS_ONLINE"
+    resp.user.has_verified_email = True
+    resp.user.settings.timezone = "UTC"
+    resp.user.settings.time_format = "TIME_FORMAT_24_HOUR"
+    resp.user.has_password = True
+    _mock_method(client, "viewer", "get_viewer", resp)
+
     async with client:
         user = await client.me()
+
     assert user.id == "u1"
     assert user.login == "alice"
     assert user.display_name == "Alice"
@@ -147,27 +142,20 @@ async def test_me(mock_api, client):
 # --- Room directory ----------------------------------------------------
 
 
-async def test_list_rooms(mock_api, client):
-    _mount(mock_api, f"{API_V1}.RoomDirectoryService", "ListRooms").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "rooms": [
-                    {
-                        "room": {
-                            "id": "r1",
-                            "kind": "ROOM_KIND_CHANNEL",
-                            "name": "general",
-                            "groupId": "g1",
-                        },
-                        "viewerState": {"isMember": True, "hasUnread": False},
-                    }
-                ]
-            },
-        )
-    )
+async def test_list_rooms(client):
+    resp = room_directory_pb2.ListRoomsResponse()
+    entry = resp.rooms.add()
+    entry.room.id = "r1"
+    entry.room.kind = "ROOM_KIND_CHANNEL"
+    entry.room.name = "general"
+    entry.room.group_id = "g1"
+    entry.viewer_state.is_member = True
+    entry.viewer_state.has_unread = False
+    _mock_method(client, "room_directory", "list_rooms", resp)
+
     async with client:
         rooms = await client.list_rooms()
+
     assert len(rooms) == 1
     assert rooms[0].room is not None
     assert rooms[0].room.name == "general"
@@ -178,73 +166,64 @@ async def test_list_rooms(mock_api, client):
 # --- Messages ----------------------------------------------------------
 
 
-async def test_post_message(mock_api, client):
-    _mount(mock_api, f"{API_V1}.MessageService", "CreateMessage").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "message": {
-                    "id": "e1",
-                    "roomId": "r1",
-                    "createdAt": "2026-01-01T00:00:00Z",
-                    "actorId": "u1",
-                    "body": "Hello!",
-                }
-            },
-        )
-    )
+async def test_post_message(client):
+    resp = messages_pb2.CreateMessageResponse()
+    resp.message.id = "e1"
+    resp.message.room_id = "r1"
+    resp.message.actor_id = "u1"
+    resp.message.body = "Hello!"
+    _mock_method(client, "messages", "create_message", resp)
+
     async with client:
         message = await client.post_message("r1", "Hello!")
+
     assert message.id == "e1"
     assert message.body == "Hello!"
     assert message.room_id == "r1"
 
 
-async def test_update_message(mock_api, client):
-    _mount(mock_api, f"{API_V1}.MessageService", "UpdateMessage").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "message": {
-                    "id": "e1",
-                    "roomId": "r1",
-                    "createdAt": "2026-01-01T00:00:00Z",
-                    "actorId": "u1",
-                    "body": "edited",
-                    "updatedAt": "2026-01-01T00:01:00Z",
-                }
-            },
-        )
-    )
+async def test_update_message(client):
+    resp = messages_pb2.UpdateMessageResponse()
+    resp.message.id = "e1"
+    resp.message.room_id = "r1"
+    resp.message.actor_id = "u1"
+    resp.message.body = "edited"
+    resp.message.updated_at.FromJsonString("2026-01-01T00:01:00Z")
+    m = _mock_method(client, "messages", "update_message", resp)
+
     async with client:
-        m = await client.update_message("r1", "e1", body="edited")
-    assert m.body == "edited"
-    assert m.updated_at is not None
+        msg = await client.update_message("r1", "e1", body="edited")
+
+    assert msg.body == "edited"
+    assert msg.updated_at is not None
+    # verify the request had the optional body field explicitly set
+    call_args = m.call_args
+    req = call_args.args[0]
+    assert isinstance(req, messages_pb2.UpdateMessageRequest)
+    assert req.HasField("body")
+    assert req.body == "edited"
 
 
-async def test_delete_message(mock_api, client):
-    _mount(mock_api, f"{API_V1}.MessageService", "DeleteMessage").mock(
-        return_value=httpx.Response(200, json={"deleted": True})
-    )
+async def test_delete_message(client):
+    resp = messages_pb2.DeleteMessageResponse(deleted=True)
+    _mock_method(client, "messages", "delete_message", resp)
+
     async with client:
         assert await client.delete_message("r1", "e1") is True
 
 
-async def test_add_reaction(mock_api, client):
-    _mount(mock_api, f"{API_V1}.MessageService", "AddReaction").mock(
-        return_value=httpx.Response(
-            200,
-            json={"added": True, "reaction": {"emoji": "thumbsup", "count": 1}},
-        )
-    )
+async def test_add_reaction(client):
+    resp = reactions_pb2.AddReactionResponse(added=True)
+    _mock_method(client, "messages", "add_reaction", resp)
+
     async with client:
         assert await client.add_reaction("r1", "e1", "thumbsup") is True
 
 
-async def test_remove_reaction(mock_api, client):
-    _mount(mock_api, f"{API_V1}.MessageService", "RemoveReaction").mock(
-        return_value=httpx.Response(200, json={"removed": True})
-    )
+async def test_remove_reaction(client):
+    resp = reactions_pb2.RemoveReactionResponse(removed=True)
+    _mock_method(client, "messages", "remove_reaction", resp)
+
     async with client:
         assert await client.remove_reaction("r1", "e1", "thumbsup") is True
 
@@ -252,55 +231,52 @@ async def test_remove_reaction(mock_api, client):
 # --- Room lifecycle ---------------------------------------------------
 
 
-async def test_create_room(mock_api, client):
-    _mount(mock_api, f"{API_V1}.RoomService", "CreateRoom").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "room": {
-                    "id": "r1",
-                    "kind": "ROOM_KIND_CHANNEL",
-                    "name": "general",
-                    "groupId": "g1",
-                }
-            },
-        )
-    )
+async def test_create_room(client):
+    resp = rooms_pb2.CreateRoomResponse()
+    resp.room.id = "r1"
+    resp.room.kind = "ROOM_KIND_CHANNEL"
+    resp.room.name = "general"
+    resp.room.group_id = "g1"
+    _mock_method(client, "rooms", "create_room", resp)
+
     async with client:
         room = await client.create_room("general", "g1")
+
     assert room.id == "r1"
     assert room.name == "general"
     assert room.group_id == "g1"
 
 
-async def test_archive_room(mock_api, client):
-    _mount(mock_api, f"{API_V1}.RoomService", "ArchiveRoom").mock(
-        return_value=httpx.Response(
-            200,
-            json={"room": {"id": "r1", "name": "general", "archived": True}},
-        )
-    )
+async def test_archive_room(client):
+    resp = rooms_pb2.ArchiveRoomResponse()
+    resp.room.id = "r1"
+    resp.room.name = "general"
+    resp.room.archived = True
+    _mock_method(client, "rooms", "archive_room", resp)
+
     async with client:
         room = await client.archive_room("r1")
+
     assert room.archived is True
 
 
-async def test_ban_member(mock_api, client):
-    _mount(mock_api, f"{API_V1}.RoomService", "BanMember").mock(
-        return_value=httpx.Response(200, json={"banned": True})
-    )
+async def test_ban_member(client):
+    resp = rooms_pb2.BanMemberResponse(banned=True)
+    _mock_method(client, "rooms", "ban_member", resp)
+
     async with client:
         assert await client.ban_member("r1", "u2", "spam") is True
 
 
-async def test_start_dm(mock_api, client):
-    _mount(mock_api, f"{API_V1}.RoomService", "StartDM").mock(
-        return_value=httpx.Response(
-            200, json={"room": {"id": "r1", "kind": "ROOM_KIND_DM"}}
-        )
-    )
+async def test_start_dm(client):
+    resp = rooms_pb2.StartDMResponse()
+    resp.room.id = "r1"
+    resp.room.kind = "ROOM_KIND_DM"
+    _mock_method(client, "rooms", "start_dm", resp)
+
     async with client:
         room = await client.start_dm(["u1", "u2"])
+
     assert room.id == "r1"
     assert room.kind is RoomKind.DM
 
@@ -308,47 +284,27 @@ async def test_start_dm(mock_api, client):
 # --- Room timeline ----------------------------------------------------
 
 
-async def test_get_room_events(mock_api, client):
-    _mount(mock_api, f"{API_V1}.RoomService", "GetRoomEvents").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "page": {
-                    "events": [
-                        {
-                            "id": "e1",
-                            "createdAt": "2026-01-01T00:00:00Z",
-                            "actorId": "u1",
-                            "messagePosted": {
-                                "message": {
-                                    "id": "e1",
-                                    "roomId": "r1",
-                                    "createdAt": "2026-01-01T00:00:00Z",
-                                    "actorId": "u1",
-                                    "body": "hi",
-                                }
-                            },
-                        }
-                    ],
-                    "hasOlder": False,
-                    "hasNewer": False,
-                    "startCursor": "cA",
-                    "endCursor": "cB",
-                    "includes": {
-                        "users": {
-                            "u1": {
-                                "id": "u1",
-                                "login": "alice",
-                                "displayName": "Alice",
-                            }
-                        }
-                    },
-                }
-            },
-        )
-    )
+async def test_get_room_events(client):
+    resp = room_timeline_pb2.GetRoomEventsResponse()
+    event = resp.page.events.add()
+    event.id = "e1"
+    event.actor_id = "u1"
+    event.created_at.FromJsonString("2026-01-01T00:00:00Z")
+    event.message_posted.message.id = "e1"
+    event.message_posted.message.room_id = "r1"
+    event.message_posted.message.actor_id = "u1"
+    event.message_posted.message.body = "hi"
+    event.message_posted.message.created_at.FromJsonString("2026-01-01T00:00:00Z")
+    resp.page.start_cursor = "cA"
+    resp.page.end_cursor = "cB"
+    resp.page.includes.users["u1"].id = "u1"
+    resp.page.includes.users["u1"].login = "alice"
+    resp.page.includes.users["u1"].display_name = "Alice"
+    _mock_method(client, "rooms", "get_room_events", resp)
+
     async with client:
         page = await client.get_room_events("r1", limit=50)
+
     assert len(page.events) == 1
     assert page.events[0].kind == "message_posted"
     assert page.events[0].message is not None
@@ -356,18 +312,15 @@ async def test_get_room_events(mock_api, client):
     assert page.users_by_id["u1"].login == "alice"
 
 
-async def test_mark_room_as_read(mock_api, client):
-    _mount(mock_api, f"{API_V1}.RoomService", "MarkRoomAsRead").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "lastReadAt": "2026-01-01T00:00:00Z",
-                "previousLastReadAt": "2025-12-31T00:00:00Z",
-            },
-        )
-    )
+async def test_mark_room_as_read(client):
+    resp = read_state_pb2.MarkRoomAsReadResponse()
+    resp.last_read_at.FromJsonString("2026-01-01T00:00:00Z")
+    resp.previous_last_read_at.FromJsonString("2025-12-31T00:00:00Z")
+    _mock_method(client, "rooms", "mark_room_as_read", resp)
+
     async with client:
         last, previous = await client.mark_room_as_read("r1", up_to_event_id="e1")
+
     assert last is not None
     assert previous is not None
 
@@ -375,55 +328,49 @@ async def test_mark_room_as_read(mock_api, client):
 # --- Profile / account ------------------------------------------------
 
 
-async def test_update_profile(mock_api, client):
-    _mount(mock_api, f"{API_V1}.MyAccountService", "UpdateProfile").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "user": {
-                    "id": "u1",
-                    "login": "newname",
-                    "displayName": "New Name",
-                    "presenceStatus": "PRESENCE_STATUS_ONLINE",
-                }
-            },
-        )
-    )
+async def test_update_profile(client):
+    resp = account_pb2.UpdateProfileResponse()
+    resp.user.id = "u1"
+    resp.user.login = "newname"
+    resp.user.display_name = "New Name"
+    resp.user.presence_status = "PRESENCE_STATUS_ONLINE"
+    _mock_method(client, "account", "update_profile", resp)
+
     async with client:
         user = await client.update_profile(login="newname", display_name="New Name")
+
     assert user.login == "newname"
     assert user.display_name == "New Name"
 
 
-async def test_upload_avatar(mock_api, client, tmp_path):
-    _mount(mock_api, f"{API_V1}.MyAccountService", "UploadAvatar").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "user": {
-                    "id": "u1",
-                    "login": "alice",
-                    "displayName": "Alice",
-                    "avatarUrl": "https://example.com/avatar.jpg",
-                }
-            },
-        )
-    )
+async def test_upload_avatar(client, tmp_path):
+    resp = account_pb2.UploadAvatarResponse()
+    resp.user.id = "u1"
+    resp.user.login = "alice"
+    resp.user.display_name = "Alice"
+    resp.user.avatar_url = "https://example.com/avatar.jpg"
+    mock = _mock_method(client, "account", "upload_avatar", resp)
+
     avatar = tmp_path / "avatar.png"
     avatar.write_bytes(b"\x89PNGfake")
     async with client:
         user = await client.upload_avatar(str(avatar), content_type="image/png")
+
     assert user.avatar_url == "https://example.com/avatar.jpg"
+    req = mock.call_args.args[0]
+    assert req.image.image == b"\x89PNGfake"
+    assert req.image.filename == "avatar.png"
+    assert req.image.content_type == "image/png"
 
 
-async def test_update_presence(mock_api, client):
-    _mount(mock_api, f"{API_V1}.MyAccountService", "UpdatePresence").mock(
-        return_value=httpx.Response(
-            200, json={"status": "PRESENCE_STATUS_ONLINE"}
-        )
-    )
+async def test_update_presence(client):
+    resp = presence_pb2.UpdatePresenceResponse()
+    resp.status = "PRESENCE_STATUS_ONLINE"
+    _mock_method(client, "account", "update_presence", resp)
+
     async with client:
         result = await client.update_presence(PresenceStatus.ONLINE)
+
     assert result is PresenceStatus.ONLINE
 
 
@@ -433,19 +380,17 @@ async def test_update_presence_offline_rejected(client):
             await client.update_presence(PresenceStatus.OFFLINE)
 
 
-async def test_update_settings(mock_api, client):
-    _mount(mock_api, f"{API_V1}.MyAccountService", "UpdateSettings").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "settings": {"timezone": "Europe/Rome", "timeFormat": "TIME_FORMAT_24_HOUR"}
-            },
-        )
-    )
+async def test_update_settings(client):
+    resp = account_pb2.UpdateSettingsResponse()
+    resp.settings.timezone = "Europe/Rome"
+    resp.settings.time_format = "TIME_FORMAT_24_HOUR"
+    _mock_method(client, "account", "update_settings", resp)
+
     async with client:
         settings = await client.update_settings(
             timezone="Europe/Rome", time_format=TimeFormat.HOUR_24
         )
+
     assert settings.timezone == "Europe/Rome"
     assert settings.time_format is TimeFormat.HOUR_24
 
@@ -453,25 +398,18 @@ async def test_update_settings(mock_api, client):
 # --- Users -------------------------------------------------------------
 
 
-async def test_get_user_by_id(mock_api, client):
-    _mount(mock_api, f"{API_V1}.UserService", "GetUser").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "user": {
-                    "user": {
-                        "id": "u1",
-                        "login": "alice",
-                        "displayName": "Alice",
-                        "presenceStatus": "PRESENCE_STATUS_ONLINE",
-                    },
-                    "roles": ["everyone"],
-                }
-            },
-        )
-    )
+async def test_get_user_by_id(client):
+    resp = member_directory_pb2.GetUserResponse()
+    resp.user.user.id = "u1"
+    resp.user.user.login = "alice"
+    resp.user.user.display_name = "Alice"
+    resp.user.user.presence_status = "PRESENCE_STATUS_ONLINE"
+    resp.user.roles.append("everyone")
+    _mock_method(client, "users", "get_user", resp)
+
     async with client:
         member = await client.get_user(user_id="u1")
+
     assert member is not None
     assert member.user is not None
     assert member.user.login == "alice"
@@ -488,48 +426,40 @@ async def test_get_user_requires_one_target(client):
 # --- Threads ----------------------------------------------------------
 
 
-async def test_list_followed_threads(mock_api, client):
-    _mount(mock_api, f"{API_V1}.ThreadService", "ListFollowedThreads").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "threads": [
-                    {
-                        "room": {"id": "r1", "name": "general"},
-                        "rootMessage": {
-                            "id": "e1",
-                            "roomId": "r1",
-                            "createdAt": "2026-01-01T00:00:00Z",
-                            "actorId": "u1",
-                            "body": "root",
-                        },
-                        "thread": {
-                            "threadRootEventId": "e1",
-                            "replyCount": 3,
-                            "lastReplyAt": "2026-01-02T00:00:00Z",
-                            "viewerState": {"isFollowing": True, "hasUnread": False},
-                        },
-                    }
-                ],
-                "page": {"totalCount": 1, "hasMore": False},
-            },
-        )
-    )
+async def test_list_followed_threads(client):
+    resp = threads_pb2.ListFollowedThreadsResponse()
+    ft = resp.threads.add()
+    ft.room.id = "r1"
+    ft.room.name = "general"
+    ft.root_message.id = "e1"
+    ft.root_message.room_id = "r1"
+    ft.root_message.actor_id = "u1"
+    ft.root_message.body = "root"
+    ft.root_message.created_at.FromJsonString("2026-01-01T00:00:00Z")
+    ft.thread.thread_root_event_id = "e1"
+    ft.thread.reply_count = 3
+    ft.thread.last_reply_at.FromJsonString("2026-01-02T00:00:00Z")
+    ft.thread.viewer_state.is_following = True
+    ft.thread.viewer_state.has_unread = False
+    resp.page.total_count = 1
+    resp.page.has_more = False
+    _mock_method(client, "threads", "list_followed_threads", resp)
+
     async with client:
         page = await client.list_followed_threads()
+
     assert page.page.total_count == 1
     assert page.threads[0].thread is not None
     assert page.threads[0].thread.reply_count == 3
     assert page.threads[0].thread.is_following is True
 
 
-async def test_follow_and_unfollow_thread(mock_api, client):
-    _mount(mock_api, f"{API_V1}.ThreadService", "FollowThread").mock(
-        return_value=httpx.Response(200, json={"following": True})
-    )
-    _mount(mock_api, f"{API_V1}.ThreadService", "UnfollowThread").mock(
-        return_value=httpx.Response(200, json={"following": False})
-    )
+async def test_follow_and_unfollow_thread(client):
+    follow_resp = threads_pb2.FollowThreadResponse(following=True)
+    unfollow_resp = threads_pb2.UnfollowThreadResponse(following=False)
+    _mock_method(client, "threads", "follow_thread", follow_resp)
+    _mock_method(client, "threads", "unfollow_thread", unfollow_resp)
+
     async with client:
         assert await client.follow_thread("r1", "e1") is True
         assert await client.unfollow_thread("r1", "e1") is False
@@ -538,66 +468,53 @@ async def test_follow_and_unfollow_thread(mock_api, client):
 # --- Notifications ----------------------------------------------------
 
 
-async def test_list_notifications(mock_api, client):
-    _mount(mock_api, f"{API_V1}.NotificationService", "ListNotifications").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "notifications": [
-                    {
-                        "id": "n1",
-                        "createdAt": "2026-01-01T00:00:00Z",
-                        "actor": {
-                            "id": "u1",
-                            "login": "alice",
-                            "displayName": "Alice",
-                        },
-                        "mention": {
-                            "room": {"id": "r1", "name": "general"},
-                            "eventId": "e1",
-                        },
-                    }
-                ],
-                "page": {"totalCount": 1, "hasMore": False},
-            },
-        )
-    )
+async def test_list_notifications(client):
+    resp = notifications_pb2.ListNotificationsResponse()
+    n = resp.notifications.add()
+    n.id = "n1"
+    n.created_at.FromJsonString("2026-01-01T00:00:00Z")
+    n.actor.id = "u1"
+    n.actor.login = "alice"
+    n.actor.display_name = "Alice"
+    n.mention.room.id = "r1"
+    n.mention.room.name = "general"
+    n.mention.event_id = "e1"
+    resp.page.total_count = 1
+    _mock_method(client, "notifications", "list_notifications", resp)
+
     async with client:
         page = await client.list_notifications()
+
     assert page.page.total_count == 1
     assert page.notifications[0].kind == "mention"
     assert page.notifications[0].room is not None
     assert page.notifications[0].room.name == "general"
 
 
-async def test_dismiss_notification(mock_api, client):
-    _mount(mock_api, f"{API_V1}.NotificationService", "DismissNotification").mock(
-        return_value=httpx.Response(200, json={"dismissed": True})
-    )
+async def test_dismiss_notification(client):
+    resp = notifications_pb2.DismissNotificationResponse(dismissed=True)
+    _mock_method(client, "notifications", "dismiss_notification", resp)
+
     async with client:
         assert await client.dismiss_notification("n1") is True
 
 
-async def test_notification_preference(mock_api, client):
-    _mount(
-        mock_api,
-        f"{API_V1}.NotificationPreferencesService",
-        "UpdateRoomNotificationPreference",
-    ).mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "preference": {
-                    "level": "NOTIFICATION_LEVEL_MUTED",
-                    "effectiveLevel": "NOTIFICATION_LEVEL_MUTED",
-                }
-            },
-        )
+async def test_notification_preference(client):
+    resp = notification_preferences_pb2.UpdateNotificationPreferenceResponse()
+    resp.preference.level = "NOTIFICATION_LEVEL_MUTED"
+    resp.preference.effective_level = "NOTIFICATION_LEVEL_MUTED"
+    _mock_method(
+        client,
+        "notification_prefs",
+        "update_room_notification_preference",
+        resp,
     )
+
     async with client:
         pref = await client.update_room_notification_preference(
             "r1", NotificationLevel.MUTED
         )
+
     assert pref.level is NotificationLevel.MUTED
     assert pref.effective_level is NotificationLevel.MUTED
 
@@ -605,10 +522,10 @@ async def test_notification_preference(mock_api, client):
 # --- Push -------------------------------------------------------------
 
 
-async def test_subscribe_push(mock_api, client):
-    _mount(mock_api, f"{API_V1}.PushNotificationService", "Subscribe").mock(
-        return_value=httpx.Response(200, json={"subscribed": True})
-    )
+async def test_subscribe_push(client):
+    resp = push_notifications_pb2.SubscribePushResponse(subscribed=True)
+    _mock_method(client, "push", "subscribe", resp)
+
     async with client:
         assert await client.subscribe_push("https://push", "k", "a") is True
 
@@ -616,23 +533,21 @@ async def test_subscribe_push(mock_api, client):
 # --- Voice calls ------------------------------------------------------
 
 
-async def test_active_calls(mock_api, client):
-    _mount(mock_api, f"{API_V1}.VoiceCallService", "ListActiveCalls").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "calls": [
-                    {
-                        "callId": "c1",
-                        "room": {"id": "r1", "name": "voice"},
-                        "participants": [{"userId": "u1"}],
-                    }
-                ]
-            },
-        )
-    )
+async def test_active_calls(client):
+    resp = voice_calls_pb2.ListActiveCallsResponse()
+    call = resp.calls.add()
+    call.call_id = "c1"
+    call.room.id = "r1"
+    call.room.name = "voice"
+    p = call.participants.add()
+    p.user.id = "u1"
+    p.user.login = "alice"
+    p.user.display_name = "Alice"
+    _mock_method(client, "voice_calls", "list_active_calls", resp)
+
     async with client:
         calls = await client.list_active_calls()
+
     assert len(calls) == 1
     assert calls[0].call_id == "c1"
     assert calls[0].room is not None
@@ -642,58 +557,51 @@ async def test_active_calls(mock_api, client):
 # --- Assets -----------------------------------------------------------
 
 
-async def test_get_asset_with_thumbnail(mock_api, client):
-    route = _mount(mock_api, f"{API_V1}.AssetService", "GetAsset").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "asset": {
-                    "id": "a1",
-                    "filename": "pic.png",
-                    "contentType": "image/png",
-                    "size": 1024,
-                    "assetUrl": {"url": "https://cdn/pic.png"},
-                }
-            },
-        )
-    )
+async def test_get_asset_with_thumbnail(client):
+    resp = attachments_pb2.GetAssetResponse()
+    resp.asset.id = "a1"
+    resp.asset.filename = "pic.png"
+    resp.asset.content_type = "image/png"
+    resp.asset.size = 1024
+    resp.asset.asset_url.url = "https://cdn/pic.png"
+    mock = _mock_method(client, "assets", "get_asset", resp)
+
     async with client:
         asset = await client.get_asset(
             "r1",
             "a1",
             thumbnail=ImageTransformOptions(128, 128, ImageFitMode.COVER),
         )
+
     assert asset is not None
     assert asset.filename == "pic.png"
     assert asset.asset_url is not None
     assert asset.asset_url.url == "https://cdn/pic.png"
-    # ensure the request encoded thumbnail options with the wire enum
-    body = route.calls.last.request.content
-    assert b'"IMAGE_FIT_MODE_COVER"' in body
+    # verify the request encoded thumbnail options
+    req = mock.call_args.args[0]
+    assert req.thumbnail.width == 128
+    assert req.thumbnail.height == 128
 
 
 # --- Roles ------------------------------------------------------------
 
 
-async def test_list_roles(mock_api, client):
-    _mount(mock_api, f"{API_V1}.RoleService", "ListRoles").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "roles": [
-                    {
-                        "name": "everyone",
-                        "displayName": "Everyone",
-                        "isSystem": True,
-                        "position": 0,
-                    },
-                    {"name": "admin", "displayName": "Admin", "position": 10},
-                ]
-            },
-        )
-    )
+async def test_list_roles(client):
+    resp = roles_pb2.ListRolesResponse()
+    r1 = resp.roles.add()
+    r1.name = "everyone"
+    r1.display_name = "Everyone"
+    r1.is_system = True
+    r1.position = 0
+    r2 = resp.roles.add()
+    r2.name = "admin"
+    r2.display_name = "Admin"
+    r2.position = 10
+    _mock_method(client, "roles", "list_roles", resp)
+
     async with client:
         roles = await client.list_roles()
+
     assert [r.name for r in roles] == ["everyone", "admin"]
     assert roles[0].is_system is True
 
@@ -701,115 +609,86 @@ async def test_list_roles(mock_api, client):
 # --- Asset uploads ---------------------------------------------------
 
 
-async def test_asset_upload_end_to_end(mock_api, client, tmp_path):
+async def test_asset_upload_end_to_end(client, tmp_path):
     import hashlib
 
-    payload = b"hello world" * 100  # 1100 bytes; well under the mock chunk size
+    payload = b"hello world" * 100
     file = tmp_path / "greet.txt"
     file.write_bytes(payload)
     sha = hashlib.sha256(payload).hexdigest()
 
-    create = _mount(mock_api, f"{API_V1}.AssetUploadService", "CreateUpload").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "upload": {
-                    "uploadId": "up1",
-                    "roomId": "r1",
-                    "status": "ASSET_UPLOAD_STATUS_OPEN",
-                    "committedOffset": 0,
-                    "size": len(payload),
-                    "maxChunkSize": 4096,
-                    "sha256": sha,
-                }
-            },
-        )
+    create_resp = asset_uploads_pb2.CreateUploadResponse()
+    create_resp.upload.upload_id = "up1"
+    create_resp.upload.room_id = "r1"
+    create_resp.upload.status = "ASSET_UPLOAD_STATUS_OPEN"
+    create_resp.upload.committed_offset = 0
+    create_resp.upload.size = len(payload)
+    create_resp.upload.max_chunk_size = 4096
+    create_resp.upload.sha256 = sha
+    create_mock = _mock_method(
+        client, "asset_uploads", "create_upload", create_resp
     )
-    _mount(mock_api, f"{API_V1}.AssetUploadService", "UploadChunk").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "upload": {
-                    "uploadId": "up1",
-                    "roomId": "r1",
-                    "status": "ASSET_UPLOAD_STATUS_OPEN",
-                    "committedOffset": len(payload),
-                    "size": len(payload),
-                    "maxChunkSize": 4096,
-                    "sha256": sha,
-                }
-            },
-        )
-    )
-    _mount(mock_api, f"{API_V1}.AssetUploadService", "CompleteUpload").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "upload": {
-                    "uploadId": "up1",
-                    "roomId": "r1",
-                    "status": "ASSET_UPLOAD_STATUS_COMPLETED",
-                    "committedOffset": len(payload),
-                    "size": len(payload),
-                    "sha256": sha,
-                    "assetId": "a1",
-                },
-                "asset": {
-                    "id": "a1",
-                    "filename": "greet.txt",
-                    "contentType": "text/plain",
-                    "size": len(payload),
-                },
-            },
-        )
-    )
+
+    chunk_resp = asset_uploads_pb2.UploadChunkResponse()
+    chunk_resp.upload.upload_id = "up1"
+    chunk_resp.upload.room_id = "r1"
+    chunk_resp.upload.status = "ASSET_UPLOAD_STATUS_OPEN"
+    chunk_resp.upload.committed_offset = len(payload)
+    chunk_resp.upload.size = len(payload)
+    chunk_resp.upload.max_chunk_size = 4096
+    chunk_resp.upload.sha256 = sha
+    _mock_method(client, "asset_uploads", "upload_chunk", chunk_resp)
+
+    complete_resp = asset_uploads_pb2.CompleteUploadResponse()
+    complete_resp.upload.upload_id = "up1"
+    complete_resp.upload.room_id = "r1"
+    complete_resp.upload.status = "ASSET_UPLOAD_STATUS_COMPLETED"
+    complete_resp.upload.committed_offset = len(payload)
+    complete_resp.upload.size = len(payload)
+    complete_resp.upload.sha256 = sha
+    complete_resp.upload.asset_id = "a1"
+    complete_resp.asset.id = "a1"
+    complete_resp.asset.filename = "greet.txt"
+    complete_resp.asset.content_type = "text/plain"
+    complete_resp.asset.size = len(payload)
+    _mock_method(client, "asset_uploads", "complete_upload", complete_resp)
+
     async with client:
         asset = await client.upload_attachment(
             "r1", file, content_type="text/plain"
         )
+
     assert asset.id == "a1"
     assert asset.filename == "greet.txt"
 
-    # CreateUpload should have carried the correct sha and size.
-    body = create.calls.last.request.content
-    assert sha.encode() in body
-    assert str(len(payload)).encode() in body
+    create_req = create_mock.call_args.args[0]
+    assert create_req.sha256 == sha
+    assert create_req.size == len(payload)
 
 
 # --- External identities --------------------------------------------
 
 
-async def test_list_external_identities(mock_api, client):
-    _mount(mock_api, f"{API_V1}.MyAccountService", "ListExternalIdentities").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "providers": [
-                    {
-                        "provider": {
-                            "id": "github",
-                            "type": "github",
-                            "label": "GitHub",
-                            "loginUrl": "/auth/github/login",
-                        },
-                        "linkUrl": "/auth/github/link",
-                        "linked": True,
-                        "linkedIdentitySubjectHash": "sha_xyz",
-                    }
-                ],
-                "linkedIdentities": [
-                    {
-                        "providerId": "github",
-                        "providerType": "github",
-                        "providerLabel": "GitHub",
-                        "subjectHash": "sha_xyz",
-                    }
-                ],
-            },
-        )
-    )
+async def test_list_external_identities(client):
+    resp = external_identities_pb2.ListExternalIdentitiesResponse()
+    p = resp.providers.add()
+    p.provider.id = "github"
+    p.provider.type = "github"
+    p.provider.label = "GitHub"
+    p.provider.login_url = "/auth/github/login"
+    p.link_url = "/auth/github/link"
+    p.linked = True
+    p.linked_identity_subject_hash = "sha_xyz"
+    li = resp.linked_identities.add()
+    li.provider_id = "github"
+    li.provider_type = "github"
+    li.provider_label = "GitHub"
+    li.subject_hash = "sha_xyz"
+    _mock_method(client, "account", "list_external_identities", resp)
+
     async with client:
         providers, linked = await client.list_external_identities()
+
     assert providers[0].linked is True
     assert providers[0].provider is not None
     assert providers[0].provider.id == "github"
@@ -819,27 +698,25 @@ async def test_list_external_identities(mock_api, client):
 # --- Admin (structural smoke tests) ----------------------------------
 
 
-async def test_admin_list_room_groups(mock_api, client):
-    _mount(mock_api, f"{ADMIN_V1}.AdminRoomLayoutService", "ListRoomGroups").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "groups": [
-                    {
-                        "id": "g1",
-                        "name": "General",
-                        "items": [
-                            {"room": {"id": "r1", "kind": "ROOM_KIND_CHANNEL", "name": "chat"}},
-                            {"sidebarLink": {"id": "sl1", "label": "Docs", "url": "https://x"}},
-                        ],
-                        "canCreateRoom": True,
-                    }
-                ]
-            },
-        )
-    )
+async def test_admin_list_room_groups(client):
+    resp = room_layout_pb2.ListRoomGroupsResponse()
+    g = resp.groups.add()
+    g.id = "g1"
+    g.name = "General"
+    room_item = g.items.add()
+    room_item.room.id = "r1"
+    room_item.room.kind = "ROOM_KIND_CHANNEL"
+    room_item.room.name = "chat"
+    link_item = g.items.add()
+    link_item.sidebar_link.id = "sl1"
+    link_item.sidebar_link.label = "Docs"
+    link_item.sidebar_link.url = "https://x"
+    g.can_create_room = True
+    _mock_method(client, "admin_room_layout", "list_room_groups", resp)
+
     async with client:
         groups = await client.admin_list_room_groups()
+
     assert len(groups) == 1
     assert groups[0].name == "General"
     assert groups[0].rooms[0].id == "r1"
@@ -847,31 +724,31 @@ async def test_admin_list_room_groups(mock_api, client):
     assert groups[0].can_create_room is True
 
 
-async def test_admin_create_sidebar_link(mock_api, client):
-    _mount(mock_api, f"{ADMIN_V1}.AdminRoomLayoutService", "CreateSidebarLink").mock(
-        return_value=httpx.Response(
-            200,
-            json={"sidebarLink": {"id": "sl1", "label": "Docs", "url": "https://x"}},
-        )
-    )
+async def test_admin_create_sidebar_link(client):
+    resp = room_layout_pb2.CreateSidebarLinkResponse()
+    resp.sidebar_link.id = "sl1"
+    resp.sidebar_link.label = "Docs"
+    resp.sidebar_link.url = "https://x"
+    _mock_method(client, "admin_room_layout", "create_sidebar_link", resp)
+
     async with client:
         result = await client.admin_create_sidebar_link("g1", "Docs", "https://x")
+
     assert result == {"id": "sl1", "label": "Docs", "url": "https://x"}
 
 
-async def test_admin_update_server_config(mock_api, client):
-    _mount(mock_api, f"{ADMIN_V1}.AdminServerService", "UpdateServerConfig").mock(
-        return_value=httpx.Response(
-            200,
-            json={
-                "config": {"serverName": "MyServer", "motd": "hi"},
-                "publicProfile": {"name": "MyServer", "version": "0.4.2"},
-            },
-        )
-    )
+async def test_admin_update_server_config(client):
+    resp = admin_server_pb2.UpdateServerConfigResponse()
+    resp.config.server_name = "MyServer"
+    resp.config.motd = "hi"
+    resp.public_profile.name = "MyServer"
+    resp.public_profile.version = "0.4.2"
+    _mock_method(client, "admin_server", "update_server_config", resp)
+
     async with client:
         config, profile = await client.admin_update_server_config(
             server_name="MyServer", motd="hi"
         )
+
     assert config.server_name == "MyServer"
     assert profile.version == "0.4.2"

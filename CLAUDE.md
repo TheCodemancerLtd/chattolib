@@ -34,23 +34,28 @@ mypy src/chattolib
 
 ## Architecture
 
-The library uses **httpx** for async HTTP. Realtime events use a separate
+The library uses the official **`connectrpc` Python package** for the
+request/response API surface: `_transport.build_service_clients(base_url)`
+instantiates one ConnectRPC service client per Chatto service, all sharing the
+same address and the `google.protobuf` binary codec. `httpx` remains for the
+one non-Connect endpoint (`/auth/login`). Realtime events use a separate
 binary-protobuf WebSocket protocol (`chatto.realtime.v1`) served at
 `/api/realtime`, implemented in `realtime.py` on top of `websockets` and
 generated protobuf bindings.
 
 ### Package layout: `src/chattolib/`
 
-- **client.py** — `ChattoClient` async class. Wraps every Connect service the client currently supports; the low-level `call(service, method, request)` method is a public escape hatch.
-- **_transport.py** — Connect JSON transport helpers (URL building, headers, error decoding).
+- **client.py** — `ChattoClient` async class. Each method builds a protobuf request, invokes the appropriate generated service stub via `_rpc`, and normalises the response into the library's dataclass types. `services` is a public escape hatch for reaching the raw ConnectRPC service clients directly.
+- **_transport.py** — instantiates the ConnectRPC service clients, translates `connectrpc.errors.ConnectError` into `ChattoConnectError`/`ChattoAuthError`, and exposes `pb_to_dict(message)` for the request/response ↔ dataclass bridge.
 - **types.py** — Dataclasses and `StrEnum` types mirroring the protobuf messages, with `.parse(dict)` classmethods that consume Connect JSON.
 - **exceptions.py** — `ChattoError`, `ChattoConnectError` (wraps Connect protocol errors), `ChattoAuthError`.
 - **realtime.py** — Protobuf realtime WebSocket client. `stream_events(client)` yields `RealtimeEvent(kind, payload, ...)` values. Errors surface as `ChattoRealtimeError` / `ChattoRealtimeCloseError`.
-- **_pb/** — Vendored, generated Python protobuf bindings for
-  `chatto.realtime.v1` and its transitive imports. Regenerate with
-  `scripts/generate_pb.sh` (needs `protoc` on PATH); the script fetches the
-  latest `.proto` sources from `chattocorp/chatto` and rewrites the bindings.
-  The `_pb/__init__.py` inserts its own directory onto `sys.path` so the
+- **_pb/** — Vendored, generated Python protobuf message classes (`*_pb2.py`)
+  and ConnectRPC service stubs (`*_connect.py`) for every Chatto service.
+  Regenerate with `scripts/generate_pb.sh` (needs `protoc` and
+  `protoc-gen-connect-python` on PATH). The script fetches the `.proto`
+  sources from `chattocorp/chatto` and rewrites the bindings. The
+  `_pb/__init__.py` inserts its own directory onto `sys.path` so the
   generated `from chatto.api.v1 import ...` imports resolve without polluting
   the top-level namespace of dependent projects.
 
