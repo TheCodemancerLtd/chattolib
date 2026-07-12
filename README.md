@@ -2,12 +2,11 @@
 
 **Unofficial** async Python client library for the [Chatto](https://chat.chatto.run) webchat API.
 
-> Chattolib versions track the Chatto server version they target. **0.4.2**
-> targets Chatto 0.4.2's ConnectRPC API. The upstream server dropped GraphQL
-> in favour of a protobuf-first Connect API (see ADR-042 in chattocorp/chatto),
-> and this release is a full rewrite for that transport. Request/response
-> traffic uses Connect JSON over HTTP; the realtime channel is a binary
-> protobuf WebSocket at `/api/realtime` (needs the ``[realtime]`` extra).
+> Chattolib versions track the Chatto server version they target. The current
+> release targets Chatto's ConnectRPC API. Request/response traffic uses the
+> official [`connectrpc`](https://pypi.org/project/connectrpc/) Python
+> package; the realtime channel is a binary protobuf WebSocket at
+> `/api/realtime` (needs the ``[realtime]`` extra).
 
 ## Install
 
@@ -66,10 +65,33 @@ signals; use the corresponding Connect RPC (`GetRoomEventsAround`,
 
 ## Escape hatch
 
-`ChattoClient.call(service, method, request)` invokes any Connect RPC by full
-service name, e.g.
-`await client.call("chatto.api.v1.MessageService", "GetMessage", {"roomId": ..., "eventId": ...})`.
+`ChattoClient.services` exposes the underlying `connectrpc` service clients
+directly (one per Chatto service), for anything the Pythonic wrappers don't
+yet cover. For example:
+
+```python
+from chattolib._pb.chatto.api.v1 import messages_pb2
+
+resp = await client.services.messages.get_message(
+    messages_pb2.GetMessageRequest(room_id=..., event_id=...)
+)
+```
 
 ## License
 
-MIT
+- chattolib's own code is licensed under **MPL-2.0** (Mozilla Public License
+  2.0) — a weak, file-level copyleft. You can use, distribute, and embed
+  chattolib in commercial or proprietary software; modifications to the
+  library's own files must be released under MPL-2.0.
+- Vendored Chatto protobuf definitions under `proto/chatto/**` and the
+  generated bindings under `src/chattolib/_pb/chatto/**` are **Apache-2.0**,
+  matching upstream [`chattocorp/chatto`](https://github.com/chattocorp/chatto).
+- Vendored `buf.validate` material is Apache-2.0 (from
+  [`bufbuild/protovalidate`](https://github.com/bufbuild/protovalidate)).
+
+See [LICENSING.md](LICENSING.md) for the full picture and
+[REUSE.toml](REUSE.toml) for the machine-readable licence map.
+
+Note: chattolib versions **0.0.1 through 0.4.9** were released under **MIT**.
+Those releases remain MIT-licensed forever on PyPI; the MPL-2.0 relicence
+applies to newly published releases only.
