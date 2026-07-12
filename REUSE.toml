@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: 2026 TheCodemancer
+# SPDX-License-Identifier: MPL-2.0
+
+version = 1
+
+# Default: chattolib's own code is MPL-2.0.
+[[annotations]]
+path = "**"
+SPDX-FileCopyrightText = "2026 TheCodemancer"
+SPDX-License-Identifier = "MPL-2.0"
+
+# Vendored Chatto material: .proto sources and the generated Python
+# protobuf / Connect stubs derived from them are Apache-2.0 upstream, per
+# chattocorp/chatto's REUSE.toml. We preserve that boundary here.
+[[annotations]]
+path = [
+    "proto/chatto/**",
+    "src/chattolib/_pb/chatto/**",
+]
+SPDX-FileCopyrightText = "2026 ChattoCorp GmbH"
+SPDX-License-Identifier = "Apache-2.0"
+
+# The buf.build validation proto and its generated binding travel under the
+# licence they ship under (Apache-2.0 in bufbuild/protovalidate).
+[[annotations]]
+path = [
+    "proto/buf/**",
+    "src/chattolib/_pb/buf/**",
+]
+SPDX-FileCopyrightText = "Buf Technologies, Inc."
+SPDX-License-Identifier = "Apache-2.0"
+
+# License text files themselves are the FSF's / OSI's canonical text.
+[[annotations]]
+path = ["LICENSE", "LICENSES/MPL-2.0.txt"]
+SPDX-FileCopyrightText = "Mozilla Foundation"
+SPDX-License-Identifier = "MPL-2.0"
+
+[[annotations]]
+path = "LICENSES/Apache-2.0.txt"
+SPDX-FileCopyrightText = "Apache Software Foundation"
+SPDX-License-Identifier = "Apache-2.0"
