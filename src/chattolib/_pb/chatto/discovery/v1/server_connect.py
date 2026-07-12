@@ -32,7 +32,7 @@ class ServerDiscoveryServiceASGIApplication(ConnectASGIApplication[ServerDiscove
                         service_name="chatto.discovery.v1.ServerDiscoveryService",
                         input=chatto_dot_discovery_dot_v1_dot_server__pb2.GetServerRequest,
                         output=chatto_dot_discovery_dot_v1_dot_server__pb2.GetServerResponse,
-                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
                     ),
                     function=svc.get_server,
                 ),
@@ -55,6 +55,7 @@ class ServerDiscoveryServiceClient(ConnectClient):
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
+        use_get: bool = False,
     ) -> chatto_dot_discovery_dot_v1_dot_server__pb2.GetServerResponse:
         return await self.execute_unary(
             request=request,
@@ -63,10 +64,11 @@ class ServerDiscoveryServiceClient(ConnectClient):
                 service_name="chatto.discovery.v1.ServerDiscoveryService",
                 input=chatto_dot_discovery_dot_v1_dot_server__pb2.GetServerRequest,
                 output=chatto_dot_discovery_dot_v1_dot_server__pb2.GetServerResponse,
-                idempotency_level=IdempotencyLevel.UNKNOWN,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
             ),
             headers=headers,
             timeout_ms=timeout_ms,
+            use_get=use_get,
         )
 
 
@@ -85,7 +87,7 @@ class ServerDiscoveryServiceWSGIApplication(ConnectWSGIApplication):
                         service_name="chatto.discovery.v1.ServerDiscoveryService",
                         input=chatto_dot_discovery_dot_v1_dot_server__pb2.GetServerRequest,
                         output=chatto_dot_discovery_dot_v1_dot_server__pb2.GetServerResponse,
-                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
                     ),
                     function=service.get_server,
                 ),
@@ -108,6 +110,7 @@ class ServerDiscoveryServiceClientSync(ConnectClientSync):
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
+        use_get: bool = False,
     ) -> chatto_dot_discovery_dot_v1_dot_server__pb2.GetServerResponse:
         return self.execute_unary(
             request=request,
@@ -116,8 +119,9 @@ class ServerDiscoveryServiceClientSync(ConnectClientSync):
                 service_name="chatto.discovery.v1.ServerDiscoveryService",
                 input=chatto_dot_discovery_dot_v1_dot_server__pb2.GetServerRequest,
                 output=chatto_dot_discovery_dot_v1_dot_server__pb2.GetServerResponse,
-                idempotency_level=IdempotencyLevel.UNKNOWN,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
             ),
             headers=headers,
             timeout_ms=timeout_ms,
+            use_get=use_get,
         )

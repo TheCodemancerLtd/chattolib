@@ -23,9 +23,10 @@ _sym_db = _symbol_database.Default()
 
 
 from buf.validate import validate_pb2 as buf_dot_validate_dot_validate__pb2
+from google.protobuf import descriptor_pb2 as google_dot_protobuf_dot_descriptor__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n&chatto/api/v1/push_notifications.proto\x12\rchatto.api.v1\x1a\x1b\x62uf/validate/validate.proto\"\x9c\x01\n\x14SubscribePushRequest\x12\x1c\n\x08\x65ndpoint\x18\x01 \x01(\tB\n\xbaH\x07r\x05\x10\x01\x18\x80 \x12\x1a\n\x06p256dh\x18\x02 \x01(\tB\n\xbaH\x07r\x05\x10\x01\x18\x80\x02\x12\x18\n\x04\x61uth\x18\x03 \x01(\tB\n\xbaH\x07r\x05\x10\x01\x18\x80\x01\x12!\n\nuser_agent\x18\x04 \x01(\tB\x08\xbaH\x05r\x03\x18\x80\x04H\x00\x88\x01\x01\x42\r\n\x0b_user_agent\"+\n\x15SubscribePushResponse\x12\x12\n\nsubscribed\x18\x01 \x01(\x08\"6\n\x16UnsubscribePushRequest\x12\x1c\n\x08\x65ndpoint\x18\x01 \x01(\tB\n\xbaH\x07r\x05\x10\x01\x18\x80 \"/\n\x17UnsubscribePushResponse\x12\x14\n\x0cunsubscribed\x18\x01 \x01(\x08\x32\xcf\x01\n\x17PushNotificationService\x12V\n\tSubscribe\x12#.chatto.api.v1.SubscribePushRequest\x1a$.chatto.api.v1.SubscribePushResponse\x12\\\n\x0bUnsubscribe\x12%.chatto.api.v1.UnsubscribePushRequest\x1a&.chatto.api.v1.UnsubscribePushResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n&chatto/api/v1/push_notifications.proto\x12\rchatto.api.v1\x1a\x1b\x62uf/validate/validate.proto\x1a google/protobuf/descriptor.proto\"\x9c\x01\n\x14SubscribePushRequest\x12\x1c\n\x08\x65ndpoint\x18\x01 \x01(\tB\n\xbaH\x07r\x05\x10\x01\x18\x80 \x12\x1a\n\x06p256dh\x18\x02 \x01(\tB\n\xbaH\x07r\x05\x10\x01\x18\x80\x02\x12\x18\n\x04\x61uth\x18\x03 \x01(\tB\n\xbaH\x07r\x05\x10\x01\x18\x80\x01\x12!\n\nuser_agent\x18\x04 \x01(\tB\x08\xbaH\x05r\x03\x18\x80\x04H\x00\x88\x01\x01\x42\r\n\x0b_user_agent\"+\n\x15SubscribePushResponse\x12\x12\n\nsubscribed\x18\x01 \x01(\x08\"6\n\x16UnsubscribePushRequest\x12\x1c\n\x08\x65ndpoint\x18\x01 \x01(\tB\n\xbaH\x07r\x05\x10\x01\x18\x80 \"/\n\x17UnsubscribePushResponse\x12\x14\n\x0cunsubscribed\x18\x01 \x01(\x08\x32\xd4\x01\n\x17PushNotificationService\x12V\n\tSubscribe\x12#.chatto.api.v1.SubscribePushRequest\x1a$.chatto.api.v1.SubscribePushResponse\x12\x61\n\x0bUnsubscribe\x12%.chatto.api.v1.UnsubscribePushRequest\x1a&.chatto.api.v1.UnsubscribePushResponse\"\x03\x90\x02\x02\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -42,14 +43,16 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_SUBSCRIBEPUSHREQUEST'].fields_by_name['user_agent']._serialized_options = b'\272H\005r\003\030\200\004'
   _globals['_UNSUBSCRIBEPUSHREQUEST'].fields_by_name['endpoint']._loaded_options = None
   _globals['_UNSUBSCRIBEPUSHREQUEST'].fields_by_name['endpoint']._serialized_options = b'\272H\007r\005\020\001\030\200 '
-  _globals['_SUBSCRIBEPUSHREQUEST']._serialized_start=87
-  _globals['_SUBSCRIBEPUSHREQUEST']._serialized_end=243
-  _globals['_SUBSCRIBEPUSHRESPONSE']._serialized_start=245
-  _globals['_SUBSCRIBEPUSHRESPONSE']._serialized_end=288
-  _globals['_UNSUBSCRIBEPUSHREQUEST']._serialized_start=290
-  _globals['_UNSUBSCRIBEPUSHREQUEST']._serialized_end=344
-  _globals['_UNSUBSCRIBEPUSHRESPONSE']._serialized_start=346
-  _globals['_UNSUBSCRIBEPUSHRESPONSE']._serialized_end=393
-  _globals['_PUSHNOTIFICATIONSERVICE']._serialized_start=396
-  _globals['_PUSHNOTIFICATIONSERVICE']._serialized_end=603
+  _globals['_PUSHNOTIFICATIONSERVICE'].methods_by_name['Unsubscribe']._loaded_options = None
+  _globals['_PUSHNOTIFICATIONSERVICE'].methods_by_name['Unsubscribe']._serialized_options = b'\220\002\002'
+  _globals['_SUBSCRIBEPUSHREQUEST']._serialized_start=121
+  _globals['_SUBSCRIBEPUSHREQUEST']._serialized_end=277
+  _globals['_SUBSCRIBEPUSHRESPONSE']._serialized_start=279
+  _globals['_SUBSCRIBEPUSHRESPONSE']._serialized_end=322
+  _globals['_UNSUBSCRIBEPUSHREQUEST']._serialized_start=324
+  _globals['_UNSUBSCRIBEPUSHREQUEST']._serialized_end=378
+  _globals['_UNSUBSCRIBEPUSHRESPONSE']._serialized_start=380
+  _globals['_UNSUBSCRIBEPUSHRESPONSE']._serialized_end=427
+  _globals['_PUSHNOTIFICATIONSERVICE']._serialized_start=430
+  _globals['_PUSHNOTIFICATIONSERVICE']._serialized_end=642
 # @@protoc_insertion_point(module_scope)
