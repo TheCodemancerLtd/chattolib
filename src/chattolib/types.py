@@ -646,6 +646,7 @@ class Message:
     channel_echo_event_id: str = ""
     reactions: list[MessageReaction] = field(default_factory=list)
     thread: ThreadSummary | None = None
+    deleted_at: datetime | None = None
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> Message | None:
@@ -667,6 +668,7 @@ class Message:
             channel_echo_event_id=data.get("channelEchoEventId", ""),
             reactions=[MessageReaction.parse(r) for r in data.get("reactions") or []],
             thread=ThreadSummary.parse(data.get("thread")),
+            deleted_at=parse_datetime(data.get("deletedAt")),
         )
 
 
