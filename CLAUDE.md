@@ -91,7 +91,7 @@ generated protobuf bindings.
 | Threads | `ThreadService` | `FollowThread`, `UnfollowThread`, `ListFollowedThreads`, `GetThreadEvents`, `GetThreadEventsAround`, `MarkThreadAsRead` |
 | Notifications | `NotificationService` | `ListNotifications`, `GetNotification`, `BatchGetNotifications`, `ListRoomNotifications`, `ListRoomNotificationCounts`, `HasNotifications`, `DismissNotification`, `DismissAllNotifications` |
 | Notification prefs | `NotificationPreferencesService` | `Get`/`Update` × `Server`/`Room` |
-| Push | `PushNotificationService` | `Subscribe`, `Unsubscribe` |
+| Push | `PushNotificationService` | `Subscribe`, `Unsubscribe`, `SendTestNotification` |
 | Assets | `AssetService` | `GetAsset`, `BatchGetAssets` |
 | Asset uploads | `AssetUploadService` | `CreateUpload`, `UploadChunk`, `GetUpload`, `CompleteUpload`, `CancelUpload`. `upload_attachment(room, path)` helper computes SHA-256, chunks, and completes in one call. |
 | Admin: server | `chatto.admin.v1.AdminServerService` | `GetServerConfig`, `UpdateServerConfig`, `UploadServerLogo`, `DeleteServerLogo`, `UploadServerBanner`, `DeleteServerBanner`, `GetServerSecurityConfig`, `UpdateBlockedUsernames` |

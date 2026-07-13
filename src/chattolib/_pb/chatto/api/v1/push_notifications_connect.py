@@ -23,6 +23,9 @@ class PushNotificationService(Protocol):
     async def unsubscribe(self, request: chatto_dot_api_dot_v1_dot_push__notifications__pb2.UnsubscribePushRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_push__notifications__pb2.UnsubscribePushResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
+    async def send_test_notification(self, request: chatto_dot_api_dot_v1_dot_push__notifications__pb2.SendTestPushNotificationRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_push__notifications__pb2.SendTestPushNotificationResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
 
 class PushNotificationServiceASGIApplication(ConnectASGIApplication[PushNotificationService]):
     def __init__(self, service: PushNotificationService | AsyncGenerator[PushNotificationService], *, interceptors: Iterable[Interceptor]=(), read_max_bytes: int | None = None, compressions: Iterable[Compression] | None = None) -> None:
@@ -48,6 +51,16 @@ class PushNotificationServiceASGIApplication(ConnectASGIApplication[PushNotifica
                         idempotency_level=IdempotencyLevel.IDEMPOTENT,
                     ),
                     function=svc.unsubscribe,
+                ),
+                "/chatto.api.v1.PushNotificationService/SendTestNotification": Endpoint.unary(
+                    method=MethodInfo(
+                        name="SendTestNotification",
+                        service_name="chatto.api.v1.PushNotificationService",
+                        input=chatto_dot_api_dot_v1_dot_push__notifications__pb2.SendTestPushNotificationRequest,
+                        output=chatto_dot_api_dot_v1_dot_push__notifications__pb2.SendTestPushNotificationResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.send_test_notification,
                 ),
             },
             interceptors=interceptors,
@@ -102,11 +115,33 @@ class PushNotificationServiceClient(ConnectClient):
             timeout_ms=timeout_ms,
         )
 
+    async def send_test_notification(
+        self,
+        request: chatto_dot_api_dot_v1_dot_push__notifications__pb2.SendTestPushNotificationRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_api_dot_v1_dot_push__notifications__pb2.SendTestPushNotificationResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="SendTestNotification",
+                service_name="chatto.api.v1.PushNotificationService",
+                input=chatto_dot_api_dot_v1_dot_push__notifications__pb2.SendTestPushNotificationRequest,
+                output=chatto_dot_api_dot_v1_dot_push__notifications__pb2.SendTestPushNotificationResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
 
 class PushNotificationServiceSync(Protocol):
     def subscribe(self, request: chatto_dot_api_dot_v1_dot_push__notifications__pb2.SubscribePushRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_push__notifications__pb2.SubscribePushResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def unsubscribe(self, request: chatto_dot_api_dot_v1_dot_push__notifications__pb2.UnsubscribePushRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_push__notifications__pb2.UnsubscribePushResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def send_test_notification(self, request: chatto_dot_api_dot_v1_dot_push__notifications__pb2.SendTestPushNotificationRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_push__notifications__pb2.SendTestPushNotificationResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
 
@@ -133,6 +168,16 @@ class PushNotificationServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.IDEMPOTENT,
                     ),
                     function=service.unsubscribe,
+                ),
+                "/chatto.api.v1.PushNotificationService/SendTestNotification": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="SendTestNotification",
+                        service_name="chatto.api.v1.PushNotificationService",
+                        input=chatto_dot_api_dot_v1_dot_push__notifications__pb2.SendTestPushNotificationRequest,
+                        output=chatto_dot_api_dot_v1_dot_push__notifications__pb2.SendTestPushNotificationResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.send_test_notification,
                 ),
             },
             interceptors=interceptors,
@@ -182,6 +227,26 @@ class PushNotificationServiceClientSync(ConnectClientSync):
                 input=chatto_dot_api_dot_v1_dot_push__notifications__pb2.UnsubscribePushRequest,
                 output=chatto_dot_api_dot_v1_dot_push__notifications__pb2.UnsubscribePushResponse,
                 idempotency_level=IdempotencyLevel.IDEMPOTENT,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def send_test_notification(
+        self,
+        request: chatto_dot_api_dot_v1_dot_push__notifications__pb2.SendTestPushNotificationRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_api_dot_v1_dot_push__notifications__pb2.SendTestPushNotificationResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="SendTestNotification",
+                service_name="chatto.api.v1.PushNotificationService",
+                input=chatto_dot_api_dot_v1_dot_push__notifications__pb2.SendTestPushNotificationRequest,
+                output=chatto_dot_api_dot_v1_dot_push__notifications__pb2.SendTestPushNotificationResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
             timeout_ms=timeout_ms,

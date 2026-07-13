@@ -1386,6 +1386,15 @@ class ChattoClient:
         )
         return resp.unsubscribed
 
+    async def send_test_push_notification(self) -> bool:
+        resp = await self._rpc(
+            self._svc.push.send_test_notification(
+                push_notifications_pb2.SendTestPushNotificationRequest(),
+                headers=self._headers(),
+            )
+        )
+        return resp.sent
+
     # --- Assets ---------------------------------------------------------
 
     async def get_asset(

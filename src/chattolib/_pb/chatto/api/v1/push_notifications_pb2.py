@@ -26,7 +26,7 @@ from buf.validate import validate_pb2 as buf_dot_validate_dot_validate__pb2
 from google.protobuf import descriptor_pb2 as google_dot_protobuf_dot_descriptor__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n&chatto/api/v1/push_notifications.proto\x12\rchatto.api.v1\x1a\x1b\x62uf/validate/validate.proto\x1a google/protobuf/descriptor.proto\"\x9c\x01\n\x14SubscribePushRequest\x12\x1c\n\x08\x65ndpoint\x18\x01 \x01(\tB\n\xbaH\x07r\x05\x10\x01\x18\x80 \x12\x1a\n\x06p256dh\x18\x02 \x01(\tB\n\xbaH\x07r\x05\x10\x01\x18\x80\x02\x12\x18\n\x04\x61uth\x18\x03 \x01(\tB\n\xbaH\x07r\x05\x10\x01\x18\x80\x01\x12!\n\nuser_agent\x18\x04 \x01(\tB\x08\xbaH\x05r\x03\x18\x80\x04H\x00\x88\x01\x01\x42\r\n\x0b_user_agent\"+\n\x15SubscribePushResponse\x12\x12\n\nsubscribed\x18\x01 \x01(\x08\"6\n\x16UnsubscribePushRequest\x12\x1c\n\x08\x65ndpoint\x18\x01 \x01(\tB\n\xbaH\x07r\x05\x10\x01\x18\x80 \"/\n\x17UnsubscribePushResponse\x12\x14\n\x0cunsubscribed\x18\x01 \x01(\x08\x32\xd4\x01\n\x17PushNotificationService\x12V\n\tSubscribe\x12#.chatto.api.v1.SubscribePushRequest\x1a$.chatto.api.v1.SubscribePushResponse\x12\x61\n\x0bUnsubscribe\x12%.chatto.api.v1.UnsubscribePushRequest\x1a&.chatto.api.v1.UnsubscribePushResponse\"\x03\x90\x02\x02\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n&chatto/api/v1/push_notifications.proto\x12\rchatto.api.v1\x1a\x1b\x62uf/validate/validate.proto\x1a google/protobuf/descriptor.proto\"\x9c\x01\n\x14SubscribePushRequest\x12\x1c\n\x08\x65ndpoint\x18\x01 \x01(\tB\n\xbaH\x07r\x05\x10\x01\x18\x80 \x12\x1a\n\x06p256dh\x18\x02 \x01(\tB\n\xbaH\x07r\x05\x10\x01\x18\x80\x02\x12\x18\n\x04\x61uth\x18\x03 \x01(\tB\n\xbaH\x07r\x05\x10\x01\x18\x80\x01\x12!\n\nuser_agent\x18\x04 \x01(\tB\x08\xbaH\x05r\x03\x18\x80\x04H\x00\x88\x01\x01\x42\r\n\x0b_user_agent\"+\n\x15SubscribePushResponse\x12\x12\n\nsubscribed\x18\x01 \x01(\x08\"6\n\x16UnsubscribePushRequest\x12\x1c\n\x08\x65ndpoint\x18\x01 \x01(\tB\n\xbaH\x07r\x05\x10\x01\x18\x80 \"/\n\x17UnsubscribePushResponse\x12\x14\n\x0cunsubscribed\x18\x01 \x01(\x08\"!\n\x1fSendTestPushNotificationRequest\"0\n SendTestPushNotificationResponse\x12\x0c\n\x04sent\x18\x01 \x01(\x08\x32\xcd\x02\n\x17PushNotificationService\x12V\n\tSubscribe\x12#.chatto.api.v1.SubscribePushRequest\x1a$.chatto.api.v1.SubscribePushResponse\x12\x61\n\x0bUnsubscribe\x12%.chatto.api.v1.UnsubscribePushRequest\x1a&.chatto.api.v1.UnsubscribePushResponse\"\x03\x90\x02\x02\x12w\n\x14SendTestNotification\x12..chatto.api.v1.SendTestPushNotificationRequest\x1a/.chatto.api.v1.SendTestPushNotificationResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -53,6 +53,10 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_UNSUBSCRIBEPUSHREQUEST']._serialized_end=378
   _globals['_UNSUBSCRIBEPUSHRESPONSE']._serialized_start=380
   _globals['_UNSUBSCRIBEPUSHRESPONSE']._serialized_end=427
-  _globals['_PUSHNOTIFICATIONSERVICE']._serialized_start=430
-  _globals['_PUSHNOTIFICATIONSERVICE']._serialized_end=642
+  _globals['_SENDTESTPUSHNOTIFICATIONREQUEST']._serialized_start=429
+  _globals['_SENDTESTPUSHNOTIFICATIONREQUEST']._serialized_end=462
+  _globals['_SENDTESTPUSHNOTIFICATIONRESPONSE']._serialized_start=464
+  _globals['_SENDTESTPUSHNOTIFICATIONRESPONSE']._serialized_end=512
+  _globals['_PUSHNOTIFICATIONSERVICE']._serialized_start=515
+  _globals['_PUSHNOTIFICATIONSERVICE']._serialized_end=848
 # @@protoc_insertion_point(module_scope)
