@@ -10,6 +10,7 @@ build/
 # Local bot state / credentials — must not be tracked
 robochatto.env
 robochatto.db
+.env.pipy
 
 # Beans issue tracker — local only, kept out of git history
 .beans/
