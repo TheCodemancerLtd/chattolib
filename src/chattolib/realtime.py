@@ -3,7 +3,21 @@
 Chatto exposes a binary-protobuf realtime channel at ``/api/realtime`` (see
 ``proto/chatto/realtime/v1/realtime.proto``). This module speaks that
 protocol: it opens the WebSocket, exchanges ``hello`` frames, subscribes to
-the caller's authorized live-event stream, and yields decoded events.
+the caller's authorized server-projection stream, and yields decoded events.
+
+Chatto 0.4.19 introduced protocol version 2, splitting realtime delivery into
+two channels multiplexed over the same WebSocket:
+
+* **Transient events** (``user_typing``, ``presence_changed``, mention/DM/reply
+  notifications, ``session_terminated``) carried inside
+  ``RealtimeEventEnvelope`` — never replayed.
+* **Durable projection events** carried by ``RealtimeProjectionEvent``, which
+  contains ordered operations that mutate the caller's server-scoped
+  projection.
+
+Both are yielded through the same iterator as :class:`RealtimeEvent`;
+``kind`` names the frame or envelope case. A ``caught_up`` cursor is also
+surfaced as a synthetic event so callers can persist the resume cursor.
 
 Usage::
 
@@ -30,16 +44,26 @@ if TYPE_CHECKING:
     from chattolib.client import ChattoClient
 
 REALTIME_PATH = "/api/realtime"
-REALTIME_PROTOCOL_VERSION = 1
+REALTIME_PROTOCOL_VERSION = 2
 
 
 class ChattoRealtimeError(ChattoError):
     """Server returned a protocol error over the realtime WebSocket."""
 
-    def __init__(self, code: str, message: str, *, fatal: bool = False) -> None:
+    def __init__(
+        self,
+        code: str,
+        message: str,
+        *,
+        fatal: bool = False,
+        retry_after_ms: int | None = None,
+        room_id: str | None = None,
+    ) -> None:
         self.code = code
         self.message = message
         self.fatal = fatal
+        self.retry_after_ms = retry_after_ms
+        self.room_id = room_id
         super().__init__(f"{code}: {message}")
 
 
@@ -83,14 +107,21 @@ class ServerHello:
 
 @dataclass
 class RealtimeEvent:
-    """One live event delivered over the realtime WebSocket.
+    """One frame delivered over the realtime WebSocket.
 
-    ``kind`` names the ``oneof event`` case set on the envelope
-    (``message_posted``, ``reaction_added``, ``presence_changed``, …).
+    ``kind`` names either the ``oneof event`` case on
+    ``RealtimeEventEnvelope`` (``user_typing``, ``presence_changed``,
+    ``mention_notification``, …) or the top-level server-frame case for
+    non-envelope deliveries: ``projection_event`` and ``caught_up``.
     ``payload`` is the concrete protobuf sub-message; access its fields
-    directly (e.g. ``event.payload.room_id``). Callers that want to hydrate
-    the referenced resource should follow the hydration hints documented on
-    each event message in ``realtime.proto``.
+    directly (e.g. ``event.payload.room_id``).
+
+    For transient envelope events, ``id`` / ``created_at`` / ``actor_id`` come
+    from :class:`RealtimeEventEnvelope`. For ``projection_event`` frames the
+    same fields are copied from :class:`RealtimeProjectionEvent` (which also
+    carries an optional ``resume_cursor``). For ``caught_up`` frames, ``id``
+    is empty; ``payload`` is the ``RealtimeCaughtUp`` message whose
+    ``cursor`` field is the durable resume cursor.
     """
 
     id: str
@@ -98,7 +129,7 @@ class RealtimeEvent:
     actor_id: str | None
     kind: str
     payload: Any
-    raw: Any  # the full RealtimeEventEnvelope
+    raw: Any  # the full RealtimeEventEnvelope or RealtimeServerFrame
 
 
 class RealtimeConnection:
@@ -114,9 +145,13 @@ class RealtimeConnection:
         client: ChattoClient,
         *,
         protocol_version: int = REALTIME_PROTOCOL_VERSION,
+        resume_cursor: str | None = None,
+        retained_room_ids: list[str] | None = None,
     ) -> None:
         self._client = client
         self._protocol_version = protocol_version
+        self._resume_cursor = resume_cursor
+        self._retained_room_ids = list(retained_room_ids) if retained_room_ids else []
         self._ws: Any = None
         self._server_hello: ServerHello | None = None
 
@@ -174,6 +209,10 @@ class RealtimeConnection:
 
         subscribe = realtime_pb2.RealtimeClientFrame()
         subscribe.subscribe_events.SetInParent()
+        if self._resume_cursor is not None:
+            subscribe.subscribe_events.resume_cursor = self._resume_cursor
+        if self._retained_room_ids:
+            subscribe.subscribe_events.retained_room_ids.extend(self._retained_room_ids)
         await self._ws.send(subscribe.SerializeToString())
 
     async def close(self) -> None:
@@ -194,6 +233,22 @@ class RealtimeConnection:
         frame.ping.nonce = nonce
         await self._ws.send(frame.SerializeToString())
 
+    async def hydrate_room(self, room_id: str) -> None:
+        """Request lazy materialisation of one joined room's recent timeline.
+
+        The server responds on the same projection stream with a
+        ``room_timeline_replace`` operation for ``room_id``. Repeats are
+        idempotent. Errors surface as non-fatal ``RealtimeError`` frames
+        whose ``room_id`` matches.
+        """
+        if self._ws is None:
+            raise ChattoError("realtime connection is closed")
+        from chattolib._pb.chatto.realtime.v1 import realtime_pb2
+
+        frame = realtime_pb2.RealtimeClientFrame()
+        frame.hydrate_room.room_id = room_id
+        await self._ws.send(frame.SerializeToString())
+
     async def events(self) -> AsyncIterator[RealtimeEvent]:
         """Yield decoded live events until the connection closes."""
         if self._ws is None:
@@ -212,11 +267,23 @@ class RealtimeConnection:
             case = frame.WhichOneof("frame")
             if case == "event":
                 yield _wrap_event(frame.event)
+            elif case == "projection_event":
+                yield _wrap_projection_event(frame)
+            elif case == "caught_up":
+                yield _wrap_caught_up(frame)
             elif case in ("heartbeat", "pong", "subscribed"):
                 continue
             elif case == "error":
                 err = frame.error
-                exc = ChattoRealtimeError(err.code, err.message, fatal=err.fatal)
+                exc = ChattoRealtimeError(
+                    err.code,
+                    err.message,
+                    fatal=err.fatal,
+                    retry_after_ms=(
+                        err.retry_after_ms if err.HasField("retry_after_ms") else None
+                    ),
+                    room_id=err.room_id if err.HasField("room_id") else None,
+                )
                 if err.fatal:
                     raise exc
                 # Non-fatal errors are surfaced but the stream continues.
@@ -243,7 +310,15 @@ def _raise_for_control(frame: Any) -> None:
     case = frame.WhichOneof("frame")
     if case == "error":
         err = frame.error
-        raise ChattoRealtimeError(err.code, err.message, fatal=err.fatal)
+        raise ChattoRealtimeError(
+            err.code,
+            err.message,
+            fatal=err.fatal,
+            retry_after_ms=(
+                err.retry_after_ms if err.HasField("retry_after_ms") else None
+            ),
+            room_id=err.room_id if err.HasField("room_id") else None,
+        )
     if case == "close":
         close = frame.close
         raise ChattoRealtimeCloseError(
@@ -273,18 +348,59 @@ def _wrap_event(envelope: Any) -> RealtimeEvent:
     )
 
 
+def _wrap_projection_event(frame: Any) -> RealtimeEvent:
+    """Wrap a top-level projection_event frame as a :class:`RealtimeEvent`."""
+    pe = frame.projection_event
+    created_at = None
+    if pe.HasField("created_at"):
+        created_at = parse_datetime(pe.created_at.ToJsonString())
+    actor_id: str | None = pe.actor_id if pe.HasField("actor_id") else None
+    return RealtimeEvent(
+        id=pe.id,
+        created_at=created_at,
+        actor_id=actor_id,
+        kind="projection_event",
+        payload=pe,
+        raw=frame,
+    )
+
+
+def _wrap_caught_up(frame: Any) -> RealtimeEvent:
+    """Wrap a caught_up frame as a synthetic :class:`RealtimeEvent`."""
+    return RealtimeEvent(
+        id="",
+        created_at=None,
+        actor_id=None,
+        kind="caught_up",
+        payload=frame.caught_up,
+        raw=frame,
+    )
+
+
 async def stream_events(
     client: ChattoClient,
     *,
     protocol_version: int = REALTIME_PROTOCOL_VERSION,
+    resume_cursor: str | None = None,
+    retained_room_ids: list[str] | None = None,
 ) -> AsyncIterator[RealtimeEvent]:
     """Open a realtime connection and yield events until the server closes.
+
+    Pass ``resume_cursor`` from the most recently observed ``caught_up`` (or
+    ``projection_event.resume_cursor``) to resume a durable stream, and
+    ``retained_room_ids`` to declare which joined rooms' timeline windows the
+    client still retains locally.
 
     Raises :class:`ChattoRealtimeCloseError` when the server sends a close frame,
     :class:`ChattoRealtimeError` on fatal protocol errors, or
     :class:`ChattoConnectError` if the initial HTTP handshake fails.
     """
-    conn = RealtimeConnection(client, protocol_version=protocol_version)
+    conn = RealtimeConnection(
+        client,
+        protocol_version=protocol_version,
+        resume_cursor=resume_cursor,
+        retained_room_ids=retained_room_ids,
+    )
     try:
         await conn.connect()
         async for event in conn.events():

@@ -23,9 +23,10 @@ _sym_db = _symbol_database.Default()
 
 
 from buf.validate import validate_pb2 as buf_dot_validate_dot_validate__pb2
+from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n!chatto/api/v1/link_previews.proto\x12\rchatto.api.v1\x1a\x1b\x62uf/validate/validate.proto\"2\n\x17\x46\x65tchLinkPreviewRequest\x12\x17\n\x03url\x18\x01 \x01(\tB\n\xbaH\x07r\x05\x10\x01\x18\x80\x10\"\xaa\x02\n\x0bLinkPreview\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x12\n\x05title\x18\x02 \x01(\tH\x00\x88\x01\x01\x12\x18\n\x0b\x64\x65scription\x18\x03 \x01(\tH\x01\x88\x01\x01\x12\x16\n\timage_url\x18\x04 \x01(\tH\x02\x88\x01\x01\x12\x1b\n\x0eimage_asset_id\x18\x05 \x01(\tH\x03\x88\x01\x01\x12\x16\n\tsite_name\x18\x06 \x01(\tH\x04\x88\x01\x01\x12\x17\n\nembed_type\x18\x07 \x01(\tH\x05\x88\x01\x01\x12\x15\n\x08\x65mbed_id\x18\x08 \x01(\tH\x06\x88\x01\x01\x42\x08\n\x06_titleB\x0e\n\x0c_descriptionB\x0c\n\n_image_urlB\x11\n\x0f_image_asset_idB\x0c\n\n_site_nameB\r\n\x0b_embed_typeB\x0b\n\t_embed_id\"^\n\x18\x46\x65tchLinkPreviewResponse\x12+\n\x07preview\x18\x01 \x01(\x0b\x32\x1a.chatto.api.v1.LinkPreview\x12\x15\n\rpreview_token\x18\x02 \x01(\tb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n!chatto/api/v1/link_previews.proto\x12\rchatto.api.v1\x1a\x1b\x62uf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"2\n\x17\x46\x65tchLinkPreviewRequest\x12\x17\n\x03url\x18\x01 \x01(\tB\n\xbaH\x07r\x05\x10\x01\x18\x80\x10\"\xe1\x02\n\x0bLinkPreview\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x12\n\x05title\x18\x02 \x01(\tH\x00\x88\x01\x01\x12\x18\n\x0b\x64\x65scription\x18\x03 \x01(\tH\x01\x88\x01\x01\x12\x16\n\timage_url\x18\x04 \x01(\tH\x02\x88\x01\x01\x12\x1b\n\x0eimage_asset_id\x18\x05 \x01(\tH\x03\x88\x01\x01\x12\x16\n\tsite_name\x18\x06 \x01(\tH\x04\x88\x01\x01\x12\x17\n\nembed_type\x18\x07 \x01(\tH\x05\x88\x01\x01\x12\x15\n\x08\x65mbed_id\x18\x08 \x01(\tH\x06\x88\x01\x01\x12\x35\n\x0bsocial_post\x18\t \x01(\x0b\x32 .chatto.api.v1.SocialPostPreviewB\x08\n\x06_titleB\x0e\n\x0c_descriptionB\x0c\n\n_image_urlB\x11\n\x0f_image_asset_idB\x0c\n\n_site_nameB\r\n\x0b_embed_typeB\x0b\n\t_embed_id\"\xfa\x02\n\x11SocialPostPreview\x12\x10\n\x08provider\x18\x01 \x01(\t\x12/\n\x06\x61uthor\x18\x02 \x01(\x0b\x32\x1f.chatto.api.v1.SocialPostAuthor\x12\x0c\n\x04text\x18\x03 \x01(\t\x12\x30\n\x0cpublished_at\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12.\n\x06images\x18\x05 \x03(\x0b\x32\x1e.chatto.api.v1.SocialPostImage\x12<\n\rexternal_link\x18\x06 \x01(\x0b\x32%.chatto.api.v1.SocialPostExternalLink\x12\x1c\n\x0f\x63ontent_warning\x18\x07 \x01(\tH\x00\x88\x01\x01\x12\x0b\n\x03url\x18\x08 \x01(\t\x12\x35\n\x0bquoted_post\x18\t \x01(\x0b\x32 .chatto.api.v1.SocialPostPreviewB\x12\n\x10_content_warning\"\x92\x01\n\x10SocialPostAuthor\x12\x14\n\x0c\x64isplay_name\x18\x01 \x01(\t\x12\x0e\n\x06handle\x18\x02 \x01(\t\x12\x17\n\navatar_url\x18\x03 \x01(\tH\x00\x88\x01\x01\x12\x1c\n\x0f\x61vatar_asset_id\x18\x04 \x01(\tH\x01\x88\x01\x01\x42\r\n\x0b_avatar_urlB\x12\n\x10_avatar_asset_id\"\x88\x01\n\x0fSocialPostImage\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x10\n\x08\x61sset_id\x18\x02 \x01(\t\x12\x10\n\x03\x61lt\x18\x03 \x01(\tH\x00\x88\x01\x01\x12\x12\n\x05width\x18\x04 \x01(\rH\x01\x88\x01\x01\x12\x13\n\x06height\x18\x05 \x01(\rH\x02\x88\x01\x01\x42\x06\n\x04_altB\x08\n\x06_widthB\t\n\x07_height\"\xc3\x01\n\x16SocialPostExternalLink\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x12\n\x05title\x18\x02 \x01(\tH\x00\x88\x01\x01\x12\x18\n\x0b\x64\x65scription\x18\x03 \x01(\tH\x01\x88\x01\x01\x12\x16\n\timage_url\x18\x04 \x01(\tH\x02\x88\x01\x01\x12\x1b\n\x0eimage_asset_id\x18\x05 \x01(\tH\x03\x88\x01\x01\x42\x08\n\x06_titleB\x0e\n\x0c_descriptionB\x0c\n\n_image_urlB\x11\n\x0f_image_asset_id\"^\n\x18\x46\x65tchLinkPreviewResponse\x12+\n\x07preview\x18\x01 \x01(\x0b\x32\x1a.chatto.api.v1.LinkPreview\x12\x15\n\rpreview_token\x18\x02 \x01(\tb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -34,10 +35,18 @@ if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_FETCHLINKPREVIEWREQUEST'].fields_by_name['url']._loaded_options = None
   _globals['_FETCHLINKPREVIEWREQUEST'].fields_by_name['url']._serialized_options = b'\272H\007r\005\020\001\030\200\020'
-  _globals['_FETCHLINKPREVIEWREQUEST']._serialized_start=81
-  _globals['_FETCHLINKPREVIEWREQUEST']._serialized_end=131
-  _globals['_LINKPREVIEW']._serialized_start=134
-  _globals['_LINKPREVIEW']._serialized_end=432
-  _globals['_FETCHLINKPREVIEWRESPONSE']._serialized_start=434
-  _globals['_FETCHLINKPREVIEWRESPONSE']._serialized_end=528
+  _globals['_FETCHLINKPREVIEWREQUEST']._serialized_start=114
+  _globals['_FETCHLINKPREVIEWREQUEST']._serialized_end=164
+  _globals['_LINKPREVIEW']._serialized_start=167
+  _globals['_LINKPREVIEW']._serialized_end=520
+  _globals['_SOCIALPOSTPREVIEW']._serialized_start=523
+  _globals['_SOCIALPOSTPREVIEW']._serialized_end=901
+  _globals['_SOCIALPOSTAUTHOR']._serialized_start=904
+  _globals['_SOCIALPOSTAUTHOR']._serialized_end=1050
+  _globals['_SOCIALPOSTIMAGE']._serialized_start=1053
+  _globals['_SOCIALPOSTIMAGE']._serialized_end=1189
+  _globals['_SOCIALPOSTEXTERNALLINK']._serialized_start=1192
+  _globals['_SOCIALPOSTEXTERNALLINK']._serialized_end=1387
+  _globals['_FETCHLINKPREVIEWRESPONSE']._serialized_start=1389
+  _globals['_FETCHLINKPREVIEWRESPONSE']._serialized_end=1483
 # @@protoc_insertion_point(module_scope)

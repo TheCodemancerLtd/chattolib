@@ -95,14 +95,14 @@ generated protobuf bindings.
 | Assets | `AssetService` | `GetAsset`, `BatchGetAssets` |
 | Asset uploads | `AssetUploadService` | `CreateUpload`, `UploadChunk`, `GetUpload`, `CompleteUpload`, `CancelUpload`. `upload_attachment(room, path)` helper computes SHA-256, chunks, and completes in one call. |
 | Admin: server | `chatto.admin.v1.AdminServerService` | `GetServerConfig`, `UpdateServerConfig`, `UploadServerLogo`, `DeleteServerLogo`, `UploadServerBanner`, `DeleteServerBanner`, `GetServerSecurityConfig`, `UpdateBlockedUsernames` |
-| Admin: room layout | `chatto.admin.v1.AdminRoomLayoutService` | `ListRoomGroups`, `Create/Update/Delete/ReorderRoomGroup(s)`, `MoveRoomToGroup`, `ReorderSidebarItemsInGroup`, `Create/Update/Delete/MoveSidebarLink(ToGroup)` |
+| Admin: room layout | `chatto.admin.v1.AdminRoomLayoutService` | `GetRoom`, `GetRoomGroup`, `ListRoomGroups`, `Create/Update/Delete/ReorderRoomGroup(s)`, `MoveRoomToGroup`, `ReorderSidebarItemsInGroup`, `Create/Update/Delete/MoveSidebarLink(ToGroup)` |
 | Admin: users | `chatto.admin.v1.AdminUserService` | `ListMembers`, `GetMember`, `BatchGetMembers`, `AssignRole`, `RevokeRole`, `UpdateUser`, `UpdateUserPassword`, `ClearUsernameCooldown`, `DeleteUser` |
 | Admin: roles | `chatto.admin.v1.AdminRoleService` | `ListRoles`, `GetRole`, `CreateRole`, `UpdateRole`, `DeleteRole`, `ReorderRoles` |
 | Admin: event log | `chatto.admin.v1.AdminEventLogService` | `ListEvents`, `ListEventTypes`, `GetEvent` (raw response) |
 | Admin: diagnostics | `chatto.admin.v1.AdminDiagnosticsService` | `GetSystemInfo` (raw response) |
 | Admin: permissions | `chatto.admin.v1.AdminPermissionService` | `GetRole/UserPermissionMatrix`, `ListRole/UserPermissionDecisions`, `ExplainPermissions`, `SetRolePermission`, `SetUserPermission` (raw responses where the permission shape is server-version-dependent) |
 | Voice calls | `VoiceCallService` | `ListActiveCalls`, `GetActiveCall`, `BatchGetActiveCalls`, `JoinCall`, `LeaveCall`, `GetCallToken` |
-| Realtime (WS) | `chatto.realtime.v1` protobuf WS | `stream_events(client)` / `RealtimeConnection` — full frame set: hello, subscribe, event, heartbeat, ping/pong, error, close |
+| Realtime (WS) | `chatto.realtime.v1` protobuf WS (protocol v2) | `stream_events(client)` / `RealtimeConnection` — full frame set: hello, subscribe (with `resume_cursor` + `retained_room_ids`), event, projection_event, caught_up, heartbeat, ping/pong, error, close, `hydrate_room` |
 
 ### Naming conventions
 
@@ -123,3 +123,4 @@ generated protobuf bindings.
 - Server profile fields are no longer inside `server.profile`; the shape is now `ServerPublicProfile` returned by `ServerDiscoveryService.GetServer`.
 - No more `motd` on the public profile; it is a separate authenticated RPC (`ServerService.GetMotd`).
 - Room groups can contain `SidebarLink` items (not just rooms). `RoomGroup.sidebar_links` exposes them.
+- Realtime is protocol **v2** as of Chatto 0.4.19. `RealtimeEventEnvelope` now only carries **transient** events (`user_typing`, `presence_changed`, `mention_notification`, `new_direct_message_notification`, `session_terminated`). All durable state (messages, rooms, members, notifications, calls, presence, threads, room-groups) is delivered as `RealtimeProjectionEvent` frames whose operations mutate the caller's server-scoped projection. `stream_events` surfaces both, plus synthetic `caught_up` events carrying the resume cursor; `RealtimeConnection.hydrate_room(room_id)` lazily materialises a joined room's timeline window.

@@ -502,6 +502,19 @@ class VideoVariant:
 
 
 @dataclass
+class VideoHLS:
+    """HLS adaptive-streaming metadata for a processed video."""
+
+    master_playlist_url: AssetUrl | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> VideoHLS | None:
+        if not data:
+            return None
+        return cls(master_playlist_url=AssetUrl.parse(data.get("masterPlaylistUrl")))
+
+
+@dataclass
 class VideoProcessing:
     status: VideoProcessingStatus = VideoProcessingStatus.UNSPECIFIED
     duration_ms: int = 0
@@ -511,6 +524,7 @@ class VideoProcessing:
     reason_code: str = ""
     thumbnail_asset_url: AssetUrl | None = None
     variants: list[VideoVariant] = field(default_factory=list)
+    hls: VideoHLS | None = None
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> VideoProcessing | None:
@@ -529,6 +543,7 @@ class VideoProcessing:
             reason_code=data.get("reasonCode", ""),
             thumbnail_asset_url=AssetUrl.parse(data.get("thumbnailAssetUrl")),
             variants=[VideoVariant.parse(v) for v in data.get("variants") or []],
+            hls=VideoHLS.parse(data.get("hls")),
         )
 
 
@@ -558,6 +573,96 @@ class MessageAttachment:
 
 
 @dataclass
+class SocialPostAuthor:
+    display_name: str = ""
+    handle: str = ""
+    avatar_url: str | None = None
+    avatar_asset_id: str | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> SocialPostAuthor | None:
+        if not data:
+            return None
+        return cls(
+            display_name=data.get("displayName", ""),
+            handle=data.get("handle", ""),
+            avatar_url=data.get("avatarUrl"),
+            avatar_asset_id=data.get("avatarAssetId"),
+        )
+
+
+@dataclass
+class SocialPostImage:
+    url: str = ""
+    asset_id: str = ""
+    alt: str | None = None
+    width: int | None = None
+    height: int | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any]) -> SocialPostImage:
+        width = data.get("width")
+        height = data.get("height")
+        return cls(
+            url=data.get("url", ""),
+            asset_id=data.get("assetId", ""),
+            alt=data.get("alt"),
+            width=int(width) if width is not None else None,
+            height=int(height) if height is not None else None,
+        )
+
+
+@dataclass
+class SocialPostExternalLink:
+    url: str = ""
+    title: str | None = None
+    description: str | None = None
+    image_url: str | None = None
+    image_asset_id: str | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> SocialPostExternalLink | None:
+        if not data:
+            return None
+        return cls(
+            url=data.get("url", ""),
+            title=data.get("title"),
+            description=data.get("description"),
+            image_url=data.get("imageUrl"),
+            image_asset_id=data.get("imageAssetId"),
+        )
+
+
+@dataclass
+class SocialPostPreview:
+    provider: str = ""
+    author: SocialPostAuthor | None = None
+    text: str = ""
+    published_at: datetime | None = None
+    images: list[SocialPostImage] = field(default_factory=list)
+    external_link: SocialPostExternalLink | None = None
+    content_warning: str | None = None
+    url: str = ""
+    quoted_post: SocialPostPreview | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> SocialPostPreview | None:
+        if not data:
+            return None
+        return cls(
+            provider=data.get("provider", ""),
+            author=SocialPostAuthor.parse(data.get("author")),
+            text=data.get("text", ""),
+            published_at=parse_datetime(data.get("publishedAt")),
+            images=[SocialPostImage.parse(i) for i in data.get("images") or []],
+            external_link=SocialPostExternalLink.parse(data.get("externalLink")),
+            content_warning=data.get("contentWarning"),
+            url=data.get("url", ""),
+            quoted_post=cls.parse(data.get("quotedPost")),
+        )
+
+
+@dataclass
 class LinkPreview:
     url: str
     title: str | None = None
@@ -567,6 +672,7 @@ class LinkPreview:
     site_name: str | None = None
     embed_type: str | None = None
     embed_id: str | None = None
+    social_post: SocialPostPreview | None = None
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> LinkPreview | None:
@@ -581,6 +687,7 @@ class LinkPreview:
             site_name=data.get("siteName"),
             embed_type=data.get("embedType"),
             embed_id=data.get("embedId"),
+            social_post=SocialPostPreview.parse(data.get("socialPost")),
         )
 
 

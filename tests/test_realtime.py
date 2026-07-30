@@ -31,22 +31,22 @@ def test_realtime_url_strips_trailing_slash():
     )
 
 
-def test_wrap_event_message_posted():
+def test_wrap_event_user_typing():
     from chattolib._pb.chatto.realtime.v1 import realtime_pb2
 
     envelope = realtime_pb2.RealtimeEventEnvelope()
     envelope.id = "evt_1"
     envelope.actor_id = "u1"
-    envelope.message_posted.room_id = "r1"
-    envelope.message_posted.message_event_id = "e1"
+    envelope.user_typing.room_id = "r1"
+    envelope.user_typing.thread_root_event_id = "t1"
 
     wrapped = _wrap_event(envelope)
     assert isinstance(wrapped, RealtimeEvent)
     assert wrapped.id == "evt_1"
-    assert wrapped.kind == "message_posted"
+    assert wrapped.kind == "user_typing"
     assert wrapped.actor_id == "u1"
     assert wrapped.payload.room_id == "r1"
-    assert wrapped.payload.message_event_id == "e1"
+    assert wrapped.payload.thread_root_event_id == "t1"
 
 
 def test_wrap_event_presence_changed():
@@ -100,14 +100,14 @@ def test_frame_roundtrip_hello():
     from chattolib._pb.chatto.realtime.v1 import realtime_pb2
 
     frame = realtime_pb2.RealtimeClientFrame()
-    frame.hello.protocol_version = 1
+    frame.hello.protocol_version = 2
     frame.hello.bearer_token = "cht_abc"
     wire = frame.SerializeToString()
 
     parsed = realtime_pb2.RealtimeClientFrame()
     parsed.ParseFromString(wire)
     assert parsed.WhichOneof("frame") == "hello"
-    assert parsed.hello.protocol_version == 1
+    assert parsed.hello.protocol_version == 2
     assert parsed.hello.bearer_token == "cht_abc"
 
 
@@ -116,6 +116,7 @@ def test_frame_roundtrip_hello():
     [
         ("subscribe_events", "subscribe_events"),
         ("ping", "ping"),
+        ("hydrate_room", "hydrate_room"),
     ],
 )
 def test_client_frame_oneof_cases(case: str, attr: str):
@@ -124,3 +125,45 @@ def test_client_frame_oneof_cases(case: str, attr: str):
     frame = realtime_pb2.RealtimeClientFrame()
     getattr(frame, attr).SetInParent()
     assert frame.WhichOneof("frame") == case
+
+
+def test_wrap_projection_event_carries_resume_cursor():
+    from chattolib._pb.chatto.realtime.v1 import realtime_pb2
+    from chattolib.realtime import _wrap_projection_event
+
+    frame = realtime_pb2.RealtimeServerFrame()
+    frame.projection_event.id = "pe_1"
+    frame.projection_event.actor_id = "u1"
+    frame.projection_event.resume_cursor = "cursor_xyz"
+    frame.projection_event.operations.add().reset.SetInParent()
+
+    wrapped = _wrap_projection_event(frame)
+    assert wrapped.kind == "projection_event"
+    assert wrapped.id == "pe_1"
+    assert wrapped.actor_id == "u1"
+    assert wrapped.payload.resume_cursor == "cursor_xyz"
+    assert len(wrapped.payload.operations) == 1
+
+
+def test_wrap_caught_up_exposes_cursor():
+    from chattolib._pb.chatto.realtime.v1 import realtime_pb2
+    from chattolib.realtime import _wrap_caught_up
+
+    frame = realtime_pb2.RealtimeServerFrame()
+    frame.caught_up.cursor = "cursor_live_boundary"
+
+    wrapped = _wrap_caught_up(frame)
+    assert wrapped.kind == "caught_up"
+    assert wrapped.id == ""
+    assert wrapped.payload.cursor == "cursor_live_boundary"
+
+
+def test_error_exception_carries_hydrate_hints():
+    exc = ChattoRealtimeError(
+        "too_many_retained_rooms",
+        "cap exceeded",
+        retry_after_ms=1000,
+        room_id="r1",
+    )
+    assert exc.retry_after_ms == 1000
+    assert exc.room_id == "r1"

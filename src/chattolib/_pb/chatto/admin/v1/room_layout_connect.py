@@ -17,6 +17,12 @@ import chatto.admin.v1.room_layout_pb2 as chatto_dot_admin_dot_v1_dot_room__layo
 
 
 class AdminRoomLayoutService(Protocol):
+    async def get_room(self, request: chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def get_room_group(self, request: chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomGroupRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomGroupResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
     async def list_room_groups(self, request: chatto_dot_admin_dot_v1_dot_room__layout__pb2.ListRoomGroupsRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_room__layout__pb2.ListRoomGroupsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
@@ -56,6 +62,26 @@ class AdminRoomLayoutServiceASGIApplication(ConnectASGIApplication[AdminRoomLayo
         super().__init__(
             service=service,
             endpoints=lambda svc: {
+                "/chatto.admin.v1.AdminRoomLayoutService/GetRoom": Endpoint.unary(
+                    method=MethodInfo(
+                        name="GetRoom",
+                        service_name="chatto.admin.v1.AdminRoomLayoutService",
+                        input=chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomRequest,
+                        output=chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.get_room,
+                ),
+                "/chatto.admin.v1.AdminRoomLayoutService/GetRoomGroup": Endpoint.unary(
+                    method=MethodInfo(
+                        name="GetRoomGroup",
+                        service_name="chatto.admin.v1.AdminRoomLayoutService",
+                        input=chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomGroupRequest,
+                        output=chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomGroupResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.get_room_group,
+                ),
                 "/chatto.admin.v1.AdminRoomLayoutService/ListRoomGroups": Endpoint.unary(
                     method=MethodInfo(
                         name="ListRoomGroups",
@@ -179,6 +205,46 @@ class AdminRoomLayoutServiceASGIApplication(ConnectASGIApplication[AdminRoomLayo
 
 
 class AdminRoomLayoutServiceClient(ConnectClient):
+    async def get_room(
+        self,
+        request: chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetRoom",
+                service_name="chatto.admin.v1.AdminRoomLayoutService",
+                input=chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomRequest,
+                output=chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def get_room_group(
+        self,
+        request: chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomGroupRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomGroupResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetRoomGroup",
+                service_name="chatto.admin.v1.AdminRoomLayoutService",
+                input=chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomGroupRequest,
+                output=chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomGroupResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
     async def list_room_groups(
         self,
         request: chatto_dot_admin_dot_v1_dot_room__layout__pb2.ListRoomGroupsRequest,
@@ -401,6 +467,10 @@ class AdminRoomLayoutServiceClient(ConnectClient):
 
 
 class AdminRoomLayoutServiceSync(Protocol):
+    def get_room(self, request: chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def get_room_group(self, request: chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomGroupRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomGroupResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def list_room_groups(self, request: chatto_dot_admin_dot_v1_dot_room__layout__pb2.ListRoomGroupsRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_room__layout__pb2.ListRoomGroupsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def create_room_group(self, request: chatto_dot_admin_dot_v1_dot_room__layout__pb2.CreateRoomGroupRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_room__layout__pb2.CreateRoomGroupResponse:
@@ -429,6 +499,26 @@ class AdminRoomLayoutServiceWSGIApplication(ConnectWSGIApplication):
     def __init__(self, service: AdminRoomLayoutServiceSync, interceptors: Iterable[InterceptorSync]=(), read_max_bytes: int | None = None, compressions: Iterable[Compression] | None = None) -> None:
         super().__init__(
             endpoints={
+                "/chatto.admin.v1.AdminRoomLayoutService/GetRoom": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="GetRoom",
+                        service_name="chatto.admin.v1.AdminRoomLayoutService",
+                        input=chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomRequest,
+                        output=chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.get_room,
+                ),
+                "/chatto.admin.v1.AdminRoomLayoutService/GetRoomGroup": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="GetRoomGroup",
+                        service_name="chatto.admin.v1.AdminRoomLayoutService",
+                        input=chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomGroupRequest,
+                        output=chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomGroupResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.get_room_group,
+                ),
                 "/chatto.admin.v1.AdminRoomLayoutService/ListRoomGroups": EndpointSync.unary(
                     method=MethodInfo(
                         name="ListRoomGroups",
@@ -552,6 +642,46 @@ class AdminRoomLayoutServiceWSGIApplication(ConnectWSGIApplication):
 
 
 class AdminRoomLayoutServiceClientSync(ConnectClientSync):
+    def get_room(
+        self,
+        request: chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetRoom",
+                service_name="chatto.admin.v1.AdminRoomLayoutService",
+                input=chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomRequest,
+                output=chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def get_room_group(
+        self,
+        request: chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomGroupRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomGroupResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetRoomGroup",
+                service_name="chatto.admin.v1.AdminRoomLayoutService",
+                input=chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomGroupRequest,
+                output=chatto_dot_admin_dot_v1_dot_room__layout__pb2.GetRoomGroupResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
     def list_room_groups(
         self,
         request: chatto_dot_admin_dot_v1_dot_room__layout__pb2.ListRoomGroupsRequest,

@@ -30,7 +30,7 @@ from chatto.admin.v1 import roles_pb2 as chatto_dot_admin_dot_v1_dot_roles__pb2
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1d\x63hatto/admin/v1/members.proto\x12\x0f\x63hatto.admin.v1\x1a\x1b\x62uf/validate/validate.proto\x1a\x1e\x63hatto/api/v1/pagination.proto\x1a\x19\x63hatto/api/v1/roles.proto\x1a\x19\x63hatto/api/v1/users.proto\x1a\x1b\x63hatto/admin/v1/roles.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb8\x02\n\x0b\x41\x64minMember\x12\r\n\x05roles\x18\x05 \x03(\t\x12.\n\ncreated_at\x18\x06 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x1a\n\x12has_verified_email\x18\x08 \x01(\x08\x12\x17\n\x0fverified_emails\x18\t \x03(\t\x12!\n\x19viewer_can_delete_account\x18\n \x01(\x08\x12\x35\n\x11last_login_change\x18\x0b \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12!\n\x04user\x18\x0c \x01(\x0b\x32\x13.chatto.api.v1.UserJ\x04\x08\x01\x10\x05J\x04\x08\x07\x10\x08R\x02idR\x05loginR\x0c\x64isplay_nameR\navatar_urlR\x07\x64\x65leted\"i\n\x12ListMembersRequest\x12\x0e\n\x06search\x18\x01 \x01(\t\x12(\n\x04page\x18\x04 \x01(\x0b\x32\x1a.chatto.api.v1.PageRequestJ\x04\x08\x02\x10\x03J\x04\x08\x03\x10\x04R\x05limitR\x06offset\"\xb2\x01\n\x13ListMembersResponse\x12-\n\x07members\x18\x01 \x03(\x0b\x32\x1c.chatto.admin.v1.AdminMember\x12\"\n\x05roles\x18\x02 \x03(\x0b\x32\x13.chatto.api.v1.Role\x12%\n\x04page\x18\x05 \x01(\x0b\x32\x17.chatto.api.v1.PageInfoJ\x04\x08\x03\x10\x04J\x04\x08\x04\x10\x05R\x0btotal_countR\x08has_more\"R\n\x10GetMemberRequest\x12\x1a\n\x07user_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01H\x00\x12\x18\n\x05login\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01H\x00\x42\x08\n\x06target\"\xf9\x01\n\x11GetMemberResponse\x12,\n\x06member\x18\x01 \x01(\x0b\x32\x1c.chatto.admin.v1.AdminMember\x12)\n\x05roles\x18\x02 \x03(\x0b\x32\x1a.chatto.admin.v1.AdminRole\x12\x1d\n\x15\x61vailable_permissions\x18\x03 \x03(\t\x12\x1f\n\x17viewer_can_assign_roles\x18\x04 \x01(\x08\x12\x1f\n\x17viewer_can_manage_roles\x18\x05 \x01(\x08\x12*\n\"viewer_can_manage_user_permissions\x18\x06 \x01(\x08\"<\n\x16\x42\x61tchGetMembersRequest\x12\"\n\x08user_ids\x18\x01 \x03(\tB\x10\xbaH\r\x92\x01\n\x08\x01\x10\x64\"\x04r\x02\x10\x01\"l\n\x17\x42\x61tchGetMembersResponse\x12-\n\x07members\x18\x01 \x03(\x0b\x32\x1c.chatto.admin.v1.AdminMember\x12\"\n\x05roles\x18\x02 \x03(\x0b\x32\x13.chatto.api.v1.Role\"I\n\x11\x41ssignRoleRequest\x12\x18\n\x07user_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x1a\n\trole_name\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"R\n\x12\x41ssignRoleResponse\x12,\n\x06member\x18\x02 \x01(\x0b\x32\x1c.chatto.admin.v1.AdminMemberJ\x04\x08\x01\x10\x02R\x08\x61ssigned\"I\n\x11RevokeRoleRequest\x12\x18\n\x07user_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x1a\n\trole_name\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"Q\n\x12RevokeRoleResponse\x12,\n\x06member\x18\x02 \x01(\x0b\x32\x1c.chatto.admin.v1.AdminMemberJ\x04\x08\x01\x10\x02R\x07revoked\"\x8b\x01\n\x11UpdateUserRequest\x12\x18\n\x07user_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\"\n\x0c\x64isplay_name\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x18 H\x00\x88\x01\x01\x12\x1d\n\x05login\x18\x03 \x01(\tB\t\xbaH\x06r\x04\x10\x02\x18 H\x01\x88\x01\x01\x42\x0f\n\r_display_nameB\x08\n\x06_login\"e\n\x12UpdateUserResponse\x12!\n\x04user\x18\x01 \x01(\x0b\x32\x13.chatto.api.v1.User\x12,\n\x06member\x18\x02 \x01(\x0b\x32\x1c.chatto.admin.v1.AdminMember\"S\n\x19UpdateUserPasswordRequest\x12\x18\n\x07user_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x1c\n\x08password\x18\x02 \x01(\tB\n\xbaH\x07r\x05\x10\x08\x18\x80\x01\"J\n\x1aUpdateUserPasswordResponse\x12,\n\x06member\x18\x01 \x01(\x0b\x32\x1c.chatto.admin.v1.AdminMember\"8\n\x1c\x43learUsernameCooldownRequest\x12\x18\n\x07user_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"0\n\x1d\x43learUsernameCooldownResponse\x12\x0f\n\x07\x63leared\x18\x01 \x01(\x08\"G\n\x11\x44\x65leteUserRequest\x12\x18\n\x07user_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x18\n\x10\x63urrent_password\x18\x02 \x01(\t\"%\n\x12\x44\x65leteUserResponse\x12\x0f\n\x07\x64\x65leted\x18\x01 \x01(\x08\x32\xe9\x06\n\x10\x41\x64minUserService\x12X\n\x0bListMembers\x12#.chatto.admin.v1.ListMembersRequest\x1a$.chatto.admin.v1.ListMembersResponse\x12R\n\tGetMember\x12!.chatto.admin.v1.GetMemberRequest\x1a\".chatto.admin.v1.GetMemberResponse\x12\x64\n\x0f\x42\x61tchGetMembers\x12\'.chatto.admin.v1.BatchGetMembersRequest\x1a(.chatto.admin.v1.BatchGetMembersResponse\x12U\n\nAssignRole\x12\".chatto.admin.v1.AssignRoleRequest\x1a#.chatto.admin.v1.AssignRoleResponse\x12U\n\nRevokeRole\x12\".chatto.admin.v1.RevokeRoleRequest\x1a#.chatto.admin.v1.RevokeRoleResponse\x12U\n\nUpdateUser\x12\".chatto.admin.v1.UpdateUserRequest\x1a#.chatto.admin.v1.UpdateUserResponse\x12m\n\x12UpdateUserPassword\x12*.chatto.admin.v1.UpdateUserPasswordRequest\x1a+.chatto.admin.v1.UpdateUserPasswordResponse\x12v\n\x15\x43learUsernameCooldown\x12-.chatto.admin.v1.ClearUsernameCooldownRequest\x1a..chatto.admin.v1.ClearUsernameCooldownResponse\x12U\n\nDeleteUser\x12\".chatto.admin.v1.DeleteUserRequest\x1a#.chatto.admin.v1.DeleteUserResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1d\x63hatto/admin/v1/members.proto\x12\x0f\x63hatto.admin.v1\x1a\x1b\x62uf/validate/validate.proto\x1a\x1e\x63hatto/api/v1/pagination.proto\x1a\x19\x63hatto/api/v1/roles.proto\x1a\x19\x63hatto/api/v1/users.proto\x1a\x1b\x63hatto/admin/v1/roles.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb8\x02\n\x0b\x41\x64minMember\x12\r\n\x05roles\x18\x05 \x03(\t\x12.\n\ncreated_at\x18\x06 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x1a\n\x12has_verified_email\x18\x08 \x01(\x08\x12\x17\n\x0fverified_emails\x18\t \x03(\t\x12!\n\x19viewer_can_delete_account\x18\n \x01(\x08\x12\x35\n\x11last_login_change\x18\x0b \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12!\n\x04user\x18\x0c \x01(\x0b\x32\x13.chatto.api.v1.UserJ\x04\x08\x01\x10\x05J\x04\x08\x07\x10\x08R\x02idR\x05loginR\x0c\x64isplay_nameR\navatar_urlR\x07\x64\x65leted\"i\n\x12ListMembersRequest\x12\x0e\n\x06search\x18\x01 \x01(\t\x12(\n\x04page\x18\x04 \x01(\x0b\x32\x1a.chatto.api.v1.PageRequestJ\x04\x08\x02\x10\x03J\x04\x08\x03\x10\x04R\x05limitR\x06offset\"\xb2\x01\n\x13ListMembersResponse\x12-\n\x07members\x18\x01 \x03(\x0b\x32\x1c.chatto.admin.v1.AdminMember\x12\"\n\x05roles\x18\x02 \x03(\x0b\x32\x13.chatto.api.v1.Role\x12%\n\x04page\x18\x05 \x01(\x0b\x32\x17.chatto.api.v1.PageInfoJ\x04\x08\x03\x10\x04J\x04\x08\x04\x10\x05R\x0btotal_countR\x08has_more\"R\n\x10GetMemberRequest\x12\x1a\n\x07user_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01H\x00\x12\x18\n\x05login\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01H\x00\x42\x08\n\x06target\"\xdf\x02\n\x11GetMemberResponse\x12,\n\x06member\x18\x01 \x01(\x0b\x32\x1c.chatto.admin.v1.AdminMember\x12)\n\x05roles\x18\x02 \x03(\x0b\x32\x1a.chatto.admin.v1.AdminRole\x12\x1d\n\x15\x61vailable_permissions\x18\x03 \x03(\t\x12\x1f\n\x17viewer_can_assign_roles\x18\x04 \x01(\x08\x12\x1f\n\x17viewer_can_manage_roles\x18\x05 \x01(\x08\x12*\n\"viewer_can_manage_user_permissions\x18\x06 \x01(\x08\x12\x1d\n\x15\x61ssignable_role_names\x18\x07 \x03(\t\x12\x1c\n\x14revocable_role_names\x18\x08 \x03(\t\x12\'\n\x1frole_assignment_limits_enforced\x18\t \x01(\x08\"<\n\x16\x42\x61tchGetMembersRequest\x12\"\n\x08user_ids\x18\x01 \x03(\tB\x10\xbaH\r\x92\x01\n\x08\x01\x10\x64\"\x04r\x02\x10\x01\"l\n\x17\x42\x61tchGetMembersResponse\x12-\n\x07members\x18\x01 \x03(\x0b\x32\x1c.chatto.admin.v1.AdminMember\x12\"\n\x05roles\x18\x02 \x03(\x0b\x32\x13.chatto.api.v1.Role\"I\n\x11\x41ssignRoleRequest\x12\x18\n\x07user_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x1a\n\trole_name\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"R\n\x12\x41ssignRoleResponse\x12,\n\x06member\x18\x02 \x01(\x0b\x32\x1c.chatto.admin.v1.AdminMemberJ\x04\x08\x01\x10\x02R\x08\x61ssigned\"I\n\x11RevokeRoleRequest\x12\x18\n\x07user_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x1a\n\trole_name\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"Q\n\x12RevokeRoleResponse\x12,\n\x06member\x18\x02 \x01(\x0b\x32\x1c.chatto.admin.v1.AdminMemberJ\x04\x08\x01\x10\x02R\x07revoked\"\x8b\x01\n\x11UpdateUserRequest\x12\x18\n\x07user_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\"\n\x0c\x64isplay_name\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x18 H\x00\x88\x01\x01\x12\x1d\n\x05login\x18\x03 \x01(\tB\t\xbaH\x06r\x04\x10\x02\x18 H\x01\x88\x01\x01\x42\x0f\n\r_display_nameB\x08\n\x06_login\"e\n\x12UpdateUserResponse\x12!\n\x04user\x18\x01 \x01(\x0b\x32\x13.chatto.api.v1.User\x12,\n\x06member\x18\x02 \x01(\x0b\x32\x1c.chatto.admin.v1.AdminMember\"S\n\x19UpdateUserPasswordRequest\x12\x18\n\x07user_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x1c\n\x08password\x18\x02 \x01(\tB\n\xbaH\x07r\x05\x10\x08\x18\x80\x01\"J\n\x1aUpdateUserPasswordResponse\x12,\n\x06member\x18\x01 \x01(\x0b\x32\x1c.chatto.admin.v1.AdminMember\"8\n\x1c\x43learUsernameCooldownRequest\x12\x18\n\x07user_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"0\n\x1d\x43learUsernameCooldownResponse\x12\x0f\n\x07\x63leared\x18\x01 \x01(\x08\"G\n\x11\x44\x65leteUserRequest\x12\x18\n\x07user_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x18\n\x10\x63urrent_password\x18\x02 \x01(\t\"%\n\x12\x44\x65leteUserResponse\x12\x0f\n\x07\x64\x65leted\x18\x01 \x01(\x08\x32\xe9\x06\n\x10\x41\x64minUserService\x12X\n\x0bListMembers\x12#.chatto.admin.v1.ListMembersRequest\x1a$.chatto.admin.v1.ListMembersResponse\x12R\n\tGetMember\x12!.chatto.admin.v1.GetMemberRequest\x1a\".chatto.admin.v1.GetMemberResponse\x12\x64\n\x0f\x42\x61tchGetMembers\x12\'.chatto.admin.v1.BatchGetMembersRequest\x1a(.chatto.admin.v1.BatchGetMembersResponse\x12U\n\nAssignRole\x12\".chatto.admin.v1.AssignRoleRequest\x1a#.chatto.admin.v1.AssignRoleResponse\x12U\n\nRevokeRole\x12\".chatto.admin.v1.RevokeRoleRequest\x1a#.chatto.admin.v1.RevokeRoleResponse\x12U\n\nUpdateUser\x12\".chatto.admin.v1.UpdateUserRequest\x1a#.chatto.admin.v1.UpdateUserResponse\x12m\n\x12UpdateUserPassword\x12*.chatto.admin.v1.UpdateUserPasswordRequest\x1a+.chatto.admin.v1.UpdateUserPasswordResponse\x12v\n\x15\x43learUsernameCooldown\x12-.chatto.admin.v1.ClearUsernameCooldownRequest\x1a..chatto.admin.v1.ClearUsernameCooldownResponse\x12U\n\nDeleteUser\x12\".chatto.admin.v1.DeleteUserRequest\x1a#.chatto.admin.v1.DeleteUserResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -74,35 +74,35 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GETMEMBERREQUEST']._serialized_start=830
   _globals['_GETMEMBERREQUEST']._serialized_end=912
   _globals['_GETMEMBERRESPONSE']._serialized_start=915
-  _globals['_GETMEMBERRESPONSE']._serialized_end=1164
-  _globals['_BATCHGETMEMBERSREQUEST']._serialized_start=1166
-  _globals['_BATCHGETMEMBERSREQUEST']._serialized_end=1226
-  _globals['_BATCHGETMEMBERSRESPONSE']._serialized_start=1228
-  _globals['_BATCHGETMEMBERSRESPONSE']._serialized_end=1336
-  _globals['_ASSIGNROLEREQUEST']._serialized_start=1338
-  _globals['_ASSIGNROLEREQUEST']._serialized_end=1411
-  _globals['_ASSIGNROLERESPONSE']._serialized_start=1413
-  _globals['_ASSIGNROLERESPONSE']._serialized_end=1495
-  _globals['_REVOKEROLEREQUEST']._serialized_start=1497
-  _globals['_REVOKEROLEREQUEST']._serialized_end=1570
-  _globals['_REVOKEROLERESPONSE']._serialized_start=1572
-  _globals['_REVOKEROLERESPONSE']._serialized_end=1653
-  _globals['_UPDATEUSERREQUEST']._serialized_start=1656
-  _globals['_UPDATEUSERREQUEST']._serialized_end=1795
-  _globals['_UPDATEUSERRESPONSE']._serialized_start=1797
-  _globals['_UPDATEUSERRESPONSE']._serialized_end=1898
-  _globals['_UPDATEUSERPASSWORDREQUEST']._serialized_start=1900
-  _globals['_UPDATEUSERPASSWORDREQUEST']._serialized_end=1983
-  _globals['_UPDATEUSERPASSWORDRESPONSE']._serialized_start=1985
-  _globals['_UPDATEUSERPASSWORDRESPONSE']._serialized_end=2059
-  _globals['_CLEARUSERNAMECOOLDOWNREQUEST']._serialized_start=2061
-  _globals['_CLEARUSERNAMECOOLDOWNREQUEST']._serialized_end=2117
-  _globals['_CLEARUSERNAMECOOLDOWNRESPONSE']._serialized_start=2119
-  _globals['_CLEARUSERNAMECOOLDOWNRESPONSE']._serialized_end=2167
-  _globals['_DELETEUSERREQUEST']._serialized_start=2169
-  _globals['_DELETEUSERREQUEST']._serialized_end=2240
-  _globals['_DELETEUSERRESPONSE']._serialized_start=2242
-  _globals['_DELETEUSERRESPONSE']._serialized_end=2279
-  _globals['_ADMINUSERSERVICE']._serialized_start=2282
-  _globals['_ADMINUSERSERVICE']._serialized_end=3155
+  _globals['_GETMEMBERRESPONSE']._serialized_end=1266
+  _globals['_BATCHGETMEMBERSREQUEST']._serialized_start=1268
+  _globals['_BATCHGETMEMBERSREQUEST']._serialized_end=1328
+  _globals['_BATCHGETMEMBERSRESPONSE']._serialized_start=1330
+  _globals['_BATCHGETMEMBERSRESPONSE']._serialized_end=1438
+  _globals['_ASSIGNROLEREQUEST']._serialized_start=1440
+  _globals['_ASSIGNROLEREQUEST']._serialized_end=1513
+  _globals['_ASSIGNROLERESPONSE']._serialized_start=1515
+  _globals['_ASSIGNROLERESPONSE']._serialized_end=1597
+  _globals['_REVOKEROLEREQUEST']._serialized_start=1599
+  _globals['_REVOKEROLEREQUEST']._serialized_end=1672
+  _globals['_REVOKEROLERESPONSE']._serialized_start=1674
+  _globals['_REVOKEROLERESPONSE']._serialized_end=1755
+  _globals['_UPDATEUSERREQUEST']._serialized_start=1758
+  _globals['_UPDATEUSERREQUEST']._serialized_end=1897
+  _globals['_UPDATEUSERRESPONSE']._serialized_start=1899
+  _globals['_UPDATEUSERRESPONSE']._serialized_end=2000
+  _globals['_UPDATEUSERPASSWORDREQUEST']._serialized_start=2002
+  _globals['_UPDATEUSERPASSWORDREQUEST']._serialized_end=2085
+  _globals['_UPDATEUSERPASSWORDRESPONSE']._serialized_start=2087
+  _globals['_UPDATEUSERPASSWORDRESPONSE']._serialized_end=2161
+  _globals['_CLEARUSERNAMECOOLDOWNREQUEST']._serialized_start=2163
+  _globals['_CLEARUSERNAMECOOLDOWNREQUEST']._serialized_end=2219
+  _globals['_CLEARUSERNAMECOOLDOWNRESPONSE']._serialized_start=2221
+  _globals['_CLEARUSERNAMECOOLDOWNRESPONSE']._serialized_end=2269
+  _globals['_DELETEUSERREQUEST']._serialized_start=2271
+  _globals['_DELETEUSERREQUEST']._serialized_end=2342
+  _globals['_DELETEUSERRESPONSE']._serialized_start=2344
+  _globals['_DELETEUSERRESPONSE']._serialized_end=2381
+  _globals['_ADMINUSERSERVICE']._serialized_start=2384
+  _globals['_ADMINUSERSERVICE']._serialized_end=3257
 # @@protoc_insertion_point(module_scope)
