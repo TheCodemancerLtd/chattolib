@@ -26,11 +26,10 @@ from buf.validate import validate_pb2 as buf_dot_validate_dot_validate__pb2
 from chatto.api.v1 import pagination_pb2 as chatto_dot_api_dot_v1_dot_pagination__pb2
 from chatto.api.v1 import rooms_pb2 as chatto_dot_api_dot_v1_dot_rooms__pb2
 from chatto.api.v1 import users_pb2 as chatto_dot_api_dot_v1_dot_users__pb2
-from google.protobuf import descriptor_pb2 as google_dot_protobuf_dot_descriptor__pb2
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n!chatto/api/v1/notifications.proto\x12\rchatto.api.v1\x1a\x1b\x62uf/validate/validate.proto\x1a\x1e\x63hatto/api/v1/pagination.proto\x1a\x19\x63hatto/api/v1/rooms.proto\x1a\x19\x63hatto/api/v1/users.proto\x1a google/protobuf/descriptor.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"f\n\x19\x44irectMessageNotification\x12\x10\n\x08\x65vent_id\x18\x02 \x01(\t\x12(\n\x04room\x18\x03 \x01(\x0b\x32\x1a.chatto.api.v1.RoomSummaryJ\x04\x08\x01\x10\x02R\x07room_id\"\x8d\x01\n\x13MentionNotification\x12(\n\x04room\x18\x01 \x01(\x0b\x32\x1a.chatto.api.v1.RoomSummary\x12\x10\n\x08\x65vent_id\x18\x02 \x01(\t\x12!\n\x14thread_root_event_id\x18\x03 \x01(\tH\x00\x88\x01\x01\x42\x17\n\x15_thread_root_event_id\"\xa3\x01\n\x11ReplyNotification\x12(\n\x04room\x18\x01 \x01(\x0b\x32\x1a.chatto.api.v1.RoomSummary\x12\x10\n\x08\x65vent_id\x18\x02 \x01(\t\x12\x16\n\x0ein_reply_to_id\x18\x03 \x01(\t\x12!\n\x14thread_root_event_id\x18\x04 \x01(\tH\x00\x88\x01\x01\x42\x17\n\x15_thread_root_event_id\"U\n\x17RoomMessageNotification\x12(\n\x04room\x18\x01 \x01(\x0b\x32\x1a.chatto.api.v1.RoomSummary\x12\x10\n\x08\x65vent_id\x18\x02 \x01(\t\"\xf7\x02\n\x10NotificationItem\x12\n\n\x02id\x18\x01 \x01(\t\x12.\n\ncreated_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\"\n\x05\x61\x63tor\x18\x03 \x01(\x0b\x32\x13.chatto.api.v1.User\x12\x42\n\x0e\x64irect_message\x18\n \x01(\x0b\x32(.chatto.api.v1.DirectMessageNotificationH\x00\x12\x35\n\x07mention\x18\x0b \x01(\x0b\x32\".chatto.api.v1.MentionNotificationH\x00\x12\x31\n\x05reply\x18\x0c \x01(\x0b\x32 .chatto.api.v1.ReplyNotificationH\x00\x12>\n\x0croom_message\x18\r \x01(\x0b\x32&.chatto.api.v1.RoomMessageNotificationH\x00\x42\x06\n\x04kindJ\x04\x08\x04\x10\x05R\x07summary\"_\n\x18ListNotificationsRequest\x12(\n\x04page\x18\x03 \x01(\x0b\x32\x1a.chatto.api.v1.PageRequestJ\x04\x08\x01\x10\x02J\x04\x08\x02\x10\x03R\x05limitR\x06offset\"}\n\x1cListRoomNotificationsRequest\x12\x18\n\x07room_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12(\n\x04page\x18\x04 \x01(\x0b\x32\x1a.chatto.api.v1.PageRequestJ\x04\x08\x02\x10\x03J\x04\x08\x03\x10\x04R\x05limitR\x06offset\"\xb0\x01\n\x19ListNotificationsResponse\x12\x36\n\rnotifications\x18\x01 \x03(\x0b\x32\x1f.chatto.api.v1.NotificationItem\x12%\n\x04page\x18\x05 \x01(\x0b\x32\x17.chatto.api.v1.PageInfoJ\x04\x08\x02\x10\x03J\x04\x08\x03\x10\x04J\x04\x08\x04\x10\x05R\x0btotal_countR\x08has_moreR\x0bserver_name\":\n\x16GetNotificationRequest\x12 \n\x0fnotification_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"c\n\x17GetNotificationResponse\x12\x35\n\x0cnotification\x18\x01 \x01(\x0b\x32\x1f.chatto.api.v1.NotificationItemJ\x04\x08\x02\x10\x03R\x0bserver_name\"J\n\x1c\x42\x61tchGetNotificationsRequest\x12*\n\x10notification_ids\x18\x01 \x03(\tB\x10\xbaH\r\x92\x01\n\x08\x01\x10\x64\"\x04r\x02\x10\x01\"j\n\x1d\x42\x61tchGetNotificationsResponse\x12\x36\n\rnotifications\x18\x01 \x03(\x0b\x32\x1f.chatto.api.v1.NotificationItemJ\x04\x08\x02\x10\x03R\x0bserver_name\"\xb4\x01\n\x1dListRoomNotificationsResponse\x12\x36\n\rnotifications\x18\x01 \x03(\x0b\x32\x1f.chatto.api.v1.NotificationItem\x12%\n\x04page\x18\x05 \x01(\x0b\x32\x17.chatto.api.v1.PageInfoJ\x04\x08\x02\x10\x03J\x04\x08\x03\x10\x04J\x04\x08\x04\x10\x05R\x0btotal_countR\x08has_moreR\x0bserver_name\"\x19\n\x17HasNotificationsRequest\"5\n\x18HasNotificationsResponse\x12\x19\n\x11has_notifications\x18\x01 \x01(\x08\"=\n\x15RoomNotificationCount\x12\x0f\n\x07room_id\x18\x01 \x01(\t\x12\x13\n\x0btotal_count\x18\x02 \x01(\x05\"#\n!ListRoomNotificationCountsRequest\"_\n\"ListRoomNotificationCountsResponse\x12\x39\n\x0broom_counts\x18\x01 \x03(\x0b\x32$.chatto.api.v1.RoomNotificationCount\">\n\x1a\x44ismissNotificationRequest\x12 \n\x0fnotification_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"0\n\x1b\x44ismissNotificationResponse\x12\x11\n\tdismissed\x18\x01 \x01(\x08\" \n\x1e\x44ismissAllNotificationsRequest\":\n\x1f\x44ismissAllNotificationsResponse\x12\x17\n\x0f\x64ismissed_count\x18\x01 \x01(\x05\x32\x9d\x07\n\x13NotificationService\x12\x66\n\x11ListNotifications\x12\'.chatto.api.v1.ListNotificationsRequest\x1a(.chatto.api.v1.ListNotificationsResponse\x12`\n\x0fGetNotification\x12%.chatto.api.v1.GetNotificationRequest\x1a&.chatto.api.v1.GetNotificationResponse\x12r\n\x15\x42\x61tchGetNotifications\x12+.chatto.api.v1.BatchGetNotificationsRequest\x1a,.chatto.api.v1.BatchGetNotificationsResponse\x12r\n\x15ListRoomNotifications\x12+.chatto.api.v1.ListRoomNotificationsRequest\x1a,.chatto.api.v1.ListRoomNotificationsResponse\x12\x81\x01\n\x1aListRoomNotificationCounts\x12\x30.chatto.api.v1.ListRoomNotificationCountsRequest\x1a\x31.chatto.api.v1.ListRoomNotificationCountsResponse\x12\x63\n\x10HasNotifications\x12&.chatto.api.v1.HasNotificationsRequest\x1a\'.chatto.api.v1.HasNotificationsResponse\x12q\n\x13\x44ismissNotification\x12).chatto.api.v1.DismissNotificationRequest\x1a*.chatto.api.v1.DismissNotificationResponse\"\x03\x90\x02\x02\x12x\n\x17\x44ismissAllNotifications\x12-.chatto.api.v1.DismissAllNotificationsRequest\x1a..chatto.api.v1.DismissAllNotificationsResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n!chatto/api/v1/notifications.proto\x12\rchatto.api.v1\x1a\x1b\x62uf/validate/validate.proto\x1a\x1e\x63hatto/api/v1/pagination.proto\x1a\x19\x63hatto/api/v1/rooms.proto\x1a\x19\x63hatto/api/v1/users.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"f\n\x19\x44irectMessageNotification\x12\x10\n\x08\x65vent_id\x18\x02 \x01(\t\x12(\n\x04room\x18\x03 \x01(\x0b\x32\x1a.chatto.api.v1.RoomSummaryJ\x04\x08\x01\x10\x02R\x07room_id\"\x8d\x01\n\x13MentionNotification\x12(\n\x04room\x18\x01 \x01(\x0b\x32\x1a.chatto.api.v1.RoomSummary\x12\x10\n\x08\x65vent_id\x18\x02 \x01(\t\x12!\n\x14thread_root_event_id\x18\x03 \x01(\tH\x00\x88\x01\x01\x42\x17\n\x15_thread_root_event_id\"\xa3\x01\n\x11ReplyNotification\x12(\n\x04room\x18\x01 \x01(\x0b\x32\x1a.chatto.api.v1.RoomSummary\x12\x10\n\x08\x65vent_id\x18\x02 \x01(\t\x12\x16\n\x0ein_reply_to_id\x18\x03 \x01(\t\x12!\n\x14thread_root_event_id\x18\x04 \x01(\tH\x00\x88\x01\x01\x42\x17\n\x15_thread_root_event_id\"U\n\x17RoomMessageNotification\x12(\n\x04room\x18\x01 \x01(\x0b\x32\x1a.chatto.api.v1.RoomSummary\x12\x10\n\x08\x65vent_id\x18\x02 \x01(\t\"\xf7\x02\n\x10NotificationItem\x12\n\n\x02id\x18\x01 \x01(\t\x12.\n\ncreated_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\"\n\x05\x61\x63tor\x18\x03 \x01(\x0b\x32\x13.chatto.api.v1.User\x12\x42\n\x0e\x64irect_message\x18\n \x01(\x0b\x32(.chatto.api.v1.DirectMessageNotificationH\x00\x12\x35\n\x07mention\x18\x0b \x01(\x0b\x32\".chatto.api.v1.MentionNotificationH\x00\x12\x31\n\x05reply\x18\x0c \x01(\x0b\x32 .chatto.api.v1.ReplyNotificationH\x00\x12>\n\x0croom_message\x18\r \x01(\x0b\x32&.chatto.api.v1.RoomMessageNotificationH\x00\x42\x06\n\x04kindJ\x04\x08\x04\x10\x05R\x07summary\"_\n\x18ListNotificationsRequest\x12(\n\x04page\x18\x03 \x01(\x0b\x32\x1a.chatto.api.v1.PageRequestJ\x04\x08\x01\x10\x02J\x04\x08\x02\x10\x03R\x05limitR\x06offset\"}\n\x1cListRoomNotificationsRequest\x12\x18\n\x07room_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12(\n\x04page\x18\x04 \x01(\x0b\x32\x1a.chatto.api.v1.PageRequestJ\x04\x08\x02\x10\x03J\x04\x08\x03\x10\x04R\x05limitR\x06offset\"\xb0\x01\n\x19ListNotificationsResponse\x12\x36\n\rnotifications\x18\x01 \x03(\x0b\x32\x1f.chatto.api.v1.NotificationItem\x12%\n\x04page\x18\x05 \x01(\x0b\x32\x17.chatto.api.v1.PageInfoJ\x04\x08\x02\x10\x03J\x04\x08\x03\x10\x04J\x04\x08\x04\x10\x05R\x0btotal_countR\x08has_moreR\x0bserver_name\":\n\x16GetNotificationRequest\x12 \n\x0fnotification_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"c\n\x17GetNotificationResponse\x12\x35\n\x0cnotification\x18\x01 \x01(\x0b\x32\x1f.chatto.api.v1.NotificationItemJ\x04\x08\x02\x10\x03R\x0bserver_name\"J\n\x1c\x42\x61tchGetNotificationsRequest\x12*\n\x10notification_ids\x18\x01 \x03(\tB\x10\xbaH\r\x92\x01\n\x08\x01\x10\x64\"\x04r\x02\x10\x01\"j\n\x1d\x42\x61tchGetNotificationsResponse\x12\x36\n\rnotifications\x18\x01 \x03(\x0b\x32\x1f.chatto.api.v1.NotificationItemJ\x04\x08\x02\x10\x03R\x0bserver_name\"\xb4\x01\n\x1dListRoomNotificationsResponse\x12\x36\n\rnotifications\x18\x01 \x03(\x0b\x32\x1f.chatto.api.v1.NotificationItem\x12%\n\x04page\x18\x05 \x01(\x0b\x32\x17.chatto.api.v1.PageInfoJ\x04\x08\x02\x10\x03J\x04\x08\x03\x10\x04J\x04\x08\x04\x10\x05R\x0btotal_countR\x08has_moreR\x0bserver_name\"\x19\n\x17HasNotificationsRequest\"5\n\x18HasNotificationsResponse\x12\x19\n\x11has_notifications\x18\x01 \x01(\x08\"=\n\x15RoomNotificationCount\x12\x0f\n\x07room_id\x18\x01 \x01(\t\x12\x13\n\x0btotal_count\x18\x02 \x01(\x05\"#\n!ListRoomNotificationCountsRequest\"_\n\"ListRoomNotificationCountsResponse\x12\x39\n\x0broom_counts\x18\x01 \x03(\x0b\x32$.chatto.api.v1.RoomNotificationCount\">\n\x1a\x44ismissNotificationRequest\x12 \n\x0fnotification_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"0\n\x1b\x44ismissNotificationResponse\x12\x11\n\tdismissed\x18\x01 \x01(\x08\" \n\x1e\x44ismissAllNotificationsRequest\":\n\x1f\x44ismissAllNotificationsResponse\x12\x17\n\x0f\x64ismissed_count\x18\x01 \x01(\x05\x32\x98\x07\n\x13NotificationService\x12\x66\n\x11ListNotifications\x12\'.chatto.api.v1.ListNotificationsRequest\x1a(.chatto.api.v1.ListNotificationsResponse\x12`\n\x0fGetNotification\x12%.chatto.api.v1.GetNotificationRequest\x1a&.chatto.api.v1.GetNotificationResponse\x12r\n\x15\x42\x61tchGetNotifications\x12+.chatto.api.v1.BatchGetNotificationsRequest\x1a,.chatto.api.v1.BatchGetNotificationsResponse\x12r\n\x15ListRoomNotifications\x12+.chatto.api.v1.ListRoomNotificationsRequest\x1a,.chatto.api.v1.ListRoomNotificationsResponse\x12\x81\x01\n\x1aListRoomNotificationCounts\x12\x30.chatto.api.v1.ListRoomNotificationCountsRequest\x1a\x31.chatto.api.v1.ListRoomNotificationCountsResponse\x12\x63\n\x10HasNotifications\x12&.chatto.api.v1.HasNotificationsRequest\x1a\'.chatto.api.v1.HasNotificationsResponse\x12l\n\x13\x44ismissNotification\x12).chatto.api.v1.DismissNotificationRequest\x1a*.chatto.api.v1.DismissNotificationResponse\x12x\n\x17\x44ismissAllNotifications\x12-.chatto.api.v1.DismissAllNotificationsRequest\x1a..chatto.api.v1.DismissAllNotificationsResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -45,52 +44,50 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_BATCHGETNOTIFICATIONSREQUEST'].fields_by_name['notification_ids']._serialized_options = b'\272H\r\222\001\n\010\001\020d\"\004r\002\020\001'
   _globals['_DISMISSNOTIFICATIONREQUEST'].fields_by_name['notification_id']._loaded_options = None
   _globals['_DISMISSNOTIFICATIONREQUEST'].fields_by_name['notification_id']._serialized_options = b'\272H\004r\002\020\001'
-  _globals['_NOTIFICATIONSERVICE'].methods_by_name['DismissNotification']._loaded_options = None
-  _globals['_NOTIFICATIONSERVICE'].methods_by_name['DismissNotification']._serialized_options = b'\220\002\002'
-  _globals['_DIRECTMESSAGENOTIFICATION']._serialized_start=234
-  _globals['_DIRECTMESSAGENOTIFICATION']._serialized_end=336
-  _globals['_MENTIONNOTIFICATION']._serialized_start=339
-  _globals['_MENTIONNOTIFICATION']._serialized_end=480
-  _globals['_REPLYNOTIFICATION']._serialized_start=483
-  _globals['_REPLYNOTIFICATION']._serialized_end=646
-  _globals['_ROOMMESSAGENOTIFICATION']._serialized_start=648
-  _globals['_ROOMMESSAGENOTIFICATION']._serialized_end=733
-  _globals['_NOTIFICATIONITEM']._serialized_start=736
-  _globals['_NOTIFICATIONITEM']._serialized_end=1111
-  _globals['_LISTNOTIFICATIONSREQUEST']._serialized_start=1113
-  _globals['_LISTNOTIFICATIONSREQUEST']._serialized_end=1208
-  _globals['_LISTROOMNOTIFICATIONSREQUEST']._serialized_start=1210
-  _globals['_LISTROOMNOTIFICATIONSREQUEST']._serialized_end=1335
-  _globals['_LISTNOTIFICATIONSRESPONSE']._serialized_start=1338
-  _globals['_LISTNOTIFICATIONSRESPONSE']._serialized_end=1514
-  _globals['_GETNOTIFICATIONREQUEST']._serialized_start=1516
-  _globals['_GETNOTIFICATIONREQUEST']._serialized_end=1574
-  _globals['_GETNOTIFICATIONRESPONSE']._serialized_start=1576
-  _globals['_GETNOTIFICATIONRESPONSE']._serialized_end=1675
-  _globals['_BATCHGETNOTIFICATIONSREQUEST']._serialized_start=1677
-  _globals['_BATCHGETNOTIFICATIONSREQUEST']._serialized_end=1751
-  _globals['_BATCHGETNOTIFICATIONSRESPONSE']._serialized_start=1753
-  _globals['_BATCHGETNOTIFICATIONSRESPONSE']._serialized_end=1859
-  _globals['_LISTROOMNOTIFICATIONSRESPONSE']._serialized_start=1862
-  _globals['_LISTROOMNOTIFICATIONSRESPONSE']._serialized_end=2042
-  _globals['_HASNOTIFICATIONSREQUEST']._serialized_start=2044
-  _globals['_HASNOTIFICATIONSREQUEST']._serialized_end=2069
-  _globals['_HASNOTIFICATIONSRESPONSE']._serialized_start=2071
-  _globals['_HASNOTIFICATIONSRESPONSE']._serialized_end=2124
-  _globals['_ROOMNOTIFICATIONCOUNT']._serialized_start=2126
-  _globals['_ROOMNOTIFICATIONCOUNT']._serialized_end=2187
-  _globals['_LISTROOMNOTIFICATIONCOUNTSREQUEST']._serialized_start=2189
-  _globals['_LISTROOMNOTIFICATIONCOUNTSREQUEST']._serialized_end=2224
-  _globals['_LISTROOMNOTIFICATIONCOUNTSRESPONSE']._serialized_start=2226
-  _globals['_LISTROOMNOTIFICATIONCOUNTSRESPONSE']._serialized_end=2321
-  _globals['_DISMISSNOTIFICATIONREQUEST']._serialized_start=2323
-  _globals['_DISMISSNOTIFICATIONREQUEST']._serialized_end=2385
-  _globals['_DISMISSNOTIFICATIONRESPONSE']._serialized_start=2387
-  _globals['_DISMISSNOTIFICATIONRESPONSE']._serialized_end=2435
-  _globals['_DISMISSALLNOTIFICATIONSREQUEST']._serialized_start=2437
-  _globals['_DISMISSALLNOTIFICATIONSREQUEST']._serialized_end=2469
-  _globals['_DISMISSALLNOTIFICATIONSRESPONSE']._serialized_start=2471
-  _globals['_DISMISSALLNOTIFICATIONSRESPONSE']._serialized_end=2529
-  _globals['_NOTIFICATIONSERVICE']._serialized_start=2532
-  _globals['_NOTIFICATIONSERVICE']._serialized_end=3457
+  _globals['_DIRECTMESSAGENOTIFICATION']._serialized_start=200
+  _globals['_DIRECTMESSAGENOTIFICATION']._serialized_end=302
+  _globals['_MENTIONNOTIFICATION']._serialized_start=305
+  _globals['_MENTIONNOTIFICATION']._serialized_end=446
+  _globals['_REPLYNOTIFICATION']._serialized_start=449
+  _globals['_REPLYNOTIFICATION']._serialized_end=612
+  _globals['_ROOMMESSAGENOTIFICATION']._serialized_start=614
+  _globals['_ROOMMESSAGENOTIFICATION']._serialized_end=699
+  _globals['_NOTIFICATIONITEM']._serialized_start=702
+  _globals['_NOTIFICATIONITEM']._serialized_end=1077
+  _globals['_LISTNOTIFICATIONSREQUEST']._serialized_start=1079
+  _globals['_LISTNOTIFICATIONSREQUEST']._serialized_end=1174
+  _globals['_LISTROOMNOTIFICATIONSREQUEST']._serialized_start=1176
+  _globals['_LISTROOMNOTIFICATIONSREQUEST']._serialized_end=1301
+  _globals['_LISTNOTIFICATIONSRESPONSE']._serialized_start=1304
+  _globals['_LISTNOTIFICATIONSRESPONSE']._serialized_end=1480
+  _globals['_GETNOTIFICATIONREQUEST']._serialized_start=1482
+  _globals['_GETNOTIFICATIONREQUEST']._serialized_end=1540
+  _globals['_GETNOTIFICATIONRESPONSE']._serialized_start=1542
+  _globals['_GETNOTIFICATIONRESPONSE']._serialized_end=1641
+  _globals['_BATCHGETNOTIFICATIONSREQUEST']._serialized_start=1643
+  _globals['_BATCHGETNOTIFICATIONSREQUEST']._serialized_end=1717
+  _globals['_BATCHGETNOTIFICATIONSRESPONSE']._serialized_start=1719
+  _globals['_BATCHGETNOTIFICATIONSRESPONSE']._serialized_end=1825
+  _globals['_LISTROOMNOTIFICATIONSRESPONSE']._serialized_start=1828
+  _globals['_LISTROOMNOTIFICATIONSRESPONSE']._serialized_end=2008
+  _globals['_HASNOTIFICATIONSREQUEST']._serialized_start=2010
+  _globals['_HASNOTIFICATIONSREQUEST']._serialized_end=2035
+  _globals['_HASNOTIFICATIONSRESPONSE']._serialized_start=2037
+  _globals['_HASNOTIFICATIONSRESPONSE']._serialized_end=2090
+  _globals['_ROOMNOTIFICATIONCOUNT']._serialized_start=2092
+  _globals['_ROOMNOTIFICATIONCOUNT']._serialized_end=2153
+  _globals['_LISTROOMNOTIFICATIONCOUNTSREQUEST']._serialized_start=2155
+  _globals['_LISTROOMNOTIFICATIONCOUNTSREQUEST']._serialized_end=2190
+  _globals['_LISTROOMNOTIFICATIONCOUNTSRESPONSE']._serialized_start=2192
+  _globals['_LISTROOMNOTIFICATIONCOUNTSRESPONSE']._serialized_end=2287
+  _globals['_DISMISSNOTIFICATIONREQUEST']._serialized_start=2289
+  _globals['_DISMISSNOTIFICATIONREQUEST']._serialized_end=2351
+  _globals['_DISMISSNOTIFICATIONRESPONSE']._serialized_start=2353
+  _globals['_DISMISSNOTIFICATIONRESPONSE']._serialized_end=2401
+  _globals['_DISMISSALLNOTIFICATIONSREQUEST']._serialized_start=2403
+  _globals['_DISMISSALLNOTIFICATIONSREQUEST']._serialized_end=2435
+  _globals['_DISMISSALLNOTIFICATIONSRESPONSE']._serialized_start=2437
+  _globals['_DISMISSALLNOTIFICATIONSRESPONSE']._serialized_end=2495
+  _globals['_NOTIFICATIONSERVICE']._serialized_start=2498
+  _globals['_NOTIFICATIONSERVICE']._serialized_end=3418
 # @@protoc_insertion_point(module_scope)

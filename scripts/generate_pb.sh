@@ -2,9 +2,18 @@
 # Regenerate the vendored Python protobuf + ConnectRPC bindings under
 # src/chattolib/_pb.
 #
-# Fetches the required .proto sources into proto/ (from chattocorp/chatto's
-# main branch and bufbuild/protovalidate) and runs protoc with both the
-# built-in Python code generator and the connect-python plugin.
+# Fetches the .proto sources for a pinned Chatto ref (default: the version
+# recorded in pyproject.toml, as a `v<version>` tag) and runs protoc with
+# the built-in Python generator and the connect-python plugin.
+#
+# ALWAYS pin to a released tag. Fetching from `main` risks shipping
+# unreleased wire changes that the deployed Chatto server does not speak
+# — chattolib 0.4.19 shipped that way and broke realtime for every
+# downstream client. Override the pin explicitly if you know what you are
+# doing:
+#
+#   CHATTO_REF=v0.4.19       ./scripts/generate_pb.sh
+#   CHATTO_REF=main          ./scripts/generate_pb.sh   # unreleased
 #
 # Requirements:
 #   - protoc on PATH
@@ -25,9 +34,23 @@ fi
 repo_root=$(cd "$(dirname "$0")/.." && pwd)
 cd "$repo_root"
 
+# Default the Chatto ref to `v<base-version-in-pyproject.toml>`. Strip any
+# post/pre-release suffix — those are chattolib-only fixes against the same
+# server release. Callers can override with CHATTO_REF.
+default_version=$(sed -nE 's/^version *= *"([^"]+)".*/\1/p' pyproject.toml | head -1)
+default_base=${default_version%%.post*}
+default_base=${default_base%%.dev*}
+default_base=${default_base%%a*}
+default_base=${default_base%%b*}
+default_base=${default_base%%rc*}
+default_ref="v${default_base}"
+
+chatto_ref=${CHATTO_REF:-$default_ref}
+echo "Fetching proto sources from chattocorp/chatto@${chatto_ref}"
+
 mkdir -p proto/chatto/{api,admin,auth,discovery,realtime}/v1 proto/buf/validate
 
-chatto_base="https://raw.githubusercontent.com/chattocorp/chatto/main/proto/chatto"
+chatto_base="https://raw.githubusercontent.com/chattocorp/chatto/${chatto_ref}/proto/chatto"
 
 fetch() {
     local rel=$1

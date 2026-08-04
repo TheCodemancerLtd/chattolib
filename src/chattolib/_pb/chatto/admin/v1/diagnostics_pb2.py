@@ -22,42 +22,37 @@ _runtime_version.ValidateProtobufRuntimeVersion(
 _sym_db = _symbol_database.Default()
 
 
-from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n!chatto/admin/v1/diagnostics.proto\x12\x0f\x63hatto.admin.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x16\n\x14GetSystemInfoRequest\"\xcb\x01\n\x15GetSystemInfoResponse\x12\x35\n\x0bsystem_info\x18\x01 \x01(\x0b\x32 .chatto.admin.v1.AdminSystemInfo\x12:\n\x0bprojections\x18\x02 \x03(\x0b\x32%.chatto.admin.v1.AdminProjectionState\x12?\n\rasset_cleanup\x18\x03 \x01(\x0b\x32(.chatto.admin.v1.AdminAssetCleanupStatus\"\xb7\x03\n\x17\x41\x64minAssetCleanupStatus\x12\x38\n\x06health\x18\x01 \x01(\x0e\x32(.chatto.admin.v1.AdminAssetCleanupHealth\x12\x15\n\rpending_count\x18\x02 \x01(\x03\x12\x35\n\x11oldest_pending_at\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x18\n\x10pass_in_progress\x18\x04 \x01(\x08\x12\x30\n\x0clast_pass_at\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12;\n\x17last_successful_pass_at\x18\x06 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12.\n\nupdated_at\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x18\n\x10last_pass_failed\x18\x08 \x01(\x08\x12\x1f\n\x17last_inspected_sequence\x18\t \x01(\t\x12 \n\x18latest_deletion_sequence\x18\n \x01(\t\"\xe0\x01\n\x0f\x41\x64minSystemInfo\x12\x38\n\nconnection\x18\x01 \x01(\x0b\x32$.chatto.admin.v1.AdminConnectionInfo\x12\x32\n\x07\x61\x63\x63ount\x18\x02 \x01(\x0b\x32!.chatto.admin.v1.AdminAccountInfo\x12-\n\x04nats\x18\x03 \x01(\x0b\x32\x1f.chatto.admin.v1.AdminNatsStats\x12\x30\n\x05stats\x18\x04 \x01(\x0b\x32!.chatto.admin.v1.AdminServerStats\"\x83\x01\n\x13\x41\x64minConnectionInfo\x12\x11\n\tconnected\x18\x01 \x01(\x08\x12\x11\n\tserver_id\x18\x02 \x01(\t\x12\x13\n\x0bserver_name\x18\x03 \x01(\t\x12\x0f\n\x07version\x18\x04 \x01(\t\x12\x13\n\x0bmax_payload\x18\x05 \x01(\x03\x12\x0b\n\x03rtt\x18\x06 \x01(\t\"\xb0\x01\n\x10\x41\x64minAccountInfo\x12\x0e\n\x06memory\x18\x01 \x01(\x03\x12\x13\n\x0bmemory_used\x18\x02 \x01(\x03\x12\x0f\n\x07storage\x18\x03 \x01(\x03\x12\x14\n\x0cstorage_used\x18\x04 \x01(\x03\x12\x0f\n\x07streams\x18\x05 \x01(\x05\x12\x14\n\x0cstreams_used\x18\x06 \x01(\x05\x12\x11\n\tconsumers\x18\x07 \x01(\x05\x12\x16\n\x0e\x63onsumers_used\x18\x08 \x01(\x05\"Y\n\x10\x41\x64minServerStats\x12\x12\n\nuser_count\x18\x01 \x01(\x05\x12\x1a\n\x12\x63hannel_room_count\x18\x02 \x01(\x05\x12\x15\n\rdm_room_count\x18\x03 \x01(\x05\"\xea\x01\n\x0e\x41\x64minNatsStats\x12\x16\n\x0etotal_messages\x18\x01 \x01(\x03\x12\x13\n\x0btotal_bytes\x18\x02 \x01(\x03\x12\x1e\n\x16total_consumer_pending\x18\x03 \x01(\x03\x12\x19\n\x11total_ack_pending\x18\x04 \x01(\x05\x12\x35\n\x07streams\x18\x05 \x03(\x0b\x32$.chatto.admin.v1.AdminNatsStreamInfo\x12\x39\n\tconsumers\x18\x06 \x03(\x0b\x32&.chatto.admin.v1.AdminNatsConsumerInfo\"\xed\x01\n\x13\x41\x64minNatsStreamInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\x12\x10\n\x08subjects\x18\x03 \x03(\t\x12\x0f\n\x07storage\x18\x04 \x01(\t\x12\x10\n\x08messages\x18\x05 \x01(\x03\x12\r\n\x05\x62ytes\x18\x06 \x01(\x03\x12\x16\n\x0e\x66irst_sequence\x18\x07 \x01(\t\x12\x15\n\rlast_sequence\x18\x08 \x01(\t\x12\x16\n\x0e\x63onsumer_count\x18\t \x01(\x05\x12\x10\n\x08replicas\x18\n \x01(\x05\x12\x16\n\x0e\x63luster_leader\x18\x0b \x01(\t\"\x8f\x03\n\x15\x41\x64minNatsConsumerInfo\x12\x0e\n\x06stream\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0f\n\x07\x64urable\x18\x03 \x01(\t\x12\x16\n\x0e\x66ilter_subject\x18\x04 \x01(\t\x12\x17\n\x0f\x66ilter_subjects\x18\x05 \x03(\t\x12\x12\n\nack_policy\x18\x06 \x01(\t\x12\x12\n\npull_based\x18\x07 \x01(\x08\x12\x12\n\npush_bound\x18\x08 \x01(\x08\x12\x0f\n\x07pending\x18\t \x01(\x03\x12\x13\n\x0b\x61\x63k_pending\x18\n \x01(\x05\x12\x13\n\x0bredelivered\x18\x0b \x01(\x05\x12\x0f\n\x07waiting\x18\x0c \x01(\x05\x12#\n\x1b\x64\x65livered_consumer_sequence\x18\r \x01(\t\x12!\n\x19\x64\x65livered_stream_sequence\x18\x0e \x01(\t\x12#\n\x1b\x61\x63k_floor_consumer_sequence\x18\x0f \x01(\t\x12!\n\x19\x61\x63k_floor_stream_sequence\x18\x10 \x01(\t\"\xc2\x03\n\x14\x41\x64minProjectionState\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x10\n\x08subjects\x18\x03 \x03(\t\x12\x0f\n\x07started\x18\x04 \x01(\x08\x12%\n\x18startup_duration_seconds\x18\x05 \x01(\x01H\x00\x88\x01\x01\x12\x1d\n\x15last_applied_sequence\x18\x06 \x01(\t\x12 \n\x18matching_stream_sequence\x18\x07 \x01(\t\x12\x1c\n\x14stream_last_sequence\x18\x08 \x01(\t\x12\x0b\n\x03lag\x18\t \x01(\x03\x12\x0e\n\x06\x66\x61iled\x18\n \x01(\x08\x12\x17\n\x0f\x66\x61iled_sequence\x18\x0b \x01(\t\x12\x0f\n\x07\x66\x61ilure\x18\x0c \x01(\t\x12\x13\n\x0b\x65ntry_count\x18\r \x01(\x03\x12\x17\n\x0f\x65stimated_bytes\x18\x0e \x01(\x03\x12\x1b\n\x13\x61verage_entry_bytes\x18\x0f \x01(\x03\x12\x37\n\x07metrics\x18\x10 \x03(\x0b\x32&.chatto.admin.v1.AdminProjectionMetricB\x1b\n\x19_startup_duration_seconds\"C\n\x15\x41\x64minProjectionMetric\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x03\x12\r\n\x05\x62ytes\x18\x03 \x01(\x03*\xc0\x02\n\x17\x41\x64minAssetCleanupHealth\x12*\n&ADMIN_ASSET_CLEANUP_HEALTH_UNSPECIFIED\x10\x00\x12\'\n#ADMIN_ASSET_CLEANUP_HEALTH_INACTIVE\x10\x01\x12+\n\'ADMIN_ASSET_CLEANUP_HEALTH_INITIALIZING\x10\x02\x12&\n\"ADMIN_ASSET_CLEANUP_HEALTH_HEALTHY\x10\x03\x12\'\n#ADMIN_ASSET_CLEANUP_HEALTH_RETRYING\x10\x04\x12&\n\"ADMIN_ASSET_CLEANUP_HEALTH_STALLED\x10\x05\x12*\n&ADMIN_ASSET_CLEANUP_HEALTH_UNAVAILABLE\x10\x06\x32y\n\x17\x41\x64minDiagnosticsService\x12^\n\rGetSystemInfo\x12%.chatto.admin.v1.GetSystemInfoRequest\x1a&.chatto.admin.v1.GetSystemInfoResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n!chatto/admin/v1/diagnostics.proto\x12\x0f\x63hatto.admin.v1\"\x16\n\x14GetSystemInfoRequest\"\x8a\x01\n\x15GetSystemInfoResponse\x12\x35\n\x0bsystem_info\x18\x01 \x01(\x0b\x32 .chatto.admin.v1.AdminSystemInfo\x12:\n\x0bprojections\x18\x02 \x03(\x0b\x32%.chatto.admin.v1.AdminProjectionState\"\xe0\x01\n\x0f\x41\x64minSystemInfo\x12\x38\n\nconnection\x18\x01 \x01(\x0b\x32$.chatto.admin.v1.AdminConnectionInfo\x12\x32\n\x07\x61\x63\x63ount\x18\x02 \x01(\x0b\x32!.chatto.admin.v1.AdminAccountInfo\x12-\n\x04nats\x18\x03 \x01(\x0b\x32\x1f.chatto.admin.v1.AdminNatsStats\x12\x30\n\x05stats\x18\x04 \x01(\x0b\x32!.chatto.admin.v1.AdminServerStats\"\x83\x01\n\x13\x41\x64minConnectionInfo\x12\x11\n\tconnected\x18\x01 \x01(\x08\x12\x11\n\tserver_id\x18\x02 \x01(\t\x12\x13\n\x0bserver_name\x18\x03 \x01(\t\x12\x0f\n\x07version\x18\x04 \x01(\t\x12\x13\n\x0bmax_payload\x18\x05 \x01(\x03\x12\x0b\n\x03rtt\x18\x06 \x01(\t\"\xb0\x01\n\x10\x41\x64minAccountInfo\x12\x0e\n\x06memory\x18\x01 \x01(\x03\x12\x13\n\x0bmemory_used\x18\x02 \x01(\x03\x12\x0f\n\x07storage\x18\x03 \x01(\x03\x12\x14\n\x0cstorage_used\x18\x04 \x01(\x03\x12\x0f\n\x07streams\x18\x05 \x01(\x05\x12\x14\n\x0cstreams_used\x18\x06 \x01(\x05\x12\x11\n\tconsumers\x18\x07 \x01(\x05\x12\x16\n\x0e\x63onsumers_used\x18\x08 \x01(\x05\"Y\n\x10\x41\x64minServerStats\x12\x12\n\nuser_count\x18\x01 \x01(\x05\x12\x1a\n\x12\x63hannel_room_count\x18\x02 \x01(\x05\x12\x15\n\rdm_room_count\x18\x03 \x01(\x05\"\xea\x01\n\x0e\x41\x64minNatsStats\x12\x16\n\x0etotal_messages\x18\x01 \x01(\x03\x12\x13\n\x0btotal_bytes\x18\x02 \x01(\x03\x12\x1e\n\x16total_consumer_pending\x18\x03 \x01(\x03\x12\x19\n\x11total_ack_pending\x18\x04 \x01(\x05\x12\x35\n\x07streams\x18\x05 \x03(\x0b\x32$.chatto.admin.v1.AdminNatsStreamInfo\x12\x39\n\tconsumers\x18\x06 \x03(\x0b\x32&.chatto.admin.v1.AdminNatsConsumerInfo\"\xed\x01\n\x13\x41\x64minNatsStreamInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\x12\x10\n\x08subjects\x18\x03 \x03(\t\x12\x0f\n\x07storage\x18\x04 \x01(\t\x12\x10\n\x08messages\x18\x05 \x01(\x03\x12\r\n\x05\x62ytes\x18\x06 \x01(\x03\x12\x16\n\x0e\x66irst_sequence\x18\x07 \x01(\t\x12\x15\n\rlast_sequence\x18\x08 \x01(\t\x12\x16\n\x0e\x63onsumer_count\x18\t \x01(\x05\x12\x10\n\x08replicas\x18\n \x01(\x05\x12\x16\n\x0e\x63luster_leader\x18\x0b \x01(\t\"\x8f\x03\n\x15\x41\x64minNatsConsumerInfo\x12\x0e\n\x06stream\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0f\n\x07\x64urable\x18\x03 \x01(\t\x12\x16\n\x0e\x66ilter_subject\x18\x04 \x01(\t\x12\x17\n\x0f\x66ilter_subjects\x18\x05 \x03(\t\x12\x12\n\nack_policy\x18\x06 \x01(\t\x12\x12\n\npull_based\x18\x07 \x01(\x08\x12\x12\n\npush_bound\x18\x08 \x01(\x08\x12\x0f\n\x07pending\x18\t \x01(\x03\x12\x13\n\x0b\x61\x63k_pending\x18\n \x01(\x05\x12\x13\n\x0bredelivered\x18\x0b \x01(\x05\x12\x0f\n\x07waiting\x18\x0c \x01(\x05\x12#\n\x1b\x64\x65livered_consumer_sequence\x18\r \x01(\t\x12!\n\x19\x64\x65livered_stream_sequence\x18\x0e \x01(\t\x12#\n\x1b\x61\x63k_floor_consumer_sequence\x18\x0f \x01(\t\x12!\n\x19\x61\x63k_floor_stream_sequence\x18\x10 \x01(\t\"\xc2\x03\n\x14\x41\x64minProjectionState\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x10\n\x08subjects\x18\x03 \x03(\t\x12\x0f\n\x07started\x18\x04 \x01(\x08\x12%\n\x18startup_duration_seconds\x18\x05 \x01(\x01H\x00\x88\x01\x01\x12\x1d\n\x15last_applied_sequence\x18\x06 \x01(\t\x12 \n\x18matching_stream_sequence\x18\x07 \x01(\t\x12\x1c\n\x14stream_last_sequence\x18\x08 \x01(\t\x12\x0b\n\x03lag\x18\t \x01(\x03\x12\x0e\n\x06\x66\x61iled\x18\n \x01(\x08\x12\x17\n\x0f\x66\x61iled_sequence\x18\x0b \x01(\t\x12\x0f\n\x07\x66\x61ilure\x18\x0c \x01(\t\x12\x13\n\x0b\x65ntry_count\x18\r \x01(\x03\x12\x17\n\x0f\x65stimated_bytes\x18\x0e \x01(\x03\x12\x1b\n\x13\x61verage_entry_bytes\x18\x0f \x01(\x03\x12\x37\n\x07metrics\x18\x10 \x03(\x0b\x32&.chatto.admin.v1.AdminProjectionMetricB\x1b\n\x19_startup_duration_seconds\"C\n\x15\x41\x64minProjectionMetric\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x03\x12\r\n\x05\x62ytes\x18\x03 \x01(\x03\x32y\n\x17\x41\x64minDiagnosticsService\x12^\n\rGetSystemInfo\x12%.chatto.admin.v1.GetSystemInfoRequest\x1a&.chatto.admin.v1.GetSystemInfoResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'chatto.admin.v1.diagnostics_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_ADMINASSETCLEANUPHEALTH']._serialized_start=2792
-  _globals['_ADMINASSETCLEANUPHEALTH']._serialized_end=3112
-  _globals['_GETSYSTEMINFOREQUEST']._serialized_start=87
-  _globals['_GETSYSTEMINFOREQUEST']._serialized_end=109
-  _globals['_GETSYSTEMINFORESPONSE']._serialized_start=112
-  _globals['_GETSYSTEMINFORESPONSE']._serialized_end=315
-  _globals['_ADMINASSETCLEANUPSTATUS']._serialized_start=318
-  _globals['_ADMINASSETCLEANUPSTATUS']._serialized_end=757
-  _globals['_ADMINSYSTEMINFO']._serialized_start=760
-  _globals['_ADMINSYSTEMINFO']._serialized_end=984
-  _globals['_ADMINCONNECTIONINFO']._serialized_start=987
-  _globals['_ADMINCONNECTIONINFO']._serialized_end=1118
-  _globals['_ADMINACCOUNTINFO']._serialized_start=1121
-  _globals['_ADMINACCOUNTINFO']._serialized_end=1297
-  _globals['_ADMINSERVERSTATS']._serialized_start=1299
-  _globals['_ADMINSERVERSTATS']._serialized_end=1388
-  _globals['_ADMINNATSSTATS']._serialized_start=1391
-  _globals['_ADMINNATSSTATS']._serialized_end=1625
-  _globals['_ADMINNATSSTREAMINFO']._serialized_start=1628
-  _globals['_ADMINNATSSTREAMINFO']._serialized_end=1865
-  _globals['_ADMINNATSCONSUMERINFO']._serialized_start=1868
-  _globals['_ADMINNATSCONSUMERINFO']._serialized_end=2267
-  _globals['_ADMINPROJECTIONSTATE']._serialized_start=2270
-  _globals['_ADMINPROJECTIONSTATE']._serialized_end=2720
-  _globals['_ADMINPROJECTIONMETRIC']._serialized_start=2722
-  _globals['_ADMINPROJECTIONMETRIC']._serialized_end=2789
-  _globals['_ADMINDIAGNOSTICSSERVICE']._serialized_start=3114
-  _globals['_ADMINDIAGNOSTICSSERVICE']._serialized_end=3235
+  _globals['_GETSYSTEMINFOREQUEST']._serialized_start=54
+  _globals['_GETSYSTEMINFOREQUEST']._serialized_end=76
+  _globals['_GETSYSTEMINFORESPONSE']._serialized_start=79
+  _globals['_GETSYSTEMINFORESPONSE']._serialized_end=217
+  _globals['_ADMINSYSTEMINFO']._serialized_start=220
+  _globals['_ADMINSYSTEMINFO']._serialized_end=444
+  _globals['_ADMINCONNECTIONINFO']._serialized_start=447
+  _globals['_ADMINCONNECTIONINFO']._serialized_end=578
+  _globals['_ADMINACCOUNTINFO']._serialized_start=581
+  _globals['_ADMINACCOUNTINFO']._serialized_end=757
+  _globals['_ADMINSERVERSTATS']._serialized_start=759
+  _globals['_ADMINSERVERSTATS']._serialized_end=848
+  _globals['_ADMINNATSSTATS']._serialized_start=851
+  _globals['_ADMINNATSSTATS']._serialized_end=1085
+  _globals['_ADMINNATSSTREAMINFO']._serialized_start=1088
+  _globals['_ADMINNATSSTREAMINFO']._serialized_end=1325
+  _globals['_ADMINNATSCONSUMERINFO']._serialized_start=1328
+  _globals['_ADMINNATSCONSUMERINFO']._serialized_end=1727
+  _globals['_ADMINPROJECTIONSTATE']._serialized_start=1730
+  _globals['_ADMINPROJECTIONSTATE']._serialized_end=2180
+  _globals['_ADMINPROJECTIONMETRIC']._serialized_start=2182
+  _globals['_ADMINPROJECTIONMETRIC']._serialized_end=2249
+  _globals['_ADMINDIAGNOSTICSSERVICE']._serialized_start=2251
+  _globals['_ADMINDIAGNOSTICSSERVICE']._serialized_end=2372
 # @@protoc_insertion_point(module_scope)

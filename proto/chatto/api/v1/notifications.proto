@@ -6,7 +6,6 @@ import "buf/validate/validate.proto";
 import "chatto/api/v1/pagination.proto";
 import "chatto/api/v1/rooms.proto";
 import "chatto/api/v1/users.proto";
-import "google/protobuf/descriptor.proto";
 import "google/protobuf/timestamp.proto";
 
 // Direct-message notification payload.
@@ -218,9 +217,7 @@ service NotificationService {
   rpc HasNotifications(HasNotificationsRequest) returns (HasNotificationsResponse);
   // Dismisses one pending notification. Already-dismissed notifications are
   // treated as idempotent success.
-  rpc DismissNotification(DismissNotificationRequest) returns (DismissNotificationResponse) {
-    option idempotency_level = IDEMPOTENT;
-  }
+  rpc DismissNotification(DismissNotificationRequest) returns (DismissNotificationResponse);
   // Dismisses all pending notifications.
   rpc DismissAllNotifications(DismissAllNotificationsRequest) returns (DismissAllNotificationsResponse);
 }
