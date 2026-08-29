@@ -60,13 +60,14 @@ async def main() -> None:
         bot.on("presence", lambda e: on_presence(bot, e))
         bot.on("typing", lambda e: on_typing(bot, e))
 
-        # Get online and join the rooms we can see.
+        # Get online and join the rooms we can see, group by group (the way
+        # the UI's one-click "join group" works). Swap for selective joins if
+        # your bot should only be present in some rooms.
         await bot.set_presence(PresenceStatus.ONLINE)
-        for room in await bot.list_rooms():
-            room_id = room.room.id if room.room else ""
-            if room_id:
-                await bot.join_room(room_id)
-                print(f"joined {room_id}")
+        for group in await bot.list_room_groups():
+            joined = await bot.join_room_group(group.id)
+            if joined:
+                print(f"joined group {group.name!r}: {joined}")
 
         # Run until interrupted.
         stop = asyncio.Event()

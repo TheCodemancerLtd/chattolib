@@ -62,6 +62,7 @@ from chattolib.types import (
     Message,
     PresenceStatus,
     Room,
+    RoomGroup,
     RoomWithViewerState,
     User,
 )
@@ -334,9 +335,22 @@ class Bot:
 
     # -- verbs: messaging --------------------------------------------------
 
-    async def say(self, room_id: str, body: str = "") -> Message:
-        """Post a message to a room. Returns the created :class:`Message`."""
-        return await self._client.post_message(room_id, body)
+    async def say(self, room_id: str, body: str = "", *, join_if_needed: bool = True) -> Message:
+        """Post a message to a room. Returns the created :class:`Message`.
+
+        With ``join_if_needed`` (the default), the bot joins the room first if
+        it isn't already a member — so a bot that wants to be present
+        everywhere can simply ``await bot.say(room_id, ...)`` without a
+        separate join step. Pass ``join_if_needed=False`` to instead surface
+        the server's ``permission_denied`` if the bot can't post.
+        """
+        try:
+            return await self._client.post_message(room_id, body)
+        except ChattoError as exc:
+            if not join_if_needed or "not a member" not in str(exc):
+                raise
+            await self._client.join_room(room_id)
+            return await self._client.post_message(room_id, body)
 
     async def reply(
         self,
@@ -383,6 +397,49 @@ class Bot:
     async def join_room(self, room_id: str) -> Room:
         """Join a room. Returns the joined :class:`Room`."""
         return await self._client.join_room(room_id)
+
+    async def join_room_group(self, group_id: str) -> list[str]:
+        """Join **all** the rooms in a room group in one call.
+
+        Mirrors the Chatto UI's one-click "join group" action. Returns the
+        list of room IDs the bot is now a member of as a result.
+        """
+        return await self._client.join_room_group(group_id)
+
+    async def list_room_groups(self) -> list[RoomGroup]:
+        """List the room groups (and the rooms each contains) the bot can see."""
+        return await self._client.list_room_groups()
+
+    async def join_all_rooms(self) -> list[str]:
+        """Join every room the bot can see, grouped the way the UI does.
+
+        Joins each room group in one call (so a bot becomes a member of all
+        the rooms in a group at once), then joins any ungrouped rooms
+        individually. Returns the room IDs the bot is now a member of.
+        """
+        joined: list[str] = []
+        groups = await self.list_room_groups()
+        grouped_room_ids: set[str] = set()
+        for group in groups:
+            for rws in group.rooms:
+                if rws.room is not None:
+                    grouped_room_ids.add(rws.room.id)
+            try:
+                joined.extend(await self.join_room_group(group.id))
+            except ChattoError:
+                # A group the bot can't join is skipped, not fatal.
+                continue
+        # Rooms that are not part of any group.
+        for rws in await self.list_rooms():
+            if rws.room is None or rws.room.id in grouped_room_ids:
+                continue
+            if rws.viewer_state.is_member:
+                continue
+            try:
+                joined.append((await self.join_room(rws.room.id)).id)
+            except ChattoError:
+                continue
+        return joined
 
     async def leave_room(self, room_id: str) -> bool:
         """Leave a room."""

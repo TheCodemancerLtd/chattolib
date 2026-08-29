@@ -16,7 +16,7 @@ grant set.
 from chattolib.bot import Bot
 
 async with await Bot.login("cht_BK_...") as bot:
-    print(bot.login_name, bot.user.is_bot)   # 'felix_bot' True
+    print(bot.login_name, bot.user.is_bot)  # 'felix_bot' True
 ```
 
 `Bot.login` also accepts `base_url=` to target a self-hosted or preview
@@ -69,18 +69,21 @@ import asyncio
 from chattolib.bot import Bot, BotMessageEvent
 from chattolib.types import PresenceStatus
 
+
 async def on_message(event: BotMessageEvent) -> None:
     if event.is_mention:
         await event.bot.reply(event, f"you said: {event.body!r}")
+
 
 async def main() -> None:
     async with await Bot.login("cht_BK_...") as bot:
         bot.on("message", on_message)
         await bot.set_presence(PresenceStatus.ONLINE)
-        for room in await bot.list_rooms():
-            if room.room:
-                await bot.join_room(room.room.id)
-        await bot.run()   # blocks until the stream closes
+        # Be present everywhere: join every visible room, group by group.
+        # (Or join selectively — the policy is up to your bot.)
+        await bot.join_all_rooms()
+        await bot.run()  # blocks until the stream closes
+
 
 asyncio.run(main())
 ```
@@ -93,14 +96,17 @@ handlers for Ctrl-C.
 
 | Method | Wraps | Notes |
 |--------|-------|-------|
-| `await bot.say(room_id, body)` | `post_message` | post a plain message |
+| `await bot.say(room_id, body)` | `post_message` | post a plain message; auto-joins the room first if the bot isn't a member (pass `join_if_needed=False` to opt out) |
 | `await bot.reply(target, body)` | `post_message` | `target` is a `Message` or `BotMessageEvent`; threads to its room |
 | `await bot.react(room_id, event_id, emoji)` | `add_reaction` | |
 | `await bot.unreact(room_id, event_id, emoji)` | `remove_reaction` | |
 | `await bot.set_presence(status)` | `update_presence` | `ONLINE` / `AWAY` / `DO_NOT_DISTURB` |
 | `await bot.set_status(emoji, text)` | `update_custom_status` | |
 | `await bot.clear_status()` | `delete_custom_status` | |
-| `await bot.join_room(room_id)` | `join_room` | |
+| `await bot.join_room(room_id)` | `join_room` | join a single room |
+| `await bot.join_room_group(group_id)` | `join_room_group` | join **all** rooms in a group in one call (the UI's one-click group join) |
+| `await bot.list_room_groups()` | `list_room_groups` | the groups and the rooms each contains |
+| `await bot.join_all_rooms()` | `join_room_group` + `join_room` | join every visible room, group by group, then any ungrouped rooms |
 | `await bot.leave_room(room_id)` | `leave_room` | |
 | `await bot.create_room(name, group_id, ...)` | `create_room` | |
 | `await bot.list_rooms()` | `list_rooms` | rooms the bot is a member of |

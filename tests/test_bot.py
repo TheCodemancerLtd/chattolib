@@ -215,3 +215,129 @@ async def test_a_failing_handler_does_not_stop_the_loop():
     op.presences_replace.statuses["u1"] = presence_pb2.PresenceStatus.PRESENCE_STATUS_ONLINE
     await bot._handle_projection(_wrap_projection_event(frame))
     assert calls == [1]  # the good handler still ran after the bad one raised
+
+
+# --- group-aware joining & auto-join say() ------------------------------
+
+
+def _group_response(group_id: str, room_ids: list[str], *, member: bool = True):
+    from chattolib._pb.chatto.api.v1 import room_directory_pb2
+
+    resp = room_directory_pb2.ListRoomGroupsResponse()
+    g = resp.groups.add()
+    g.id = group_id
+    g.name = "Group " + group_id
+    for rid in room_ids:
+        item = g.items.add()
+        item.room.id = rid
+        item.viewer_state.is_member = member
+    return resp
+
+
+async def test_join_room_group():
+    bot = _bot()
+    from chattolib._pb.chatto.api.v1 import rooms_pb2
+
+    join_resp = rooms_pb2.JoinRoomGroupResponse()
+    join_resp.joined_room_ids.extend(["r1", "r2"])
+    m = _mock(bot.client, "rooms", "join_room_group", join_resp)
+
+    joined = await bot.join_room_group("g1")
+    assert joined == ["r1", "r2"]
+    m.assert_awaited_once()
+
+
+async def test_join_all_rooms_groups_then_ungrouped():
+    bot = _bot()
+    from chattolib._pb.chatto.api.v1 import room_directory_pb2, rooms_pb2
+
+    # Two groups: g1 has r1,r2 (already members), g2 has r3 (not a member).
+    groups_resp = room_directory_pb2.ListRoomGroupsResponse()
+    g1 = groups_resp.groups.add()
+    g1.id = "g1"
+    for rid in ("r1", "r2"):
+        it = g1.items.add()
+        it.room.room.id = rid
+        it.room.viewer_state.is_member = True
+    g2 = groups_resp.groups.add()
+    g2.id = "g2"
+    it = g2.items.add()
+    it.room.room.id = "r3"
+    it.room.viewer_state.is_member = False
+    _mock(bot.client, "room_directory", "list_room_groups", groups_resp)
+
+    # join_room_group: g1 no-op, g2 joins r3.
+    jg = rooms_pb2.JoinRoomGroupResponse()
+    jg.joined_room_ids.extend(["r3"])
+    bot.client.join_room_group = AsyncMock(return_value=["r3"])  # type: ignore[method-assign]
+
+    # list_rooms returns the ungrouped room r4 (not a member) plus the group rooms.
+    rooms_resp = room_directory_pb2.ListRoomsResponse()
+    for rid, member in (("r1", True), ("r2", True), ("r3", True), ("r4", False)):
+        row = rooms_resp.rooms.add()
+        row.room.id = rid
+        row.viewer_state.is_member = member
+    _mock(bot.client, "room_directory", "list_rooms", rooms_resp)
+
+    # r4 is ungrouped and not a member -> join_room is called for it.
+    from chattolib.types import Room
+
+    async def fake_join_room(room_id):
+        return Room(id=room_id)
+
+    bot.client.join_room = fake_join_room  # type: ignore[method-assign]
+
+    joined = await bot.join_all_rooms()
+    # r3 from the group join + r4 from the individual join.
+    assert "r3" in joined and "r4" in joined
+    assert fake_join_room is bot.client.join_room
+
+
+async def test_say_auto_joins_when_not_member():
+    bot = _bot()
+    from chattolib._pb.chatto.api.v1 import messages_pb2, rooms_pb2
+    from chattolib.exceptions import ChattoConnectError
+
+    post = messages_pb2.CreateMessageResponse()
+    post.message.id = "e1"
+    post.message.room_id = "r1"
+    post.message.body = "hi"
+
+    state = {"joined": False}
+
+    async def fake_post(room_id, body, **kwargs):
+        if not state["joined"]:
+            raise ChattoConnectError("permission_denied", "not a member of this room")
+        return post.message
+
+    bot.client.post_message = fake_post  # type: ignore[method-assign]
+    join_resp = rooms_pb2.JoinRoomResponse()
+    join_resp.room.id = "r1"
+
+    async def fake_join(room_id):
+        state["joined"] = True  # joining makes the subsequent post succeed
+        return join_resp.room
+
+    bot.client.join_room = fake_join  # type: ignore[method-assign]
+
+    msg = await bot.say("r1", "hi")
+    assert msg.id == "e1"
+    assert state["joined"] is True
+
+
+async def test_say_no_join_when_disabled():
+    bot = _bot()
+    from chattolib.exceptions import ChattoConnectError
+
+    async def deny(room_id, body, **kwargs):
+        raise ChattoConnectError("permission_denied", "not a member of this room")
+
+    bot.client.post_message = deny  # type: ignore[method-assign]
+    bot.client.join_room = AsyncMock()  # type: ignore[method-assign]
+
+    try:
+        await bot.say("r1", "hi", join_if_needed=False)
+        raise AssertionError("expected ChattoConnectError to propagate")
+    except ChattoConnectError:
+        pass
+    bot.client.join_room.assert_not_awaited()
