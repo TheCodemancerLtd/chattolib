@@ -63,7 +63,7 @@ echo "Fetching proto sources ..."
 for f in \
     account.proto attachments.proto asset_uploads.proto common.proto \
     external_identities.proto link_previews.proto member_directory.proto \
-    messages.proto message_types.proto notification_preferences.proto \
+    messages.proto message_types.proto \
     notifications.proto pagination.proto permissions.proto presence.proto \
     push_notifications.proto reactions.proto read_state.proto \
     room_directory.proto rooms.proto room_timeline.proto roles.proto \

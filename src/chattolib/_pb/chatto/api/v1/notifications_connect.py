@@ -17,28 +17,31 @@ import chatto.api.v1.notifications_pb2 as chatto_dot_api_dot_v1_dot_notification
 
 
 class NotificationService(Protocol):
-    async def list_notifications(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationsRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationsResponse:
+    async def get_notification_occurrence(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationOccurrenceRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationOccurrenceResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
-    async def get_notification(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationResponse:
+    async def batch_get_notification_occurrences(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationOccurrencesRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationOccurrencesResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
-    async def batch_get_notifications(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationsRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationsResponse:
+    async def list_notification_occurrences(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationOccurrencesRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationOccurrencesResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
-    async def list_room_notifications(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationsRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationsResponse:
+    async def mark_notification_read(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.MarkNotificationReadRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.MarkNotificationReadResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
-    async def list_room_notification_counts(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationCountsRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationCountsResponse:
+    async def delete_notification_occurrence(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteNotificationOccurrenceRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteNotificationOccurrenceResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
-    async def has_notifications(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.HasNotificationsRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.HasNotificationsResponse:
+    async def batch_delete_notification_occurrences(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.BatchDeleteNotificationOccurrencesRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.BatchDeleteNotificationOccurrencesResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
-    async def dismiss_notification(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.DismissNotificationRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.DismissNotificationResponse:
+    async def delete_all_notification_occurrences(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteAllNotificationOccurrencesRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteAllNotificationOccurrencesResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
-    async def dismiss_all_notifications(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.DismissAllNotificationsRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.DismissAllNotificationsResponse:
+    async def get_notification_policy(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationPolicyRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationPolicyResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def update_notification_policy(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.UpdateNotificationPolicyRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.UpdateNotificationPolicyResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
 
@@ -47,85 +50,95 @@ class NotificationServiceASGIApplication(ConnectASGIApplication[NotificationServ
         super().__init__(
             service=service,
             endpoints=lambda svc: {
-                "/chatto.api.v1.NotificationService/ListNotifications": Endpoint.unary(
+                "/chatto.api.v1.NotificationService/GetNotificationOccurrence": Endpoint.unary(
                     method=MethodInfo(
-                        name="ListNotifications",
+                        name="GetNotificationOccurrence",
                         service_name="chatto.api.v1.NotificationService",
-                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationsRequest,
-                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationsResponse,
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationOccurrenceRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationOccurrenceResponse,
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
-                    function=svc.list_notifications,
+                    function=svc.get_notification_occurrence,
                 ),
-                "/chatto.api.v1.NotificationService/GetNotification": Endpoint.unary(
+                "/chatto.api.v1.NotificationService/BatchGetNotificationOccurrences": Endpoint.unary(
                     method=MethodInfo(
-                        name="GetNotification",
+                        name="BatchGetNotificationOccurrences",
                         service_name="chatto.api.v1.NotificationService",
-                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationRequest,
-                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationResponse,
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationOccurrencesRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationOccurrencesResponse,
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
-                    function=svc.get_notification,
+                    function=svc.batch_get_notification_occurrences,
                 ),
-                "/chatto.api.v1.NotificationService/BatchGetNotifications": Endpoint.unary(
+                "/chatto.api.v1.NotificationService/ListNotificationOccurrences": Endpoint.unary(
                     method=MethodInfo(
-                        name="BatchGetNotifications",
+                        name="ListNotificationOccurrences",
                         service_name="chatto.api.v1.NotificationService",
-                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationsRequest,
-                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationsResponse,
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationOccurrencesRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationOccurrencesResponse,
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
-                    function=svc.batch_get_notifications,
+                    function=svc.list_notification_occurrences,
                 ),
-                "/chatto.api.v1.NotificationService/ListRoomNotifications": Endpoint.unary(
+                "/chatto.api.v1.NotificationService/MarkNotificationRead": Endpoint.unary(
                     method=MethodInfo(
-                        name="ListRoomNotifications",
+                        name="MarkNotificationRead",
                         service_name="chatto.api.v1.NotificationService",
-                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationsRequest,
-                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationsResponse,
-                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.MarkNotificationReadRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.MarkNotificationReadResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
                     ),
-                    function=svc.list_room_notifications,
+                    function=svc.mark_notification_read,
                 ),
-                "/chatto.api.v1.NotificationService/ListRoomNotificationCounts": Endpoint.unary(
+                "/chatto.api.v1.NotificationService/DeleteNotificationOccurrence": Endpoint.unary(
                     method=MethodInfo(
-                        name="ListRoomNotificationCounts",
+                        name="DeleteNotificationOccurrence",
                         service_name="chatto.api.v1.NotificationService",
-                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationCountsRequest,
-                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationCountsResponse,
-                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteNotificationOccurrenceRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteNotificationOccurrenceResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
                     ),
-                    function=svc.list_room_notification_counts,
+                    function=svc.delete_notification_occurrence,
                 ),
-                "/chatto.api.v1.NotificationService/HasNotifications": Endpoint.unary(
+                "/chatto.api.v1.NotificationService/BatchDeleteNotificationOccurrences": Endpoint.unary(
                     method=MethodInfo(
-                        name="HasNotifications",
+                        name="BatchDeleteNotificationOccurrences",
                         service_name="chatto.api.v1.NotificationService",
-                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.HasNotificationsRequest,
-                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.HasNotificationsResponse,
-                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchDeleteNotificationOccurrencesRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchDeleteNotificationOccurrencesResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
                     ),
-                    function=svc.has_notifications,
+                    function=svc.batch_delete_notification_occurrences,
                 ),
-                "/chatto.api.v1.NotificationService/DismissNotification": Endpoint.unary(
+                "/chatto.api.v1.NotificationService/DeleteAllNotificationOccurrences": Endpoint.unary(
                     method=MethodInfo(
-                        name="DismissNotification",
+                        name="DeleteAllNotificationOccurrences",
                         service_name="chatto.api.v1.NotificationService",
-                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.DismissNotificationRequest,
-                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.DismissNotificationResponse,
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteAllNotificationOccurrencesRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteAllNotificationOccurrencesResponse,
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
-                    function=svc.dismiss_notification,
+                    function=svc.delete_all_notification_occurrences,
                 ),
-                "/chatto.api.v1.NotificationService/DismissAllNotifications": Endpoint.unary(
+                "/chatto.api.v1.NotificationService/GetNotificationPolicy": Endpoint.unary(
                     method=MethodInfo(
-                        name="DismissAllNotifications",
+                        name="GetNotificationPolicy",
                         service_name="chatto.api.v1.NotificationService",
-                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.DismissAllNotificationsRequest,
-                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.DismissAllNotificationsResponse,
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationPolicyRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationPolicyResponse,
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
-                    function=svc.dismiss_all_notifications,
+                    function=svc.get_notification_policy,
+                ),
+                "/chatto.api.v1.NotificationService/UpdateNotificationPolicy": Endpoint.unary(
+                    method=MethodInfo(
+                        name="UpdateNotificationPolicy",
+                        service_name="chatto.api.v1.NotificationService",
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.UpdateNotificationPolicyRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.UpdateNotificationPolicyResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
+                    ),
+                    function=svc.update_notification_policy,
                 ),
             },
             interceptors=interceptors,
@@ -140,161 +153,302 @@ class NotificationServiceASGIApplication(ConnectASGIApplication[NotificationServ
 
 
 class NotificationServiceClient(ConnectClient):
-    async def list_notifications(
+    async def get_notification_occurrence(
         self,
-        request: chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationsRequest,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationOccurrenceRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationsResponse:
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationOccurrenceResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="ListNotifications",
+                name="GetNotificationOccurrence",
                 service_name="chatto.api.v1.NotificationService",
-                input=chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationsRequest,
-                output=chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationsResponse,
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationOccurrenceRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationOccurrenceResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
             timeout_ms=timeout_ms,
         )
 
-    async def get_notification(
+    async def batch_get_notification_occurrences(
         self,
-        request: chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationRequest,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationOccurrencesRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationResponse:
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationOccurrencesResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="GetNotification",
+                name="BatchGetNotificationOccurrences",
                 service_name="chatto.api.v1.NotificationService",
-                input=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationRequest,
-                output=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationResponse,
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationOccurrencesRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationOccurrencesResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
             timeout_ms=timeout_ms,
         )
 
-    async def batch_get_notifications(
+    async def list_notification_occurrences(
         self,
-        request: chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationsRequest,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationOccurrencesRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationsResponse:
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationOccurrencesResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="BatchGetNotifications",
+                name="ListNotificationOccurrences",
                 service_name="chatto.api.v1.NotificationService",
-                input=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationsRequest,
-                output=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationsResponse,
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationOccurrencesRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationOccurrencesResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
             timeout_ms=timeout_ms,
         )
 
-    async def list_room_notifications(
+    async def mark_notification_read(
         self,
-        request: chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationsRequest,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.MarkNotificationReadRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationsResponse:
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.MarkNotificationReadResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="ListRoomNotifications",
+                name="MarkNotificationRead",
                 service_name="chatto.api.v1.NotificationService",
-                input=chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationsRequest,
-                output=chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationsResponse,
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.MarkNotificationReadRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.MarkNotificationReadResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def delete_notification_occurrence(
+        self,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteNotificationOccurrenceRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteNotificationOccurrenceResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="DeleteNotificationOccurrence",
+                service_name="chatto.api.v1.NotificationService",
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteNotificationOccurrenceRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteNotificationOccurrenceResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def batch_delete_notification_occurrences(
+        self,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.BatchDeleteNotificationOccurrencesRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.BatchDeleteNotificationOccurrencesResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="BatchDeleteNotificationOccurrences",
+                service_name="chatto.api.v1.NotificationService",
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchDeleteNotificationOccurrencesRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchDeleteNotificationOccurrencesResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def delete_all_notification_occurrences(
+        self,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteAllNotificationOccurrencesRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteAllNotificationOccurrencesResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="DeleteAllNotificationOccurrences",
+                service_name="chatto.api.v1.NotificationService",
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteAllNotificationOccurrencesRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteAllNotificationOccurrencesResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
             timeout_ms=timeout_ms,
         )
 
-    async def list_room_notification_counts(
+    async def get_notification_policy(
         self,
-        request: chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationCountsRequest,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationPolicyRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationCountsResponse:
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationPolicyResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="ListRoomNotificationCounts",
+                name="GetNotificationPolicy",
                 service_name="chatto.api.v1.NotificationService",
-                input=chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationCountsRequest,
-                output=chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationCountsResponse,
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationPolicyRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationPolicyResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
             timeout_ms=timeout_ms,
         )
 
-    async def has_notifications(
+    async def update_notification_policy(
         self,
-        request: chatto_dot_api_dot_v1_dot_notifications__pb2.HasNotificationsRequest,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.UpdateNotificationPolicyRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.HasNotificationsResponse:
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.UpdateNotificationPolicyResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="HasNotifications",
+                name="UpdateNotificationPolicy",
                 service_name="chatto.api.v1.NotificationService",
-                input=chatto_dot_api_dot_v1_dot_notifications__pb2.HasNotificationsRequest,
-                output=chatto_dot_api_dot_v1_dot_notifications__pb2.HasNotificationsResponse,
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.UpdateNotificationPolicyRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.UpdateNotificationPolicyResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+
+
+class NotificationPolicyService(Protocol):
+    async def get_notification_policy(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceGetNotificationPolicyRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceGetNotificationPolicyResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def batch_get_notification_policies(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationPoliciesRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationPoliciesResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def update_notification_policy(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceUpdateNotificationPolicyRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceUpdateNotificationPolicyResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+
+class NotificationPolicyServiceASGIApplication(ConnectASGIApplication[NotificationPolicyService]):
+    def __init__(self, service: NotificationPolicyService | AsyncGenerator[NotificationPolicyService], *, interceptors: Iterable[Interceptor]=(), read_max_bytes: int | None = None, compressions: Iterable[Compression] | None = None) -> None:
+        super().__init__(
+            service=service,
+            endpoints=lambda svc: {
+                "/chatto.api.v1.NotificationPolicyService/GetNotificationPolicy": Endpoint.unary(
+                    method=MethodInfo(
+                        name="GetNotificationPolicy",
+                        service_name="chatto.api.v1.NotificationPolicyService",
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceGetNotificationPolicyRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceGetNotificationPolicyResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.get_notification_policy,
+                ),
+                "/chatto.api.v1.NotificationPolicyService/BatchGetNotificationPolicies": Endpoint.unary(
+                    method=MethodInfo(
+                        name="BatchGetNotificationPolicies",
+                        service_name="chatto.api.v1.NotificationPolicyService",
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationPoliciesRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationPoliciesResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.batch_get_notification_policies,
+                ),
+                "/chatto.api.v1.NotificationPolicyService/UpdateNotificationPolicy": Endpoint.unary(
+                    method=MethodInfo(
+                        name="UpdateNotificationPolicy",
+                        service_name="chatto.api.v1.NotificationPolicyService",
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceUpdateNotificationPolicyRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceUpdateNotificationPolicyResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
+                    ),
+                    function=svc.update_notification_policy,
+                ),
+            },
+            interceptors=interceptors,
+            read_max_bytes=read_max_bytes,
+            compressions=compressions,
+        )
+
+    @property
+    def path(self) -> str:
+        """Returns the URL path to mount the application to when serving multiple applications."""
+        return "/chatto.api.v1.NotificationPolicyService"
+
+
+class NotificationPolicyServiceClient(ConnectClient):
+    async def get_notification_policy(
+        self,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceGetNotificationPolicyRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceGetNotificationPolicyResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetNotificationPolicy",
+                service_name="chatto.api.v1.NotificationPolicyService",
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceGetNotificationPolicyRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceGetNotificationPolicyResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
             timeout_ms=timeout_ms,
         )
 
-    async def dismiss_notification(
+    async def batch_get_notification_policies(
         self,
-        request: chatto_dot_api_dot_v1_dot_notifications__pb2.DismissNotificationRequest,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationPoliciesRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.DismissNotificationResponse:
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationPoliciesResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="DismissNotification",
-                service_name="chatto.api.v1.NotificationService",
-                input=chatto_dot_api_dot_v1_dot_notifications__pb2.DismissNotificationRequest,
-                output=chatto_dot_api_dot_v1_dot_notifications__pb2.DismissNotificationResponse,
+                name="BatchGetNotificationPolicies",
+                service_name="chatto.api.v1.NotificationPolicyService",
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationPoliciesRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationPoliciesResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
             timeout_ms=timeout_ms,
         )
 
-    async def dismiss_all_notifications(
+    async def update_notification_policy(
         self,
-        request: chatto_dot_api_dot_v1_dot_notifications__pb2.DismissAllNotificationsRequest,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceUpdateNotificationPolicyRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.DismissAllNotificationsResponse:
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceUpdateNotificationPolicyResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="DismissAllNotifications",
-                service_name="chatto.api.v1.NotificationService",
-                input=chatto_dot_api_dot_v1_dot_notifications__pb2.DismissAllNotificationsRequest,
-                output=chatto_dot_api_dot_v1_dot_notifications__pb2.DismissAllNotificationsResponse,
-                idempotency_level=IdempotencyLevel.UNKNOWN,
+                name="UpdateNotificationPolicy",
+                service_name="chatto.api.v1.NotificationPolicyService",
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceUpdateNotificationPolicyRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceUpdateNotificationPolicyResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
             ),
             headers=headers,
             timeout_ms=timeout_ms,
@@ -302,21 +456,23 @@ class NotificationServiceClient(ConnectClient):
 
 
 class NotificationServiceSync(Protocol):
-    def list_notifications(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationsRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationsResponse:
+    def get_notification_occurrence(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationOccurrenceRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationOccurrenceResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-    def get_notification(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationResponse:
+    def batch_get_notification_occurrences(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationOccurrencesRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationOccurrencesResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-    def batch_get_notifications(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationsRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationsResponse:
+    def list_notification_occurrences(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationOccurrencesRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationOccurrencesResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-    def list_room_notifications(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationsRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationsResponse:
+    def mark_notification_read(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.MarkNotificationReadRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.MarkNotificationReadResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-    def list_room_notification_counts(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationCountsRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationCountsResponse:
+    def delete_notification_occurrence(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteNotificationOccurrenceRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteNotificationOccurrenceResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-    def has_notifications(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.HasNotificationsRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.HasNotificationsResponse:
+    def batch_delete_notification_occurrences(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.BatchDeleteNotificationOccurrencesRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.BatchDeleteNotificationOccurrencesResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-    def dismiss_notification(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.DismissNotificationRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.DismissNotificationResponse:
+    def delete_all_notification_occurrences(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteAllNotificationOccurrencesRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteAllNotificationOccurrencesResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
-    def dismiss_all_notifications(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.DismissAllNotificationsRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.DismissAllNotificationsResponse:
+    def get_notification_policy(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationPolicyRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationPolicyResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def update_notification_policy(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.UpdateNotificationPolicyRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.UpdateNotificationPolicyResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
 
@@ -324,85 +480,95 @@ class NotificationServiceWSGIApplication(ConnectWSGIApplication):
     def __init__(self, service: NotificationServiceSync, interceptors: Iterable[InterceptorSync]=(), read_max_bytes: int | None = None, compressions: Iterable[Compression] | None = None) -> None:
         super().__init__(
             endpoints={
-                "/chatto.api.v1.NotificationService/ListNotifications": EndpointSync.unary(
+                "/chatto.api.v1.NotificationService/GetNotificationOccurrence": EndpointSync.unary(
                     method=MethodInfo(
-                        name="ListNotifications",
+                        name="GetNotificationOccurrence",
                         service_name="chatto.api.v1.NotificationService",
-                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationsRequest,
-                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationsResponse,
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationOccurrenceRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationOccurrenceResponse,
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
-                    function=service.list_notifications,
+                    function=service.get_notification_occurrence,
                 ),
-                "/chatto.api.v1.NotificationService/GetNotification": EndpointSync.unary(
+                "/chatto.api.v1.NotificationService/BatchGetNotificationOccurrences": EndpointSync.unary(
                     method=MethodInfo(
-                        name="GetNotification",
+                        name="BatchGetNotificationOccurrences",
                         service_name="chatto.api.v1.NotificationService",
-                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationRequest,
-                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationResponse,
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationOccurrencesRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationOccurrencesResponse,
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
-                    function=service.get_notification,
+                    function=service.batch_get_notification_occurrences,
                 ),
-                "/chatto.api.v1.NotificationService/BatchGetNotifications": EndpointSync.unary(
+                "/chatto.api.v1.NotificationService/ListNotificationOccurrences": EndpointSync.unary(
                     method=MethodInfo(
-                        name="BatchGetNotifications",
+                        name="ListNotificationOccurrences",
                         service_name="chatto.api.v1.NotificationService",
-                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationsRequest,
-                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationsResponse,
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationOccurrencesRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationOccurrencesResponse,
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
-                    function=service.batch_get_notifications,
+                    function=service.list_notification_occurrences,
                 ),
-                "/chatto.api.v1.NotificationService/ListRoomNotifications": EndpointSync.unary(
+                "/chatto.api.v1.NotificationService/MarkNotificationRead": EndpointSync.unary(
                     method=MethodInfo(
-                        name="ListRoomNotifications",
+                        name="MarkNotificationRead",
                         service_name="chatto.api.v1.NotificationService",
-                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationsRequest,
-                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationsResponse,
-                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.MarkNotificationReadRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.MarkNotificationReadResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
                     ),
-                    function=service.list_room_notifications,
+                    function=service.mark_notification_read,
                 ),
-                "/chatto.api.v1.NotificationService/ListRoomNotificationCounts": EndpointSync.unary(
+                "/chatto.api.v1.NotificationService/DeleteNotificationOccurrence": EndpointSync.unary(
                     method=MethodInfo(
-                        name="ListRoomNotificationCounts",
+                        name="DeleteNotificationOccurrence",
                         service_name="chatto.api.v1.NotificationService",
-                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationCountsRequest,
-                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationCountsResponse,
-                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteNotificationOccurrenceRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteNotificationOccurrenceResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
                     ),
-                    function=service.list_room_notification_counts,
+                    function=service.delete_notification_occurrence,
                 ),
-                "/chatto.api.v1.NotificationService/HasNotifications": EndpointSync.unary(
+                "/chatto.api.v1.NotificationService/BatchDeleteNotificationOccurrences": EndpointSync.unary(
                     method=MethodInfo(
-                        name="HasNotifications",
+                        name="BatchDeleteNotificationOccurrences",
                         service_name="chatto.api.v1.NotificationService",
-                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.HasNotificationsRequest,
-                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.HasNotificationsResponse,
-                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchDeleteNotificationOccurrencesRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchDeleteNotificationOccurrencesResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
                     ),
-                    function=service.has_notifications,
+                    function=service.batch_delete_notification_occurrences,
                 ),
-                "/chatto.api.v1.NotificationService/DismissNotification": EndpointSync.unary(
+                "/chatto.api.v1.NotificationService/DeleteAllNotificationOccurrences": EndpointSync.unary(
                     method=MethodInfo(
-                        name="DismissNotification",
+                        name="DeleteAllNotificationOccurrences",
                         service_name="chatto.api.v1.NotificationService",
-                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.DismissNotificationRequest,
-                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.DismissNotificationResponse,
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteAllNotificationOccurrencesRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteAllNotificationOccurrencesResponse,
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
-                    function=service.dismiss_notification,
+                    function=service.delete_all_notification_occurrences,
                 ),
-                "/chatto.api.v1.NotificationService/DismissAllNotifications": EndpointSync.unary(
+                "/chatto.api.v1.NotificationService/GetNotificationPolicy": EndpointSync.unary(
                     method=MethodInfo(
-                        name="DismissAllNotifications",
+                        name="GetNotificationPolicy",
                         service_name="chatto.api.v1.NotificationService",
-                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.DismissAllNotificationsRequest,
-                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.DismissAllNotificationsResponse,
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationPolicyRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationPolicyResponse,
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
-                    function=service.dismiss_all_notifications,
+                    function=service.get_notification_policy,
+                ),
+                "/chatto.api.v1.NotificationService/UpdateNotificationPolicy": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="UpdateNotificationPolicy",
+                        service_name="chatto.api.v1.NotificationService",
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.UpdateNotificationPolicyRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.UpdateNotificationPolicyResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
+                    ),
+                    function=service.update_notification_policy,
                 ),
             },
             interceptors=interceptors,
@@ -417,161 +583,297 @@ class NotificationServiceWSGIApplication(ConnectWSGIApplication):
 
 
 class NotificationServiceClientSync(ConnectClientSync):
-    def list_notifications(
+    def get_notification_occurrence(
         self,
-        request: chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationsRequest,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationOccurrenceRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationsResponse:
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationOccurrenceResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="ListNotifications",
+                name="GetNotificationOccurrence",
                 service_name="chatto.api.v1.NotificationService",
-                input=chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationsRequest,
-                output=chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationsResponse,
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationOccurrenceRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationOccurrenceResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
             timeout_ms=timeout_ms,
         )
 
-    def get_notification(
+    def batch_get_notification_occurrences(
         self,
-        request: chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationRequest,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationOccurrencesRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationResponse:
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationOccurrencesResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="GetNotification",
+                name="BatchGetNotificationOccurrences",
                 service_name="chatto.api.v1.NotificationService",
-                input=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationRequest,
-                output=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationResponse,
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationOccurrencesRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationOccurrencesResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
             timeout_ms=timeout_ms,
         )
 
-    def batch_get_notifications(
+    def list_notification_occurrences(
         self,
-        request: chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationsRequest,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationOccurrencesRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationsResponse:
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationOccurrencesResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="BatchGetNotifications",
+                name="ListNotificationOccurrences",
                 service_name="chatto.api.v1.NotificationService",
-                input=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationsRequest,
-                output=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationsResponse,
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationOccurrencesRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.ListNotificationOccurrencesResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
             timeout_ms=timeout_ms,
         )
 
-    def list_room_notifications(
+    def mark_notification_read(
         self,
-        request: chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationsRequest,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.MarkNotificationReadRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationsResponse:
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.MarkNotificationReadResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="ListRoomNotifications",
+                name="MarkNotificationRead",
                 service_name="chatto.api.v1.NotificationService",
-                input=chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationsRequest,
-                output=chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationsResponse,
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.MarkNotificationReadRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.MarkNotificationReadResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def delete_notification_occurrence(
+        self,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteNotificationOccurrenceRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteNotificationOccurrenceResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="DeleteNotificationOccurrence",
+                service_name="chatto.api.v1.NotificationService",
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteNotificationOccurrenceRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteNotificationOccurrenceResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def batch_delete_notification_occurrences(
+        self,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.BatchDeleteNotificationOccurrencesRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.BatchDeleteNotificationOccurrencesResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="BatchDeleteNotificationOccurrences",
+                service_name="chatto.api.v1.NotificationService",
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchDeleteNotificationOccurrencesRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchDeleteNotificationOccurrencesResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def delete_all_notification_occurrences(
+        self,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteAllNotificationOccurrencesRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteAllNotificationOccurrencesResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="DeleteAllNotificationOccurrences",
+                service_name="chatto.api.v1.NotificationService",
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteAllNotificationOccurrencesRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.DeleteAllNotificationOccurrencesResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
             timeout_ms=timeout_ms,
         )
 
-    def list_room_notification_counts(
+    def get_notification_policy(
         self,
-        request: chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationCountsRequest,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationPolicyRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationCountsResponse:
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationPolicyResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="ListRoomNotificationCounts",
+                name="GetNotificationPolicy",
                 service_name="chatto.api.v1.NotificationService",
-                input=chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationCountsRequest,
-                output=chatto_dot_api_dot_v1_dot_notifications__pb2.ListRoomNotificationCountsResponse,
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationPolicyRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.GetNotificationPolicyResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
             timeout_ms=timeout_ms,
         )
 
-    def has_notifications(
+    def update_notification_policy(
         self,
-        request: chatto_dot_api_dot_v1_dot_notifications__pb2.HasNotificationsRequest,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.UpdateNotificationPolicyRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.HasNotificationsResponse:
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.UpdateNotificationPolicyResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="HasNotifications",
+                name="UpdateNotificationPolicy",
                 service_name="chatto.api.v1.NotificationService",
-                input=chatto_dot_api_dot_v1_dot_notifications__pb2.HasNotificationsRequest,
-                output=chatto_dot_api_dot_v1_dot_notifications__pb2.HasNotificationsResponse,
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.UpdateNotificationPolicyRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.UpdateNotificationPolicyResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+class NotificationPolicyServiceSync(Protocol):
+    def get_notification_policy(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceGetNotificationPolicyRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceGetNotificationPolicyResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def batch_get_notification_policies(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationPoliciesRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationPoliciesResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def update_notification_policy(self, request: chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceUpdateNotificationPolicyRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceUpdateNotificationPolicyResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+
+class NotificationPolicyServiceWSGIApplication(ConnectWSGIApplication):
+    def __init__(self, service: NotificationPolicyServiceSync, interceptors: Iterable[InterceptorSync]=(), read_max_bytes: int | None = None, compressions: Iterable[Compression] | None = None) -> None:
+        super().__init__(
+            endpoints={
+                "/chatto.api.v1.NotificationPolicyService/GetNotificationPolicy": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="GetNotificationPolicy",
+                        service_name="chatto.api.v1.NotificationPolicyService",
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceGetNotificationPolicyRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceGetNotificationPolicyResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.get_notification_policy,
+                ),
+                "/chatto.api.v1.NotificationPolicyService/BatchGetNotificationPolicies": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="BatchGetNotificationPolicies",
+                        service_name="chatto.api.v1.NotificationPolicyService",
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationPoliciesRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationPoliciesResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.batch_get_notification_policies,
+                ),
+                "/chatto.api.v1.NotificationPolicyService/UpdateNotificationPolicy": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="UpdateNotificationPolicy",
+                        service_name="chatto.api.v1.NotificationPolicyService",
+                        input=chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceUpdateNotificationPolicyRequest,
+                        output=chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceUpdateNotificationPolicyResponse,
+                        idempotency_level=IdempotencyLevel.IDEMPOTENT,
+                    ),
+                    function=service.update_notification_policy,
+                ),
+            },
+            interceptors=interceptors,
+            read_max_bytes=read_max_bytes,
+            compressions=compressions,
+        )
+
+    @property
+    def path(self) -> str:
+        """Returns the URL path to mount the application to when serving multiple applications."""
+        return "/chatto.api.v1.NotificationPolicyService"
+
+
+class NotificationPolicyServiceClientSync(ConnectClientSync):
+    def get_notification_policy(
+        self,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceGetNotificationPolicyRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceGetNotificationPolicyResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetNotificationPolicy",
+                service_name="chatto.api.v1.NotificationPolicyService",
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceGetNotificationPolicyRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceGetNotificationPolicyResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
             timeout_ms=timeout_ms,
         )
 
-    def dismiss_notification(
+    def batch_get_notification_policies(
         self,
-        request: chatto_dot_api_dot_v1_dot_notifications__pb2.DismissNotificationRequest,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationPoliciesRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.DismissNotificationResponse:
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationPoliciesResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="DismissNotification",
-                service_name="chatto.api.v1.NotificationService",
-                input=chatto_dot_api_dot_v1_dot_notifications__pb2.DismissNotificationRequest,
-                output=chatto_dot_api_dot_v1_dot_notifications__pb2.DismissNotificationResponse,
+                name="BatchGetNotificationPolicies",
+                service_name="chatto.api.v1.NotificationPolicyService",
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationPoliciesRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.BatchGetNotificationPoliciesResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
             timeout_ms=timeout_ms,
         )
 
-    def dismiss_all_notifications(
+    def update_notification_policy(
         self,
-        request: chatto_dot_api_dot_v1_dot_notifications__pb2.DismissAllNotificationsRequest,
+        request: chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceUpdateNotificationPolicyRequest,
         *,
         headers: Headers | Mapping[str, str] | None = None,
         timeout_ms: int | None = None,
-    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.DismissAllNotificationsResponse:
+    ) -> chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceUpdateNotificationPolicyResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="DismissAllNotifications",
-                service_name="chatto.api.v1.NotificationService",
-                input=chatto_dot_api_dot_v1_dot_notifications__pb2.DismissAllNotificationsRequest,
-                output=chatto_dot_api_dot_v1_dot_notifications__pb2.DismissAllNotificationsResponse,
-                idempotency_level=IdempotencyLevel.UNKNOWN,
+                name="UpdateNotificationPolicy",
+                service_name="chatto.api.v1.NotificationPolicyService",
+                input=chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceUpdateNotificationPolicyRequest,
+                output=chatto_dot_api_dot_v1_dot_notifications__pb2.NotificationPolicyServiceUpdateNotificationPolicyResponse,
+                idempotency_level=IdempotencyLevel.IDEMPOTENT,
             ),
             headers=headers,
             timeout_ms=timeout_ms,

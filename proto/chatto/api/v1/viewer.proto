@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package chatto.api.v1;
 
-import "chatto/api/v1/notification_preferences.proto";
 import "chatto/api/v1/permissions.proto";
 import "chatto/api/v1/users.proto";
 import "google/protobuf/timestamp.proto";
@@ -53,8 +52,6 @@ message ViewerCapabilities {
   repeated CapabilityGrant grants = 1;
   // Whether the user has unread followed threads.
   bool has_unread_followed_threads = 2;
-  // Whether a followed channel thread has a pending notification.
-  bool has_pending_followed_thread_notifications = 3;
 }
 
 // Effective server/channel permission decisions for the authenticated user.
@@ -65,19 +62,8 @@ message ServerViewerPermissions {
 
 // Non-permission server state for the authenticated user.
 message ServerViewerState {
-  // Whether any joined channel room has unread messages.
+  // Whether any joined channel room has neutral Badge attention.
   bool has_unread_rooms = 1;
-}
-
-// Room notification preference for one joined room.
-message RoomNotificationPreference {
-  reserved 2, 3;
-  reserved "level", "effective_level";
-
-  // Room whose preference is represented.
-  string room_id = 1;
-  // Stored and effective notification preference.
-  NotificationPreference preference = 4;
 }
 
 // Request for the authenticated viewer snapshot.
@@ -85,14 +71,13 @@ message GetViewerRequest {}
 
 // Authenticated viewer snapshot needed by application shells.
 message GetViewerResponse {
+  reserved 3, 4;
+  reserved "server_notification_preference", "room_notification_preferences";
+
   // Current authenticated user.
   ViewerUser user = 1;
   // Permission-derived capabilities.
   ViewerCapabilities capabilities = 2;
-  // Server-wide notification preference.
-  NotificationPreference server_notification_preference = 3;
-  // Notification preferences for rooms the user participates in.
-  repeated RoomNotificationPreference room_notification_preferences = 4;
   // Effective server/channel permission decisions for the authenticated user.
   ServerViewerPermissions viewer_permissions = 5;
   // Non-permission server state for the authenticated user.

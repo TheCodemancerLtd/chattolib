@@ -94,17 +94,21 @@ from chattolib.types import (
     LinkedExternalIdentity,
     LinkPreview,
     Message,
-    Notification,
     NotificationLevel,
+    NotificationOccurrence,
+    NotificationOccurrencesPage,
+    NotificationPolicy,
     NotificationPreference,
-    NotificationsPage,
     Page,
+    PinnedMessage,
+    PinnedMessagesPage,
     PresenceStatus,
     Role,
     Room,
     RoomBan,
     RoomDirectoryScope,
     RoomGroup,
+    RoomThreadingMode,
     RoomWithViewerState,
     ServerConfig,
     ServerLogin,
@@ -122,9 +126,7 @@ from chattolib.types import (
 RES = TypeVar("RES")
 
 
-def _page_pb(
-    limit: int | None, offset: int | None
-) -> pagination_pb2.PageRequest | None:
+def _page_pb(limit: int | None, offset: int | None) -> pagination_pb2.PageRequest | None:
     if limit is None and offset is None:
         return None
     return pagination_pb2.PageRequest(limit=limit or 0, offset=offset or 0)
@@ -281,9 +283,7 @@ class ChattoClient:
 
     async def get_motd(self) -> str | None:
         resp = await self._rpc(
-            self._svc.server.get_motd(
-                server_state_pb2.GetMotdRequest(), headers=self._headers()
-            )
+            self._svc.server.get_motd(server_state_pb2.GetMotdRequest(), headers=self._headers())
         )
         if not resp.HasField("motd"):
             return None
@@ -308,9 +308,7 @@ class ChattoClient:
         current user's public profile should use ``me()`` for a typed result.
         """
         resp = await self._rpc(
-            self._svc.viewer.get_viewer(
-                viewer_pb2.GetViewerRequest(), headers=self._headers()
-            )
+            self._svc.viewer.get_viewer(viewer_pb2.GetViewerRequest(), headers=self._headers())
         )
         return pb_to_dict(resp)
 
@@ -338,9 +336,7 @@ class ChattoClient:
             req.display_name = display_name
         if login is not None:
             req.login = login
-        resp = await self._rpc(
-            self._svc.account.update_profile(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.account.update_profile(req, headers=self._headers()))
         user = User.parse(pb_to_dict(resp.user))
         assert user is not None
         return user
@@ -359,9 +355,7 @@ class ChattoClient:
                 content_type=content_type,
             )
         )
-        resp = await self._rpc(
-            self._svc.account.upload_avatar(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.account.upload_avatar(req, headers=self._headers()))
         user = User.parse(pb_to_dict(resp.user))
         assert user is not None
         return user
@@ -400,9 +394,7 @@ class ChattoClient:
             req.timezone = timezone
         if time_format is not None:
             req.time_format = time_format.value
-        resp = await self._rpc(
-            self._svc.account.update_settings(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.account.update_settings(req, headers=self._headers()))
         return UserSettings.parse(pb_to_dict(resp.settings))
 
     async def update_presence(
@@ -416,12 +408,8 @@ class ChattoClient:
                 "UNSPECIFIED and OFFLINE cannot be set as presence status; "
                 "stop refreshing to go offline"
             )
-        req = presence_pb2.UpdatePresenceRequest(
-            status=status.value, user_selected=user_selected
-        )
-        resp = await self._rpc(
-            self._svc.account.update_presence(req, headers=self._headers())
-        )
+        req = presence_pb2.UpdatePresenceRequest(status=status.value, user_selected=user_selected)
+        resp = await self._rpc(self._svc.account.update_presence(req, headers=self._headers()))
         name = presence_pb2.PresenceStatus.Name(resp.status)
         return PresenceStatus(name)
 
@@ -435,9 +423,7 @@ class ChattoClient:
         req = user_status_pb2.UpdateCustomStatusRequest(emoji=emoji, text=text)
         if expires_at is not None:
             req.expires_at.CopyFrom(_timestamp_pb(expires_at))
-        resp = await self._rpc(
-            self._svc.account.update_custom_status(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.account.update_custom_status(req, headers=self._headers()))
         return pb_to_dict(resp)
 
     async def delete_custom_status(self) -> dict[str, Any]:
@@ -460,9 +446,7 @@ class ChattoClient:
     async def delete_my_account(self, confirmation_token: str) -> bool:
         resp = await self._rpc(
             self._svc.account.delete_my_account(
-                account_pb2.DeleteMyAccountRequest(
-                    confirmation_token=confirmation_token
-                ),
+                account_pb2.DeleteMyAccountRequest(confirmation_token=confirmation_token),
                 headers=self._headers(),
             )
         )
@@ -481,9 +465,7 @@ class ChattoClient:
         page = _page_pb(limit, offset)
         if page is not None:
             req.page.CopyFrom(page)
-        resp = await self._rpc(
-            self._svc.users.list_users(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.users.list_users(req, headers=self._headers()))
         data = pb_to_dict(resp)
         users = [
             u
@@ -503,9 +485,7 @@ class ChattoClient:
         else:
             assert login is not None
             req.login = login
-        resp = await self._rpc(
-            self._svc.users.get_user(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.users.get_user(req, headers=self._headers()))
         return DirectoryMember.parse(pb_to_dict(resp.user))
 
     async def batch_get_users(self, user_ids: list[str]) -> list[DirectoryMember]:
@@ -526,20 +506,14 @@ class ChattoClient:
 
     async def list_roles(self) -> list[Role]:
         resp = await self._rpc(
-            self._svc.roles.list_roles(
-                roles_pb2.ListRolesRequest(), headers=self._headers()
-            )
+            self._svc.roles.list_roles(roles_pb2.ListRolesRequest(), headers=self._headers())
         )
         data = pb_to_dict(resp)
-        return [
-            r for r in (Role.parse(row) for row in data.get("roles") or []) if r is not None
-        ]
+        return [r for r in (Role.parse(row) for row in data.get("roles") or []) if r is not None]
 
     async def get_role(self, name: str) -> Role | None:
         resp = await self._rpc(
-            self._svc.roles.get_role(
-                roles_pb2.GetRoleRequest(name=name), headers=self._headers()
-            )
+            self._svc.roles.get_role(roles_pb2.GetRoleRequest(name=name), headers=self._headers())
         )
         return Role.parse(pb_to_dict(resp.role))
 
@@ -550,9 +524,7 @@ class ChattoClient:
             )
         )
         data = pb_to_dict(resp)
-        return [
-            r for r in (Role.parse(row) for row in data.get("roles") or []) if r is not None
-        ]
+        return [r for r in (Role.parse(row) for row in data.get("roles") or []) if r is not None]
 
     # --- Room directory ------------------------------------------------
 
@@ -581,9 +553,7 @@ class ChattoClient:
         )
         data = pb_to_dict(resp)
         return [
-            g
-            for g in (RoomGroup.parse(row) for row in data.get("groups") or [])
-            if g is not None
+            g for g in (RoomGroup.parse(row) for row in data.get("groups") or []) if g is not None
         ]
 
     async def get_room_group(self, group_id: str) -> RoomGroup | None:
@@ -604,9 +574,7 @@ class ChattoClient:
         )
         data = pb_to_dict(resp)
         return [
-            g
-            for g in (RoomGroup.parse(row) for row in data.get("groups") or [])
-            if g is not None
+            g for g in (RoomGroup.parse(row) for row in data.get("groups") or []) if g is not None
         ]
 
     async def get_room(self, room_id: str) -> RoomWithViewerState | None:
@@ -641,18 +609,17 @@ class ChattoClient:
         *,
         description: str = "",
         universal: bool = False,
+        threading_mode: RoomThreadingMode | None = None,
     ) -> Room:
-        resp = await self._rpc(
-            self._svc.rooms.create_room(
-                rooms_pb2.CreateRoomRequest(
-                    name=name,
-                    group_id=group_id,
-                    description=description,
-                    universal=universal,
-                ),
-                headers=self._headers(),
-            )
+        req = rooms_pb2.CreateRoomRequest(
+            name=name,
+            group_id=group_id,
+            description=description,
+            universal=universal,
         )
+        if threading_mode is not None:
+            req.threading_mode = threading_mode.value
+        resp = await self._rpc(self._svc.rooms.create_room(req, headers=self._headers()))
         room = Room.parse(pb_to_dict(resp.room))
         assert room is not None
         return room
@@ -664,6 +631,8 @@ class ChattoClient:
         name: str | None = None,
         description: str | None = None,
         universal: bool | None = None,
+        slow_mode_seconds: int | None = None,
+        threading_mode: RoomThreadingMode | None = None,
     ) -> Room:
         req = rooms_pb2.UpdateRoomRequest(room_id=room_id)
         if name is not None:
@@ -672,9 +641,11 @@ class ChattoClient:
             req.description = description
         if universal is not None:
             req.universal = universal
-        resp = await self._rpc(
-            self._svc.rooms.update_room(req, headers=self._headers())
-        )
+        if slow_mode_seconds is not None:
+            req.slow_mode_seconds = slow_mode_seconds
+        if threading_mode is not None:
+            req.threading_mode = threading_mode.value
+        resp = await self._rpc(self._svc.rooms.update_room(req, headers=self._headers()))
         room = Room.parse(pb_to_dict(resp.room))
         assert room is not None
         return room
@@ -771,9 +742,7 @@ class ChattoClient:
         page = _page_pb(limit, offset)
         if page is not None:
             req.page.CopyFrom(page)
-        resp = await self._rpc(
-            self._svc.rooms.list_members(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.rooms.list_members(req, headers=self._headers()))
         data = pb_to_dict(resp)
         members = [
             m
@@ -785,9 +754,7 @@ class ChattoClient:
     async def get_room_member(self, room_id: str, user_id: str) -> DirectoryMember | None:
         resp = await self._rpc(
             self._svc.rooms.get_member(
-                member_directory_pb2.GetRoomMemberRequest(
-                    room_id=room_id, user_id=user_id
-                ),
+                member_directory_pb2.GetRoomMemberRequest(room_id=room_id, user_id=user_id),
                 headers=self._headers(),
             )
         )
@@ -798,9 +765,7 @@ class ChattoClient:
     ) -> list[DirectoryMember]:
         resp = await self._rpc(
             self._svc.rooms.batch_get_members(
-                member_directory_pb2.BatchGetRoomMembersRequest(
-                    room_id=room_id, user_ids=user_ids
-                ),
+                member_directory_pb2.BatchGetRoomMembersRequest(room_id=room_id, user_ids=user_ids),
                 headers=self._headers(),
             )
         )
@@ -819,22 +784,16 @@ class ChattoClient:
         *,
         expires_at: datetime | None = None,
     ) -> bool:
-        req = rooms_pb2.BanMemberRequest(
-            room_id=room_id, user_id=user_id, reason=reason
-        )
+        req = rooms_pb2.BanMemberRequest(room_id=room_id, user_id=user_id, reason=reason)
         if expires_at is not None:
             req.expires_at.CopyFrom(_timestamp_pb(expires_at))
-        resp = await self._rpc(
-            self._svc.rooms.ban_member(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.rooms.ban_member(req, headers=self._headers()))
         return resp.banned
 
     async def unban_member(self, room_id: str, user_id: str, reason: str) -> bool:
         resp = await self._rpc(
             self._svc.rooms.unban_member(
-                rooms_pb2.UnbanMemberRequest(
-                    room_id=room_id, user_id=user_id, reason=reason
-                ),
+                rooms_pb2.UnbanMemberRequest(room_id=room_id, user_id=user_id, reason=reason),
                 headers=self._headers(),
             )
         )
@@ -851,15 +810,9 @@ class ChattoClient:
         page = _page_pb(limit, offset)
         if page is not None:
             req.page.CopyFrom(page)
-        resp = await self._rpc(
-            self._svc.rooms.list_bans(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.rooms.list_bans(req, headers=self._headers()))
         data = pb_to_dict(resp)
-        bans = [
-            b
-            for b in (RoomBan.parse(row) for row in data.get("bans") or [])
-            if b is not None
-        ]
+        bans = [b for b in (RoomBan.parse(row) for row in data.get("bans") or []) if b is not None]
         return bans, Page.parse(data.get("page"))
 
     async def update_typing_indicator(
@@ -892,9 +845,7 @@ class ChattoClient:
             req.before = before
         elif after is not None:
             req.after = after
-        resp = await self._rpc(
-            self._svc.rooms.get_room_events(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.rooms.get_room_events(req, headers=self._headers()))
         return TimelinePage.parse(pb_to_dict(resp.page))
 
     async def get_room_events_around(
@@ -904,14 +855,10 @@ class ChattoClient:
         *,
         limit: int | None = None,
     ) -> tuple[TimelinePage, int]:
-        req = room_timeline_pb2.GetRoomEventsAroundRequest(
-            room_id=room_id, event_id=event_id
-        )
+        req = room_timeline_pb2.GetRoomEventsAroundRequest(room_id=room_id, event_id=event_id)
         if limit is not None:
             req.limit = limit
-        resp = await self._rpc(
-            self._svc.rooms.get_room_events_around(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.rooms.get_room_events_around(req, headers=self._headers()))
         return TimelinePage.parse(pb_to_dict(resp.page)), resp.target_index
 
     async def mark_room_as_read(
@@ -946,11 +893,47 @@ class ChattoClient:
         page = _page_pb(limit, offset)
         if page is not None:
             req.page.CopyFrom(page)
-        resp = await self._rpc(
-            self._svc.rooms.list_room_attachments(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.rooms.list_room_attachments(req, headers=self._headers()))
         data = pb_to_dict(resp)
         return list(data.get("attachments") or []), Page.parse(data.get("page"))
+
+    async def list_pinned_messages(
+        self,
+        room_id: str,
+        *,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> PinnedMessagesPage:
+        req = rooms_pb2.ListPinnedMessagesRequest(room_id=room_id)
+        page = _page_pb(limit, offset)
+        if page is not None:
+            req.page.CopyFrom(page)
+        resp = await self._rpc(self._svc.rooms.list_pinned_messages(req, headers=self._headers()))
+        return PinnedMessagesPage.parse(pb_to_dict(resp))
+
+    async def pin_message(self, room_id: str, message_event_id: str) -> PinnedMessage:
+        resp = await self._rpc(
+            self._svc.rooms.create_pinned_message(
+                rooms_pb2.CreatePinnedMessageRequest(
+                    room_id=room_id, message_event_id=message_event_id
+                ),
+                headers=self._headers(),
+            )
+        )
+        pm = PinnedMessage.parse(pb_to_dict(resp.pinned_message))
+        assert pm is not None
+        return pm
+
+    async def unpin_message(self, room_id: str, message_event_id: str) -> bool:
+        resp = await self._rpc(
+            self._svc.rooms.delete_pinned_message(
+                rooms_pb2.DeletePinnedMessageRequest(
+                    room_id=room_id, message_event_id=message_event_id
+                ),
+                headers=self._headers(),
+            )
+        )
+        return resp.deleted
 
     # --- Messages -------------------------------------------------------
 
@@ -984,9 +967,7 @@ class ChattoClient:
         )
         if attachment_asset_ids:
             req.attachment_asset_ids.extend(attachment_asset_ids)
-        resp = await self._rpc(
-            self._svc.messages.create_message(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.messages.create_message(req, headers=self._headers()))
         message = Message.parse(pb_to_dict(resp.message))
         assert message is not None
         return message
@@ -1004,9 +985,7 @@ class ChattoClient:
             req.body = body
         if also_send_to_channel is not None:
             req.also_send_to_channel = also_send_to_channel
-        resp = await self._rpc(
-            self._svc.messages.update_message(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.messages.update_message(req, headers=self._headers()))
         message = Message.parse(pb_to_dict(resp.message))
         assert message is not None
         return message
@@ -1020,9 +999,7 @@ class ChattoClient:
         )
         return resp.deleted
 
-    async def delete_attachment(
-        self, room_id: str, event_id: str, attachment_id: str
-    ) -> bool:
+    async def delete_attachment(self, room_id: str, event_id: str, attachment_id: str) -> bool:
         resp = await self._rpc(
             self._svc.messages.delete_attachment(
                 messages_pb2.DeleteAttachmentRequest(
@@ -1036,9 +1013,7 @@ class ChattoClient:
     async def delete_link_preview(self, room_id: str, event_id: str, url: str) -> bool:
         resp = await self._rpc(
             self._svc.messages.delete_link_preview(
-                messages_pb2.DeleteLinkPreviewRequest(
-                    room_id=room_id, event_id=event_id, url=url
-                ),
+                messages_pb2.DeleteLinkPreviewRequest(room_id=room_id, event_id=event_id, url=url),
                 headers=self._headers(),
             )
         )
@@ -1053,27 +1028,19 @@ class ChattoClient:
         )
         return Message.parse(pb_to_dict(resp.message))
 
-    async def batch_get_messages(
-        self, room_id: str, event_ids: list[str]
-    ) -> list[Message]:
+    async def batch_get_messages(self, room_id: str, event_ids: list[str]) -> list[Message]:
         resp = await self._rpc(
             self._svc.messages.batch_get_messages(
-                messages_pb2.BatchGetMessagesRequest(
-                    room_id=room_id, event_ids=event_ids
-                ),
+                messages_pb2.BatchGetMessagesRequest(room_id=room_id, event_ids=event_ids),
                 headers=self._headers(),
             )
         )
         data = pb_to_dict(resp)
         return [
-            m
-            for m in (Message.parse(row) for row in data.get("messages") or [])
-            if m is not None
+            m for m in (Message.parse(row) for row in data.get("messages") or []) if m is not None
         ]
 
-    async def add_reaction(
-        self, room_id: str, message_event_id: str, emoji: str
-    ) -> bool:
+    async def add_reaction(self, room_id: str, message_event_id: str, emoji: str) -> bool:
         resp = await self._rpc(
             self._svc.messages.add_reaction(
                 reactions_pb2.AddReactionRequest(
@@ -1084,9 +1051,7 @@ class ChattoClient:
         )
         return resp.added
 
-    async def remove_reaction(
-        self, room_id: str, message_event_id: str, emoji: str
-    ) -> bool:
+    async def remove_reaction(self, room_id: str, message_event_id: str, emoji: str) -> bool:
         resp = await self._rpc(
             self._svc.messages.remove_reaction(
                 reactions_pb2.RemoveReactionRequest(
@@ -1161,9 +1126,7 @@ class ChattoClient:
             req.before = before
         elif after is not None:
             req.after = after
-        resp = await self._rpc(
-            self._svc.threads.get_thread_events(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.threads.get_thread_events(req, headers=self._headers()))
         return TimelinePage.parse(pb_to_dict(resp.page))
 
     async def get_thread_events_around(
@@ -1207,105 +1170,111 @@ class ChattoClient:
 
     # --- Notifications --------------------------------------------------
 
-    async def list_notifications(
+    async def list_notification_occurrences(
         self, *, limit: int | None = None, offset: int | None = None
-    ) -> NotificationsPage:
-        req = notifications_pb2.ListNotificationsRequest()
+    ) -> NotificationOccurrencesPage:
+        req = notifications_pb2.ListNotificationOccurrencesRequest()
         page = _page_pb(limit, offset)
         if page is not None:
             req.page.CopyFrom(page)
         resp = await self._rpc(
-            self._svc.notifications.list_notifications(req, headers=self._headers())
+            self._svc.notifications.list_notification_occurrences(req, headers=self._headers())
         )
-        data = pb_to_dict(resp)
-        notifications = [Notification.parse(n) for n in data.get("notifications") or []]
-        return NotificationsPage(
-            notifications=notifications, page=Page.parse(data.get("page"))
-        )
+        return NotificationOccurrencesPage.parse(pb_to_dict(resp))
 
-    async def has_notifications(self) -> bool:
+    async def get_notification_occurrence(
+        self, notification_id: str
+    ) -> NotificationOccurrence | None:
         resp = await self._rpc(
-            self._svc.notifications.has_notifications(
-                notifications_pb2.HasNotificationsRequest(),
+            self._svc.notifications.get_notification_occurrence(
+                notifications_pb2.GetNotificationOccurrenceRequest(notification_id=notification_id),
                 headers=self._headers(),
             )
         )
-        return resp.has_notifications
+        raw = pb_to_dict(resp).get("occurrence")
+        return NotificationOccurrence.parse(raw) if raw else None
 
-    async def get_notification(self, notification_id: str) -> Notification | None:
-        resp = await self._rpc(
-            self._svc.notifications.get_notification(
-                notifications_pb2.GetNotificationRequest(notification_id=notification_id),
-                headers=self._headers(),
-            )
-        )
-        raw = pb_to_dict(resp).get("notification")
-        return Notification.parse(raw) if raw else None
-
-    async def batch_get_notifications(
+    async def batch_get_notification_occurrences(
         self, notification_ids: list[str]
-    ) -> list[Notification]:
+    ) -> list[NotificationOccurrence]:
         resp = await self._rpc(
-            self._svc.notifications.batch_get_notifications(
-                notifications_pb2.BatchGetNotificationsRequest(
+            self._svc.notifications.batch_get_notification_occurrences(
+                notifications_pb2.BatchGetNotificationOccurrencesRequest(
                     notification_ids=notification_ids
                 ),
                 headers=self._headers(),
             )
         )
         data = pb_to_dict(resp)
-        return [Notification.parse(n) for n in data.get("notifications") or []]
+        return [
+            o
+            for o in (NotificationOccurrence.parse(n) for n in data.get("occurrences") or [])
+            if o is not None
+        ]
 
-    async def list_room_notifications(
-        self,
-        room_id: str,
-        *,
-        limit: int | None = None,
-        offset: int | None = None,
-    ) -> NotificationsPage:
-        req = notifications_pb2.ListRoomNotificationsRequest(room_id=room_id)
-        page = _page_pb(limit, offset)
-        if page is not None:
-            req.page.CopyFrom(page)
+    async def mark_notification_read(self, notification_id: str) -> NotificationOccurrence | None:
         resp = await self._rpc(
-            self._svc.notifications.list_room_notifications(
-                req, headers=self._headers()
-            )
-        )
-        data = pb_to_dict(resp)
-        return NotificationsPage(
-            notifications=[Notification.parse(n) for n in data.get("notifications") or []],
-            page=Page.parse(data.get("page")),
-        )
-
-    async def list_room_notification_counts(self) -> dict[str, int]:
-        resp = await self._rpc(
-            self._svc.notifications.list_room_notification_counts(
-                notifications_pb2.ListRoomNotificationCountsRequest(),
+            self._svc.notifications.mark_notification_read(
+                notifications_pb2.MarkNotificationReadRequest(notification_id=notification_id),
                 headers=self._headers(),
             )
         )
-        return {row.room_id: row.total_count for row in resp.room_counts}
+        raw = pb_to_dict(resp).get("occurrence")
+        return NotificationOccurrence.parse(raw) if raw else None
 
-    async def dismiss_notification(self, notification_id: str) -> bool:
+    async def delete_notification_occurrence(self, notification_id: str) -> bool:
         resp = await self._rpc(
-            self._svc.notifications.dismiss_notification(
-                notifications_pb2.DismissNotificationRequest(
+            self._svc.notifications.delete_notification_occurrence(
+                notifications_pb2.DeleteNotificationOccurrenceRequest(
                     notification_id=notification_id
                 ),
                 headers=self._headers(),
             )
         )
-        return resp.dismissed
+        return resp.deleted
 
-    async def dismiss_all_notifications(self) -> int:
+    async def batch_delete_notification_occurrences(self, notification_ids: list[str]) -> int:
         resp = await self._rpc(
-            self._svc.notifications.dismiss_all_notifications(
-                notifications_pb2.DismissAllNotificationsRequest(),
+            self._svc.notifications.batch_delete_notification_occurrences(
+                notifications_pb2.BatchDeleteNotificationOccurrencesRequest(
+                    notification_ids=notification_ids
+                ),
                 headers=self._headers(),
             )
         )
-        return resp.dismissed_count
+        return resp.deleted_count
+
+    async def delete_all_notification_occurrences(self) -> int:
+        resp = await self._rpc(
+            self._svc.notifications.delete_all_notification_occurrences(
+                notifications_pb2.DeleteAllNotificationOccurrencesRequest(),
+                headers=self._headers(),
+            )
+        )
+        return resp.deleted_count
+
+    async def get_notification_policy(self, room_id: str = "") -> NotificationPolicy:
+        req = notifications_pb2.GetNotificationPolicyRequest()
+        if room_id:
+            req.room_id = room_id
+        resp = await self._rpc(
+            self._svc.notifications.get_notification_policy(req, headers=self._headers())
+        )
+        return NotificationPolicy.parse(pb_to_dict(resp.policy))
+
+    async def update_notification_policy(
+        self,
+        level: NotificationLevel,
+        *,
+        room_id: str = "",
+    ) -> NotificationPolicy:
+        req = notifications_pb2.UpdateNotificationPolicyRequest(level=level.value)
+        if room_id:
+            req.room_id = room_id
+        resp = await self._rpc(
+            self._svc.notifications.update_notification_policy(req, headers=self._headers())
+        )
+        return NotificationPolicy.parse(pb_to_dict(resp.policy))
 
     # --- Notification preferences --------------------------------------
 
@@ -1331,14 +1300,10 @@ class ChattoClient:
         )
         return NotificationPreference.parse(pb_to_dict(resp.preference))
 
-    async def get_room_notification_preference(
-        self, room_id: str
-    ) -> NotificationPreference:
+    async def get_room_notification_preference(self, room_id: str) -> NotificationPreference:
         resp = await self._rpc(
             self._svc.notification_prefs.get_room_notification_preference(
-                notification_preferences_pb2.GetRoomNotificationPreferenceRequest(
-                    room_id=room_id
-                ),
+                notification_preferences_pb2.GetRoomNotificationPreferenceRequest(room_id=room_id),
                 headers=self._headers(),
             )
         )
@@ -1372,9 +1337,7 @@ class ChattoClient:
         )
         if user_agent is not None:
             req.user_agent = user_agent
-        resp = await self._rpc(
-            self._svc.push.subscribe(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.push.subscribe(req, headers=self._headers()))
         return resp.subscribed
 
     async def unsubscribe_push(self, endpoint: str) -> bool:
@@ -1399,9 +1362,7 @@ class ChattoClient:
         thumb = _thumbnail_pb(thumbnail)
         if thumb is not None:
             req.thumbnail.CopyFrom(thumb)
-        resp = await self._rpc(
-            self._svc.assets.get_asset(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.assets.get_asset(req, headers=self._headers()))
         return Asset.parse(pb_to_dict(resp.asset))
 
     async def batch_get_assets(
@@ -1411,21 +1372,13 @@ class ChattoClient:
         *,
         thumbnail: ImageTransformOptions | None = None,
     ) -> list[Asset]:
-        req = attachments_pb2.BatchGetAssetsRequest(
-            room_id=room_id, asset_ids=asset_ids
-        )
+        req = attachments_pb2.BatchGetAssetsRequest(room_id=room_id, asset_ids=asset_ids)
         thumb = _thumbnail_pb(thumbnail)
         if thumb is not None:
             req.thumbnail.CopyFrom(thumb)
-        resp = await self._rpc(
-            self._svc.assets.batch_get_assets(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.assets.batch_get_assets(req, headers=self._headers()))
         data = pb_to_dict(resp)
-        return [
-            a
-            for a in (Asset.parse(row) for row in data.get("assets") or [])
-            if a is not None
-        ]
+        return [a for a in (Asset.parse(row) for row in data.get("assets") or []) if a is not None]
 
     # --- Asset uploads ------------------------------------------------
 
@@ -1483,9 +1436,7 @@ class ChattoClient:
         assert upload is not None
         return upload
 
-    async def complete_upload(
-        self, upload_id: str
-    ) -> tuple[AssetUpload, Asset | None]:
+    async def complete_upload(self, upload_id: str) -> tuple[AssetUpload, Asset | None]:
         resp = await self._rpc(
             self._svc.asset_uploads.complete_upload(
                 asset_uploads_pb2.CompleteUploadRequest(upload_id=upload_id),
@@ -1553,13 +1504,8 @@ class ChattoClient:
             )
         )
         data = pb_to_dict(resp)
-        providers = [
-            ExternalIdentityProvider.parse(p) for p in data.get("providers") or []
-        ]
-        linked = [
-            LinkedExternalIdentity.parse(li)
-            for li in data.get("linkedIdentities") or []
-        ]
+        providers = [ExternalIdentityProvider.parse(p) for p in data.get("providers") or []]
+        linked = [LinkedExternalIdentity.parse(li) for li in data.get("linkedIdentities") or []]
         return providers, linked
 
     async def start_external_identity_link(
@@ -1599,17 +1545,13 @@ class ChattoClient:
     async def get_pending_external_identity(self, token: str) -> dict[str, Any]:
         resp = await self._rpc(
             self._svc.external_auth.get_pending_external_identity(
-                external_identity_auth_pb2.GetPendingExternalIdentityRequest(
-                    token=token
-                ),
+                external_identity_auth_pb2.GetPendingExternalIdentityRequest(token=token),
                 headers=self._headers(),
             )
         )
         return pb_to_dict(resp)
 
-    async def create_external_identity_account(
-        self, token: str, login: str
-    ) -> dict[str, Any]:
+    async def create_external_identity_account(self, token: str, login: str) -> dict[str, Any]:
         resp = await self._rpc(
             self._svc.external_auth.create_external_identity_account(
                 external_identity_auth_pb2.CreateExternalIdentityAccountRequest(
@@ -1620,14 +1562,10 @@ class ChattoClient:
         )
         return pb_to_dict(resp)
 
-    async def confirm_external_identity_link(
-        self, token: str
-    ) -> LinkedExternalIdentity | None:
+    async def confirm_external_identity_link(self, token: str) -> LinkedExternalIdentity | None:
         resp = await self._rpc(
             self._svc.external_auth.confirm_external_identity_link(
-                external_identity_auth_pb2.ConfirmExternalIdentityLinkRequest(
-                    token=token
-                ),
+                external_identity_auth_pb2.ConfirmExternalIdentityLinkRequest(token=token),
                 headers=self._headers(),
             )
         )
@@ -1637,9 +1575,7 @@ class ChattoClient:
     async def cancel_external_identity_flow(self, token: str) -> bool:
         resp = await self._rpc(
             self._svc.external_auth.cancel_external_identity_flow(
-                external_identity_auth_pb2.CancelExternalIdentityFlowRequest(
-                    token=token
-                ),
+                external_identity_auth_pb2.CancelExternalIdentityFlowRequest(token=token),
                 headers=self._headers(),
             )
         )
@@ -1806,9 +1742,7 @@ class ChattoClient:
     async def admin_update_blocked_usernames(self, usernames: list[str]) -> list[str]:
         resp = await self._rpc(
             self._svc.admin_server.update_blocked_usernames(
-                admin_server_pb2.UpdateBlockedUsernamesRequest(
-                    blocked_usernames=usernames
-                ),
+                admin_server_pb2.UpdateBlockedUsernamesRequest(blocked_usernames=usernames),
                 headers=self._headers(),
             )
         )
@@ -1826,9 +1760,7 @@ class ChattoClient:
         data = pb_to_dict(resp)
         return [
             g
-            for g in (
-                AdminRoomLayoutGroup.parse(row) for row in data.get("groups") or []
-            )
+            for g in (AdminRoomLayoutGroup.parse(row) for row in data.get("groups") or [])
             if g is not None
         ]
 
@@ -1837,9 +1769,7 @@ class ChattoClient:
     ) -> AdminRoomLayoutGroup:
         resp = await self._rpc(
             self._svc.admin_room_layout.create_room_group(
-                room_layout_pb2.CreateRoomGroupRequest(
-                    name=name, description=description
-                ),
+                room_layout_pb2.CreateRoomGroupRequest(name=name, description=description),
                 headers=self._headers(),
             )
         )
@@ -1860,9 +1790,7 @@ class ChattoClient:
         if description is not None:
             req.description = description
         resp = await self._rpc(
-            self._svc.admin_room_layout.update_room_group(
-                req, headers=self._headers()
-            )
+            self._svc.admin_room_layout.update_room_group(req, headers=self._headers())
         )
         group = AdminRoomLayoutGroup.parse(pb_to_dict(resp.group))
         assert group is not None
@@ -1882,27 +1810,21 @@ class ChattoClient:
     ) -> list[AdminRoomLayoutGroup]:
         resp = await self._rpc(
             self._svc.admin_room_layout.reorder_room_groups(
-                room_layout_pb2.ReorderRoomGroupsRequest(
-                    ordered_group_ids=ordered_group_ids
-                ),
+                room_layout_pb2.ReorderRoomGroupsRequest(ordered_group_ids=ordered_group_ids),
                 headers=self._headers(),
             )
         )
         data = pb_to_dict(resp)
         return [
             g
-            for g in (
-                AdminRoomLayoutGroup.parse(row) for row in data.get("groups") or []
-            )
+            for g in (AdminRoomLayoutGroup.parse(row) for row in data.get("groups") or [])
             if g is not None
         ]
 
     async def admin_move_room_to_group(self, room_id: str, group_id: str) -> Room:
         resp = await self._rpc(
             self._svc.admin_room_layout.move_room_to_group(
-                room_layout_pb2.MoveRoomToGroupRequest(
-                    room_id=room_id, group_id=group_id
-                ),
+                room_layout_pb2.MoveRoomToGroupRequest(room_id=room_id, group_id=group_id),
                 headers=self._headers(),
             )
         )
@@ -1921,9 +1843,7 @@ class ChattoClient:
             item.kind = kind.value
             item.id = item_id
         resp = await self._rpc(
-            self._svc.admin_room_layout.reorder_sidebar_items_in_group(
-                req, headers=self._headers()
-            )
+            self._svc.admin_room_layout.reorder_sidebar_items_in_group(req, headers=self._headers())
         )
         group = AdminRoomLayoutGroup.parse(pb_to_dict(resp.group))
         assert group is not None
@@ -1934,9 +1854,7 @@ class ChattoClient:
     ) -> dict[str, Any]:
         resp = await self._rpc(
             self._svc.admin_room_layout.create_sidebar_link(
-                room_layout_pb2.CreateSidebarLinkRequest(
-                    group_id=group_id, label=label, url=url
-                ),
+                room_layout_pb2.CreateSidebarLinkRequest(group_id=group_id, label=label, url=url),
                 headers=self._headers(),
             )
         )
@@ -1956,9 +1874,7 @@ class ChattoClient:
         if url is not None:
             req.url = url
         resp = await self._rpc(
-            self._svc.admin_room_layout.update_sidebar_link(
-                req, headers=self._headers()
-            )
+            self._svc.admin_room_layout.update_sidebar_link(req, headers=self._headers())
         )
         sl = resp.sidebar_link
         return {"id": sl.id, "label": sl.label, "url": sl.url}
@@ -1972,14 +1888,10 @@ class ChattoClient:
         )
         return resp.deleted
 
-    async def admin_move_sidebar_link_to_group(
-        self, link_id: str, group_id: str
-    ) -> dict[str, Any]:
+    async def admin_move_sidebar_link_to_group(self, link_id: str, group_id: str) -> dict[str, Any]:
         resp = await self._rpc(
             self._svc.admin_room_layout.move_sidebar_link_to_group(
-                room_layout_pb2.MoveSidebarLinkToGroupRequest(
-                    link_id=link_id, group_id=group_id
-                ),
+                room_layout_pb2.MoveSidebarLinkToGroupRequest(link_id=link_id, group_id=group_id),
                 headers=self._headers(),
             )
         )
@@ -1999,18 +1911,14 @@ class ChattoClient:
         page = _page_pb(limit, offset)
         if page is not None:
             req.page.CopyFrom(page)
-        resp = await self._rpc(
-            self._svc.admin_users.list_members(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.admin_users.list_members(req, headers=self._headers()))
         data = pb_to_dict(resp)
         members = [
             m
             for m in (AdminMember.parse(row) for row in data.get("members") or [])
             if m is not None
         ]
-        roles = [
-            r for r in (Role.parse(row) for row in data.get("roles") or []) if r is not None
-        ]
+        roles = [r for r in (Role.parse(row) for row in data.get("roles") or []) if r is not None]
         return members, roles, Page.parse(data.get("page"))
 
     async def admin_get_member(
@@ -2027,9 +1935,7 @@ class ChattoClient:
         else:
             assert login is not None
             req.login = login
-        resp = await self._rpc(
-            self._svc.admin_users.get_member(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.admin_users.get_member(req, headers=self._headers()))
         return pb_to_dict(resp)
 
     async def admin_batch_get_members(self, user_ids: list[str]) -> list[AdminMember]:
@@ -2046,27 +1952,19 @@ class ChattoClient:
             if m is not None
         ]
 
-    async def admin_assign_role(
-        self, user_id: str, role_name: str
-    ) -> AdminMember | None:
+    async def admin_assign_role(self, user_id: str, role_name: str) -> AdminMember | None:
         resp = await self._rpc(
             self._svc.admin_users.assign_role(
-                admin_members_pb2.AssignRoleRequest(
-                    user_id=user_id, role_name=role_name
-                ),
+                admin_members_pb2.AssignRoleRequest(user_id=user_id, role_name=role_name),
                 headers=self._headers(),
             )
         )
         return AdminMember.parse(pb_to_dict(resp.member))
 
-    async def admin_revoke_role(
-        self, user_id: str, role_name: str
-    ) -> AdminMember | None:
+    async def admin_revoke_role(self, user_id: str, role_name: str) -> AdminMember | None:
         resp = await self._rpc(
             self._svc.admin_users.revoke_role(
-                admin_members_pb2.RevokeRoleRequest(
-                    user_id=user_id, role_name=role_name
-                ),
+                admin_members_pb2.RevokeRoleRequest(user_id=user_id, role_name=role_name),
                 headers=self._headers(),
             )
         )
@@ -2084,22 +1982,16 @@ class ChattoClient:
             req.display_name = display_name
         if login is not None:
             req.login = login
-        resp = await self._rpc(
-            self._svc.admin_users.update_user(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.admin_users.update_user(req, headers=self._headers()))
         return (
             User.parse(pb_to_dict(resp.user)),
             AdminMember.parse(pb_to_dict(resp.member)),
         )
 
-    async def admin_update_user_password(
-        self, user_id: str, password: str
-    ) -> AdminMember | None:
+    async def admin_update_user_password(self, user_id: str, password: str) -> AdminMember | None:
         resp = await self._rpc(
             self._svc.admin_users.update_user_password(
-                admin_members_pb2.UpdateUserPasswordRequest(
-                    user_id=user_id, password=password
-                ),
+                admin_members_pb2.UpdateUserPasswordRequest(user_id=user_id, password=password),
                 headers=self._headers(),
             )
         )
@@ -2114,9 +2006,7 @@ class ChattoClient:
         )
         return resp.cleared
 
-    async def admin_delete_user(
-        self, user_id: str, *, current_password: str = ""
-    ) -> bool:
+    async def admin_delete_user(self, user_id: str, *, current_password: str = "") -> bool:
         resp = await self._rpc(
             self._svc.admin_users.delete_user(
                 admin_members_pb2.DeleteUserRequest(
@@ -2137,9 +2027,7 @@ class ChattoClient:
         )
         data = pb_to_dict(resp)
         return [
-            r
-            for r in (AdminRole.parse(row) for row in data.get("roles") or [])
-            if r is not None
+            r for r in (AdminRole.parse(row) for row in data.get("roles") or []) if r is not None
         ]
 
     async def admin_get_role(self, name: str) -> dict[str, Any]:
@@ -2186,9 +2074,7 @@ class ChattoClient:
             req.description = description
         if pingable is not None:
             req.pingable = pingable
-        resp = await self._rpc(
-            self._svc.admin_roles.update_role(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.admin_roles.update_role(req, headers=self._headers()))
         return AdminRole.parse(pb_to_dict(resp.role))
 
     async def admin_delete_role(self, name: str) -> bool:
@@ -2209,9 +2095,7 @@ class ChattoClient:
         )
         data = pb_to_dict(resp)
         return [
-            r
-            for r in (AdminRole.parse(row) for row in data.get("roles") or [])
-            if r is not None
+            r for r in (AdminRole.parse(row) for row in data.get("roles") or []) if r is not None
         ]
 
     # --- Admin: event log / diagnostics / permissions ----------------
@@ -2229,9 +2113,7 @@ class ChattoClient:
         page = _page_pb(limit, offset)
         if page is not None:
             req.page.CopyFrom(page)
-        resp = await self._rpc(
-            self._svc.admin_event_log.list_events(req, headers=self._headers())
-        )
+        resp = await self._rpc(self._svc.admin_event_log.list_events(req, headers=self._headers()))
         return pb_to_dict(resp)
 
     async def admin_list_event_types(self) -> list[str]:
@@ -2272,14 +2154,10 @@ class ChattoClient:
         )
         return pb_to_dict(resp)
 
-    async def admin_list_role_permission_decisions(
-        self, role_name: str
-    ) -> dict[str, Any]:
+    async def admin_list_role_permission_decisions(self, role_name: str) -> dict[str, Any]:
         resp = await self._rpc(
             self._svc.admin_permissions.list_role_permission_decisions(
-                admin_permissions_pb2.ListRolePermissionDecisionsRequest(
-                    role_name=role_name
-                ),
+                admin_permissions_pb2.ListRolePermissionDecisionsRequest(role_name=role_name),
                 headers=self._headers(),
             )
         )
@@ -2294,9 +2172,7 @@ class ChattoClient:
         )
         return pb_to_dict(resp)
 
-    async def admin_list_user_permission_decisions(
-        self, user_id: str
-    ) -> dict[str, Any]:
+    async def admin_list_user_permission_decisions(self, user_id: str) -> dict[str, Any]:
         resp = await self._rpc(
             self._svc.admin_permissions.list_user_permission_decisions(
                 admin_permissions_pb2.ListUserPermissionDecisionsRequest(user_id=user_id),

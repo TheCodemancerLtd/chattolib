@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from chattolib.client import ChattoClient
 
 REALTIME_PATH = "/api/realtime"
-REALTIME_PROTOCOL_VERSION = 1
+REALTIME_PROTOCOL_VERSION = 2
 
 
 class ChattoRealtimeError(ChattoError):
@@ -82,6 +82,41 @@ class ServerHello:
 
 
 @dataclass
+class RealtimeProjectionOperation:
+    """One durable state change inside a :class:`RealtimeProjectionEvent`.
+
+    ``operation`` names the ``oneof operation`` case set on the operation
+    (``reset``, ``server_upsert``, ``viewer_upsert``, ``user_upsert``,
+    ``user_remove``, ``room_upsert``, ``room_remove``,
+    ``room_groups_replace``, ``room_timeline_replace``,
+    ``room_timeline_event_upsert``, ``server_state_upsert``,
+    ``room_timeline_event_remove``, ``room_viewer_state_replace``,
+    ``active_calls_replace``, ``presences_replace``,
+    ``thread_viewer_states_replace``, ``room_activity``,
+    ``notification_occurrences_replace``). ``payload`` is the concrete
+    protobuf sub-message.
+    """
+
+    operation: str
+    payload: Any
+    raw: Any  # the full RealtimeProjectionOperation
+
+
+@dataclass
+class RealtimeProjectionEvent:
+    """A server-projection frame: the durable state the server wants clients
+    to converge on, as a batch of :class:`RealtimeProjectionOperation` s.
+    """
+
+    id: str
+    created_at: datetime | None
+    actor_id: str | None
+    resume_cursor: str | None
+    operations: list[RealtimeProjectionOperation]
+    raw: Any  # the full RealtimeProjectionEvent
+
+
+@dataclass
 class RealtimeEvent:
     """One live event delivered over the realtime WebSocket.
 
@@ -114,9 +149,13 @@ class RealtimeConnection:
         client: ChattoClient,
         *,
         protocol_version: int = REALTIME_PROTOCOL_VERSION,
+        resume_cursor: str | None = None,
+        retained_room_ids: list[str] | None = None,
     ) -> None:
         self._client = client
         self._protocol_version = protocol_version
+        self._resume_cursor = resume_cursor
+        self._retained_room_ids = list(retained_room_ids or [])
         self._ws: Any = None
         self._server_hello: ServerHello | None = None
 
@@ -174,6 +213,9 @@ class RealtimeConnection:
 
         subscribe = realtime_pb2.RealtimeClientFrame()
         subscribe.subscribe_events.SetInParent()
+        if self._resume_cursor:
+            subscribe.subscribe_events.resume_cursor = self._resume_cursor
+        subscribe.subscribe_events.retained_room_ids.extend(self._retained_room_ids)
         await self._ws.send(subscribe.SerializeToString())
 
     async def close(self) -> None:
@@ -194,8 +236,21 @@ class RealtimeConnection:
         frame.ping.nonce = nonce
         await self._ws.send(frame.SerializeToString())
 
-    async def events(self) -> AsyncIterator[RealtimeEvent]:
-        """Yield decoded live events until the connection closes."""
+    async def hydrate_room(self, room_id: str) -> None:
+        """Ask the server to re-send the projection state for a room."""
+        if self._ws is None:
+            raise ChattoError("realtime connection is closed")
+        from chattolib._pb.chatto.realtime.v1 import realtime_pb2
+
+        frame = realtime_pb2.RealtimeClientFrame()
+        frame.hydrate_room.room_id = room_id
+        await self._ws.send(frame.SerializeToString())
+
+    async def events(
+        self,
+    ) -> AsyncIterator[RealtimeEvent | RealtimeProjectionEvent]:
+        """Yield decoded live events and projection events until the
+        connection closes."""
         if self._ws is None:
             raise ChattoError("realtime connection is not open")
         from chattolib._pb.chatto.realtime.v1 import realtime_pb2
@@ -212,8 +267,10 @@ class RealtimeConnection:
             case = frame.WhichOneof("frame")
             if case == "event":
                 yield _wrap_event(frame.event)
-            elif case in ("heartbeat", "pong", "subscribed"):
+            elif case in ("heartbeat", "pong", "subscribed", "caught_up"):
                 continue
+            elif case == "projection_event":
+                yield _wrap_projection_event(frame.projection_event)
             elif case == "error":
                 err = frame.error
                 exc = ChattoRealtimeError(err.code, err.message, fatal=err.fatal)
@@ -254,6 +311,33 @@ def _raise_for_control(frame: Any) -> None:
         )
 
 
+def _wrap_projection_event(envelope: Any) -> RealtimeProjectionEvent:
+    created_at = None
+    if envelope.HasField("created_at"):
+        created_at = parse_datetime(envelope.created_at.ToJsonString())
+    actor_id: str | None = None
+    if envelope.HasField("actor_id"):
+        actor_id = envelope.actor_id
+    resume_cursor: str | None = None
+    if envelope.HasField("resume_cursor"):
+        resume_cursor = envelope.resume_cursor
+    operations = [_wrap_projection_operation(op) for op in envelope.operations]
+    return RealtimeProjectionEvent(
+        id=envelope.id,
+        created_at=created_at,
+        actor_id=actor_id,
+        resume_cursor=resume_cursor,
+        operations=operations,
+        raw=envelope,
+    )
+
+
+def _wrap_projection_operation(op: Any) -> RealtimeProjectionOperation:
+    kind = op.WhichOneof("operation") or ""
+    payload = getattr(op, kind, None) if kind else None
+    return RealtimeProjectionOperation(operation=kind, payload=payload, raw=op)
+
+
 def _wrap_event(envelope: Any) -> RealtimeEvent:
     kind = envelope.WhichOneof("event") or ""
     payload = getattr(envelope, kind, None) if kind else None
@@ -277,14 +361,21 @@ async def stream_events(
     client: ChattoClient,
     *,
     protocol_version: int = REALTIME_PROTOCOL_VERSION,
-) -> AsyncIterator[RealtimeEvent]:
+    resume_cursor: str | None = None,
+    retained_room_ids: list[str] | None = None,
+) -> AsyncIterator[RealtimeEvent | RealtimeProjectionEvent]:
     """Open a realtime connection and yield events until the server closes.
 
     Raises :class:`ChattoRealtimeCloseError` when the server sends a close frame,
     :class:`ChattoRealtimeError` on fatal protocol errors, or
     :class:`ChattoConnectError` if the initial HTTP handshake fails.
     """
-    conn = RealtimeConnection(client, protocol_version=protocol_version)
+    conn = RealtimeConnection(
+        client,
+        protocol_version=protocol_version,
+        resume_cursor=resume_cursor,
+        retained_room_ids=retained_room_ids,
+    )
     try:
         await conn.connect()
         async for event in conn.events():
@@ -300,6 +391,8 @@ __all__ = [
     "ChattoRealtimeError",
     "RealtimeConnection",
     "RealtimeEvent",
+    "RealtimeProjectionEvent",
+    "RealtimeProjectionOperation",
     "ServerHello",
     "realtime_url",
     "stream_events",

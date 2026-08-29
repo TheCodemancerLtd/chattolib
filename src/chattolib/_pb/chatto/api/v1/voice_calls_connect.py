@@ -35,6 +35,9 @@ class VoiceCallService(Protocol):
     async def get_call_token(self, request: chatto_dot_api_dot_v1_dot_voice__calls__pb2.GetCallTokenRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_voice__calls__pb2.GetCallTokenResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
+    async def create_call_media_publisher_token(self, request: chatto_dot_api_dot_v1_dot_voice__calls__pb2.CreateCallMediaPublisherTokenRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_voice__calls__pb2.CreateCallMediaPublisherTokenResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
     async def leave_call(self, request: chatto_dot_api_dot_v1_dot_voice__calls__pb2.LeaveCallRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_voice__calls__pb2.LeaveCallResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
@@ -103,6 +106,16 @@ class VoiceCallServiceASGIApplication(ConnectASGIApplication[VoiceCallService]):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=svc.get_call_token,
+                ),
+                "/chatto.api.v1.VoiceCallService/CreateCallMediaPublisherToken": Endpoint.unary(
+                    method=MethodInfo(
+                        name="CreateCallMediaPublisherToken",
+                        service_name="chatto.api.v1.VoiceCallService",
+                        input=chatto_dot_api_dot_v1_dot_voice__calls__pb2.CreateCallMediaPublisherTokenRequest,
+                        output=chatto_dot_api_dot_v1_dot_voice__calls__pb2.CreateCallMediaPublisherTokenResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.create_call_media_publisher_token,
                 ),
                 "/chatto.api.v1.VoiceCallService/LeaveCall": Endpoint.unary(
                     method=MethodInfo(
@@ -247,6 +260,26 @@ class VoiceCallServiceClient(ConnectClient):
             timeout_ms=timeout_ms,
         )
 
+    async def create_call_media_publisher_token(
+        self,
+        request: chatto_dot_api_dot_v1_dot_voice__calls__pb2.CreateCallMediaPublisherTokenRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_api_dot_v1_dot_voice__calls__pb2.CreateCallMediaPublisherTokenResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="CreateCallMediaPublisherToken",
+                service_name="chatto.api.v1.VoiceCallService",
+                input=chatto_dot_api_dot_v1_dot_voice__calls__pb2.CreateCallMediaPublisherTokenRequest,
+                output=chatto_dot_api_dot_v1_dot_voice__calls__pb2.CreateCallMediaPublisherTokenResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
     async def leave_call(
         self,
         request: chatto_dot_api_dot_v1_dot_voice__calls__pb2.LeaveCallRequest,
@@ -280,6 +313,8 @@ class VoiceCallServiceSync(Protocol):
     def join_call(self, request: chatto_dot_api_dot_v1_dot_voice__calls__pb2.JoinCallRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_voice__calls__pb2.JoinCallResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def get_call_token(self, request: chatto_dot_api_dot_v1_dot_voice__calls__pb2.GetCallTokenRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_voice__calls__pb2.GetCallTokenResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def create_call_media_publisher_token(self, request: chatto_dot_api_dot_v1_dot_voice__calls__pb2.CreateCallMediaPublisherTokenRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_voice__calls__pb2.CreateCallMediaPublisherTokenResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def leave_call(self, request: chatto_dot_api_dot_v1_dot_voice__calls__pb2.LeaveCallRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_voice__calls__pb2.LeaveCallResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
@@ -348,6 +383,16 @@ class VoiceCallServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=service.get_call_token,
+                ),
+                "/chatto.api.v1.VoiceCallService/CreateCallMediaPublisherToken": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="CreateCallMediaPublisherToken",
+                        service_name="chatto.api.v1.VoiceCallService",
+                        input=chatto_dot_api_dot_v1_dot_voice__calls__pb2.CreateCallMediaPublisherTokenRequest,
+                        output=chatto_dot_api_dot_v1_dot_voice__calls__pb2.CreateCallMediaPublisherTokenResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.create_call_media_publisher_token,
                 ),
                 "/chatto.api.v1.VoiceCallService/LeaveCall": EndpointSync.unary(
                     method=MethodInfo(
@@ -486,6 +531,26 @@ class VoiceCallServiceClientSync(ConnectClientSync):
                 service_name="chatto.api.v1.VoiceCallService",
                 input=chatto_dot_api_dot_v1_dot_voice__calls__pb2.GetCallTokenRequest,
                 output=chatto_dot_api_dot_v1_dot_voice__calls__pb2.GetCallTokenResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def create_call_media_publisher_token(
+        self,
+        request: chatto_dot_api_dot_v1_dot_voice__calls__pb2.CreateCallMediaPublisherTokenRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_api_dot_v1_dot_voice__calls__pb2.CreateCallMediaPublisherTokenResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="CreateCallMediaPublisherToken",
+                service_name="chatto.api.v1.VoiceCallService",
+                input=chatto_dot_api_dot_v1_dot_voice__calls__pb2.CreateCallMediaPublisherTokenRequest,
+                output=chatto_dot_api_dot_v1_dot_voice__calls__pb2.CreateCallMediaPublisherTokenResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,

@@ -60,6 +60,14 @@ class RoomKind(StrEnum):
     DM = "ROOM_KIND_DM"
 
 
+class RoomThreadingMode(StrEnum):
+    UNSPECIFIED = "ROOM_THREADING_MODE_UNSPECIFIED"
+    REQUIRED = "ROOM_THREADING_MODE_REQUIRED"
+    ENCOURAGED = "ROOM_THREADING_MODE_ENCOURAGED"
+    ENABLED = "ROOM_THREADING_MODE_ENABLED"
+    DISABLED = "ROOM_THREADING_MODE_DISABLED"
+
+
 class RoomDirectoryScope(StrEnum):
     UNSPECIFIED = "ROOM_DIRECTORY_SCOPE_UNSPECIFIED"
     ALL = "ROOM_DIRECTORY_SCOPE_ALL"
@@ -155,6 +163,9 @@ class User:
     avatar_url: str | None = None
     deleted: bool = False
     custom_status: CustomUserStatus | None = None
+    is_bot: bool = False
+    bio: str | None = None
+    timezone: str | None = None
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> User | None:
@@ -170,6 +181,9 @@ class User:
             avatar_url=data.get("avatarUrl"),
             deleted=bool(data.get("deleted", False)),
             custom_status=CustomUserStatus.parse(data.get("customStatus")),
+            is_bot=bool(data.get("isBot", False)),
+            bio=data.get("bio"),
+            timezone=data.get("timezone"),
         )
 
 
@@ -183,9 +197,7 @@ class UserSettings:
         data = data or {}
         return cls(
             timezone=data.get("timezone"),
-            time_format=_parse_enum(
-                TimeFormat, data.get("timeFormat"), TimeFormat.UNSPECIFIED
-            ),  # type: ignore[arg-type]
+            time_format=_parse_enum(TimeFormat, data.get("timeFormat"), TimeFormat.UNSPECIFIED),  # type: ignore[arg-type]
         )
 
 
@@ -331,6 +343,8 @@ class Room:
     archived: bool = False
     group_id: str = ""
     universal: bool = False
+    slow_mode_seconds: int = 0
+    threading_mode: RoomThreadingMode = RoomThreadingMode.UNSPECIFIED
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> Room | None:
@@ -344,6 +358,12 @@ class Room:
             archived=bool(data.get("archived", False)),
             group_id=data.get("groupId", ""),
             universal=bool(data.get("universal", False)),
+            slow_mode_seconds=int(data.get("slowModeSeconds") or 0),
+            threading_mode=_parse_enum(
+                RoomThreadingMode,
+                data.get("threadingMode"),
+                RoomThreadingMode.UNSPECIFIED,
+            ),  # type: ignore[arg-type]
         )
 
 
@@ -558,6 +578,100 @@ class MessageAttachment:
 
 
 @dataclass
+class SocialPostAuthor:
+    display_name: str = ""
+    handle: str = ""
+    avatar_url: str | None = None
+    avatar_asset_id: str | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> SocialPostAuthor | None:
+        if not data:
+            return None
+        return cls(
+            display_name=data.get("displayName", ""),
+            handle=data.get("handle", ""),
+            avatar_url=data.get("avatarUrl"),
+            avatar_asset_id=data.get("avatarAssetId"),
+        )
+
+
+@dataclass
+class SocialPostImage:
+    url: str = ""
+    asset_id: str = ""
+    alt: str = ""
+    width: int = 0
+    height: int = 0
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> SocialPostImage | None:
+        if not data:
+            return None
+        return cls(
+            url=data.get("url", ""),
+            asset_id=data.get("assetId", ""),
+            alt=data.get("alt", ""),
+            width=int(data.get("width") or 0),
+            height=int(data.get("height") or 0),
+        )
+
+
+@dataclass
+class SocialPostExternalLink:
+    url: str = ""
+    title: str | None = None
+    description: str | None = None
+    image_url: str | None = None
+    image_asset_id: str | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> SocialPostExternalLink | None:
+        if not data:
+            return None
+        return cls(
+            url=data.get("url", ""),
+            title=data.get("title"),
+            description=data.get("description"),
+            image_url=data.get("imageUrl"),
+            image_asset_id=data.get("imageAssetId"),
+        )
+
+
+@dataclass
+class SocialPostPreview:
+    provider: str = ""
+    author: SocialPostAuthor | None = None
+    text: str | None = None
+    published_at: datetime | None = None
+    images: list[SocialPostImage] = field(default_factory=list)
+    external_link: SocialPostExternalLink | None = None
+    content_warning: str | None = None
+    url: str | None = None
+    quoted_post: SocialPostPreview | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> SocialPostPreview | None:
+        if not data:
+            return None
+        return cls(
+            provider=data.get("provider", ""),
+            author=SocialPostAuthor.parse(data.get("author")),
+            text=data.get("text"),
+            published_at=parse_datetime(data.get("publishedAt")),
+            images=[
+                i
+                for i in (SocialPostImage.parse(i) for i in data.get("images") or [])
+                if i is not None
+            ],
+            external_link=SocialPostExternalLink.parse(data.get("externalLink")),
+            content_warning=data.get("contentWarning"),
+            url=data.get("url"),
+            quoted_post=SocialPostPreview.parse(data.get("quotedPost")),
+        )
+
+
+@dataclass
 class LinkPreview:
     url: str
     title: str | None = None
@@ -567,6 +681,7 @@ class LinkPreview:
     site_name: str | None = None
     embed_type: str | None = None
     embed_id: str | None = None
+    social_post: SocialPostPreview | None = None
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> LinkPreview | None:
@@ -581,6 +696,39 @@ class LinkPreview:
             site_name=data.get("siteName"),
             embed_type=data.get("embedType"),
             embed_id=data.get("embedId"),
+            social_post=SocialPostPreview.parse(data.get("socialPost")),
+        )
+
+
+@dataclass
+class PinnedMessage:
+    """A pinned message in a room (wraps the pinned :class:`Message")."""
+
+    message: Message | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> PinnedMessage | None:
+        if not data:
+            return None
+        return cls(message=Message.parse(data.get("message")))
+
+
+@dataclass
+class PinnedMessagesPage:
+    pinned_messages: list[PinnedMessage] = field(default_factory=list)
+    page: Page = field(default_factory=Page)
+    latest_pin_marker: str | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any]) -> PinnedMessagesPage:
+        return cls(
+            pinned_messages=[
+                p
+                for p in (PinnedMessage.parse(m) for m in data.get("pinnedMessages") or [])
+                if p is not None
+            ],
+            page=Page.parse(data.get("page")),
+            latest_pin_marker=data.get("latestPinMarker"),
         )
 
 
@@ -620,9 +768,7 @@ class ThreadSummary:
             thread_root_event_id=data.get("threadRootEventId", ""),
             reply_count=int(data.get("replyCount", 0)),
             last_reply_at=parse_datetime(data.get("lastReplyAt")),
-            participant_preview_user_ids=list(
-                data.get("participantPreviewUserIds") or []
-            ),
+            participant_preview_user_ids=list(data.get("participantPreviewUserIds") or []),
             participant_count=int(data.get("participantCount", 0)),
             is_following=viewer.get("isFollowing") if "isFollowing" in viewer else None,
             has_unread=viewer.get("hasUnread") if "hasUnread" in viewer else None,
@@ -647,6 +793,7 @@ class Message:
     reactions: list[MessageReaction] = field(default_factory=list)
     thread: ThreadSummary | None = None
     deleted_at: datetime | None = None
+    pinned: bool = False
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> Message | None:
@@ -669,6 +816,7 @@ class Message:
             reactions=[MessageReaction.parse(r) for r in data.get("reactions") or []],
             thread=ThreadSummary.parse(data.get("thread")),
             deleted_at=parse_datetime(data.get("deletedAt")),
+            pinned=bool(data.get("pinned", False)),
         )
 
 
@@ -776,49 +924,169 @@ class FollowedThreadsPage:
 
 
 @dataclass
-class Notification:
-    id: str
-    created_at: datetime | None
-    actor: User | None
-    kind: str  # "direct_message" | "mention" | "reply" | "room_message"
+@dataclass
+class NotificationMessageReference:
+    """A reference to the message a notification signal points at."""
+
     room: RoomSummary | None = None
     event_id: str = ""
-    in_reply_to_id: str = ""
     thread_root_event_id: str | None = None
 
     @classmethod
-    def parse(cls, data: dict[str, Any]) -> Notification:
-        kind = ""
-        room: RoomSummary | None = None
-        event_id = ""
-        in_reply_to_id = ""
-        thread_root: str | None = None
-        for candidate in ("directMessage", "mention", "reply", "roomMessage"):
-            payload = data.get(candidate)
-            if payload is None:
-                continue
-            kind = _snake_case(candidate)
-            room = RoomSummary.parse(payload.get("room"))
-            event_id = payload.get("eventId", "")
-            in_reply_to_id = payload.get("inReplyToId", "") if candidate == "reply" else ""
-            thread_root = payload.get("threadRootEventId")
-            break
+    def parse(cls, data: dict[str, Any] | None) -> NotificationMessageReference | None:
+        if not data:
+            return None
         return cls(
-            id=data.get("id", ""),
-            created_at=parse_datetime(data.get("createdAt")),
-            actor=User.parse(data.get("actor")),
-            kind=kind,
-            room=room,
-            event_id=event_id,
-            in_reply_to_id=in_reply_to_id,
-            thread_root_event_id=thread_root,
+            room=RoomSummary.parse(data.get("room")),
+            event_id=data.get("eventId", ""),
+            thread_root_event_id=data.get("threadRootEventId"),
         )
 
 
 @dataclass
-class NotificationsPage:
-    notifications: list[Notification] = field(default_factory=list)
+class NotificationSignal:
+    """The concrete signal that produced a :class:`NotificationOccurrence`.
+
+    ``kind`` names the ``oneof kind`` case set on the signal
+    (``direct_message_received``, ``direct_mention_received``,
+    ``reply_received``, ``role_mention_received``, ``here_mention_received``,
+    ``all_mention_received``, ``followed_thread_activity``,
+    ``followed_room_activity``, ``reaction_received``,
+    ``room_message_received``). ``message`` is the referenced
+    :class:`NotificationMessageReference`.
+    """
+
+    kind: str
+    message: NotificationMessageReference | None
+    role_names: list[str] = field(default_factory=list)
+    emoji: str = ""
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> NotificationSignal | None:
+        if not data:
+            return None
+        kind = ""
+        message: NotificationMessageReference | None = None
+        for candidate in (
+            "directMessageReceived",
+            "directMentionReceived",
+            "replyReceived",
+            "roleMentionReceived",
+            "hereMentionReceived",
+            "allMentionReceived",
+            "followedThreadActivity",
+            "followedRoomActivity",
+            "reactionReceived",
+            "roomMessageReceived",
+        ):
+            payload = data.get(candidate)
+            if payload is None:
+                continue
+            kind = _snake_case(candidate)
+            message = NotificationMessageReference.parse(payload.get("message"))
+            break
+        return cls(
+            kind=kind,
+            message=message,
+            role_names=list(data.get("roleNames") or []),
+            emoji=data.get("emoji", ""),
+        )
+
+
+@dataclass
+class NotificationOccurrence:
+    """One stored notification in the viewer's notification center.
+
+    Replaces the pre-0.5 ``Notification`` message: the old oneof of
+    ``directMessage``/``mention``/``reply``/``roomMessage`` is now the
+    ``signal`` field, and dismissals became read/deletions.
+    """
+
+    id: str
+    created_at: datetime | None
+    actor: User | None
+    signal: NotificationSignal | None = None
+    unread: bool = False
+    expires_at: datetime | None = None
+    attention_level: str = ""
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> NotificationOccurrence | None:
+        if not data:
+            return None
+        return cls(
+            id=data.get("id", ""),
+            created_at=parse_datetime(data.get("createdAt")),
+            actor=User.parse(data.get("actor")),
+            signal=NotificationSignal.parse(data.get("signal")),
+            unread=bool(data.get("unread", False)),
+            expires_at=parse_datetime(data.get("expiresAt")),
+            attention_level=data.get("attentionLevel", ""),
+        )
+
+
+@dataclass
+class NotificationRoomUnreadCount:
+    room_id: str
+    unread_count: int = 0
+    important_unread_count: int = 0
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> NotificationRoomUnreadCount | None:
+        if not data:
+            return None
+        return cls(
+            room_id=data.get("roomId", ""),
+            unread_count=int(data.get("unreadCount") or 0),
+            important_unread_count=int(data.get("importantUnreadCount") or 0),
+        )
+
+
+@dataclass
+class NotificationPolicy:
+    """Effective notification policy for a scope (server, room group, room)."""
+
+    overrides: dict[str, Any] | None = None
+    effective: dict[str, Any] | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> NotificationPolicy:
+        data = data or {}
+        return cls(
+            overrides=data.get("overrides"),
+            effective=data.get("effective"),
+        )
+
+
+@dataclass
+class NotificationOccurrencesPage:
+    occurrences: list[NotificationOccurrence] = field(default_factory=list)
     page: Page = field(default_factory=Page)
+    unread_count: int = 0
+    next_expiry_at: datetime | None = None
+    room_unread_counts: list[NotificationRoomUnreadCount] = field(default_factory=list)
+    important_unread_count: int = 0
+
+    @classmethod
+    def parse(cls, data: dict[str, Any]) -> NotificationOccurrencesPage:
+        return cls(
+            occurrences=[
+                o
+                for o in (NotificationOccurrence.parse(n) for n in data.get("occurrences") or [])
+                if o is not None
+            ],
+            page=Page.parse(data.get("page")),
+            unread_count=int(data.get("unreadCount") or 0),
+            next_expiry_at=parse_datetime(data.get("nextExpiryAt")),
+            room_unread_counts=[
+                c
+                for c in (
+                    NotificationRoomUnreadCount.parse(r) for r in data.get("roomUnreadCounts") or []
+                )
+                if c is not None
+            ],
+            important_unread_count=int(data.get("importantUnreadCount") or 0),
+        )
 
 
 @dataclass
@@ -830,9 +1098,7 @@ class NotificationPreference:
     def parse(cls, data: dict[str, Any] | None) -> NotificationPreference:
         data = data or {}
         return cls(
-            level=_parse_enum(
-                NotificationLevel, data.get("level"), NotificationLevel.UNSPECIFIED
-            ),  # type: ignore[arg-type]
+            level=_parse_enum(NotificationLevel, data.get("level"), NotificationLevel.UNSPECIFIED),  # type: ignore[arg-type]
             effective_level=_parse_enum(
                 NotificationLevel,
                 data.get("effectiveLevel"),
@@ -910,9 +1176,7 @@ class ActiveCall:
         return cls(
             call_id=data.get("callId", ""),
             room=RoomSummary.parse(data.get("room")),
-            participants=[
-                ActiveCallParticipant.parse(p) for p in data.get("participants") or []
-            ],
+            participants=[ActiveCallParticipant.parse(p) for p in data.get("participants") or []],
         )
 
 

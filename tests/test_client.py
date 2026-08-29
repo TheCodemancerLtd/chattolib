@@ -468,35 +468,53 @@ async def test_follow_and_unfollow_thread(client):
 # --- Notifications ----------------------------------------------------
 
 
-async def test_list_notifications(client):
-    resp = notifications_pb2.ListNotificationsResponse()
-    n = resp.notifications.add()
-    n.id = "n1"
-    n.created_at.FromJsonString("2026-01-01T00:00:00Z")
-    n.actor.id = "u1"
-    n.actor.login = "alice"
-    n.actor.display_name = "Alice"
-    n.mention.room.id = "r1"
-    n.mention.room.name = "general"
-    n.mention.event_id = "e1"
+async def test_list_notification_occurrences(client):
+    resp = notifications_pb2.ListNotificationOccurrencesResponse()
+    occ = resp.occurrences.add()
+    occ.id = "n1"
+    occ.created_at.FromJsonString("2026-01-01T00:00:00Z")
+    occ.actor.id = "u1"
+    occ.actor.login = "alice"
+    occ.actor.display_name = "Alice"
+    occ.unread = True
+    sig = occ.signal.direct_mention_received
+    sig.message.room.id = "r1"
+    sig.message.room.name = "general"
+    sig.message.event_id = "e1"
     resp.page.total_count = 1
-    _mock_method(client, "notifications", "list_notifications", resp)
+    resp.unread_count = 1
+    _mock_method(client, "notifications", "list_notification_occurrences", resp)
 
     async with client:
-        page = await client.list_notifications()
+        page = await client.list_notification_occurrences()
 
     assert page.page.total_count == 1
-    assert page.notifications[0].kind == "mention"
-    assert page.notifications[0].room is not None
-    assert page.notifications[0].room.name == "general"
+    assert page.unread_count == 1
+    assert page.occurrences[0].signal is not None
+    assert page.occurrences[0].signal.kind == "direct_mention_received"
+    assert page.occurrences[0].signal.message is not None
+    assert page.occurrences[0].signal.message.event_id == "e1"
+    assert page.occurrences[0].signal.message.room is not None
+    assert page.occurrences[0].signal.message.room.name == "general"
 
 
-async def test_dismiss_notification(client):
-    resp = notifications_pb2.DismissNotificationResponse(dismissed=True)
-    _mock_method(client, "notifications", "dismiss_notification", resp)
+async def test_mark_and_delete_notification_occurrence(client):
+    read_resp = notifications_pb2.MarkNotificationReadResponse()
+    read_resp.occurrence.id = "n1"
+    read_resp.occurrence.unread = False
+    _mock_method(client, "notifications", "mark_notification_read", read_resp)
+
+    del_resp = notifications_pb2.DeleteNotificationOccurrenceResponse(deleted=True)
+    _mock_method(client, "notifications", "delete_notification_occurrence", del_resp)
+
+    all_resp = notifications_pb2.DeleteAllNotificationOccurrencesResponse(deleted_count=3)
+    _mock_method(client, "notifications", "delete_all_notification_occurrences", all_resp)
 
     async with client:
-        assert await client.dismiss_notification("n1") is True
+        occ = await client.mark_notification_read("n1")
+        assert occ is not None and occ.unread is False
+        assert await client.delete_notification_occurrence("n1") is True
+        assert await client.delete_all_notification_occurrences() == 3
 
 
 async def test_notification_preference(client):
@@ -511,9 +529,7 @@ async def test_notification_preference(client):
     )
 
     async with client:
-        pref = await client.update_room_notification_preference(
-            "r1", NotificationLevel.MUTED
-        )
+        pref = await client.update_room_notification_preference("r1", NotificationLevel.MUTED)
 
     assert pref.level is NotificationLevel.MUTED
     assert pref.effective_level is NotificationLevel.MUTED
@@ -625,9 +641,7 @@ async def test_asset_upload_end_to_end(client, tmp_path):
     create_resp.upload.size = len(payload)
     create_resp.upload.max_chunk_size = 4096
     create_resp.upload.sha256 = sha
-    create_mock = _mock_method(
-        client, "asset_uploads", "create_upload", create_resp
-    )
+    create_mock = _mock_method(client, "asset_uploads", "create_upload", create_resp)
 
     chunk_resp = asset_uploads_pb2.UploadChunkResponse()
     chunk_resp.upload.upload_id = "up1"
@@ -654,9 +668,7 @@ async def test_asset_upload_end_to_end(client, tmp_path):
     _mock_method(client, "asset_uploads", "complete_upload", complete_resp)
 
     async with client:
-        asset = await client.upload_attachment(
-            "r1", file, content_type="text/plain"
-        )
+        asset = await client.upload_attachment("r1", file, content_type="text/plain")
 
     assert asset.id == "a1"
     assert asset.filename == "greet.txt"
@@ -746,9 +758,7 @@ async def test_admin_update_server_config(client):
     _mock_method(client, "admin_server", "update_server_config", resp)
 
     async with client:
-        config, profile = await client.admin_update_server_config(
-            server_name="MyServer", motd="hi"
-        )
+        config, profile = await client.admin_update_server_config(server_name="MyServer", motd="hi")
 
     assert config.server_name == "MyServer"
     assert profile.version == "0.4.2"

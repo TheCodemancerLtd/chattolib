@@ -65,6 +65,15 @@ class RoomService(Protocol):
     async def list_room_attachments(self, request: chatto_dot_api_dot_v1_dot_rooms__pb2.ListRoomAttachmentsRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_rooms__pb2.ListRoomAttachmentsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
+    async def list_pinned_messages(self, request: chatto_dot_api_dot_v1_dot_rooms__pb2.ListPinnedMessagesRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_rooms__pb2.ListPinnedMessagesResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def create_pinned_message(self, request: chatto_dot_api_dot_v1_dot_rooms__pb2.CreatePinnedMessageRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_rooms__pb2.CreatePinnedMessageResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def delete_pinned_message(self, request: chatto_dot_api_dot_v1_dot_rooms__pb2.DeletePinnedMessageRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_rooms__pb2.DeletePinnedMessageResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
     async def update_typing_indicator(self, request: chatto_dot_api_dot_v1_dot_rooms__pb2.UpdateTypingIndicatorRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_rooms__pb2.UpdateTypingIndicatorResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
@@ -238,6 +247,36 @@ class RoomServiceASGIApplication(ConnectASGIApplication[RoomService]):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=svc.list_room_attachments,
+                ),
+                "/chatto.api.v1.RoomService/ListPinnedMessages": Endpoint.unary(
+                    method=MethodInfo(
+                        name="ListPinnedMessages",
+                        service_name="chatto.api.v1.RoomService",
+                        input=chatto_dot_api_dot_v1_dot_rooms__pb2.ListPinnedMessagesRequest,
+                        output=chatto_dot_api_dot_v1_dot_rooms__pb2.ListPinnedMessagesResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.list_pinned_messages,
+                ),
+                "/chatto.api.v1.RoomService/CreatePinnedMessage": Endpoint.unary(
+                    method=MethodInfo(
+                        name="CreatePinnedMessage",
+                        service_name="chatto.api.v1.RoomService",
+                        input=chatto_dot_api_dot_v1_dot_rooms__pb2.CreatePinnedMessageRequest,
+                        output=chatto_dot_api_dot_v1_dot_rooms__pb2.CreatePinnedMessageResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.create_pinned_message,
+                ),
+                "/chatto.api.v1.RoomService/DeletePinnedMessage": Endpoint.unary(
+                    method=MethodInfo(
+                        name="DeletePinnedMessage",
+                        service_name="chatto.api.v1.RoomService",
+                        input=chatto_dot_api_dot_v1_dot_rooms__pb2.DeletePinnedMessageRequest,
+                        output=chatto_dot_api_dot_v1_dot_rooms__pb2.DeletePinnedMessageResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.delete_pinned_message,
                 ),
                 "/chatto.api.v1.RoomService/UpdateTypingIndicator": Endpoint.unary(
                     method=MethodInfo(
@@ -612,6 +651,66 @@ class RoomServiceClient(ConnectClient):
             timeout_ms=timeout_ms,
         )
 
+    async def list_pinned_messages(
+        self,
+        request: chatto_dot_api_dot_v1_dot_rooms__pb2.ListPinnedMessagesRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_api_dot_v1_dot_rooms__pb2.ListPinnedMessagesResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListPinnedMessages",
+                service_name="chatto.api.v1.RoomService",
+                input=chatto_dot_api_dot_v1_dot_rooms__pb2.ListPinnedMessagesRequest,
+                output=chatto_dot_api_dot_v1_dot_rooms__pb2.ListPinnedMessagesResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def create_pinned_message(
+        self,
+        request: chatto_dot_api_dot_v1_dot_rooms__pb2.CreatePinnedMessageRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_api_dot_v1_dot_rooms__pb2.CreatePinnedMessageResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="CreatePinnedMessage",
+                service_name="chatto.api.v1.RoomService",
+                input=chatto_dot_api_dot_v1_dot_rooms__pb2.CreatePinnedMessageRequest,
+                output=chatto_dot_api_dot_v1_dot_rooms__pb2.CreatePinnedMessageResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def delete_pinned_message(
+        self,
+        request: chatto_dot_api_dot_v1_dot_rooms__pb2.DeletePinnedMessageRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_api_dot_v1_dot_rooms__pb2.DeletePinnedMessageResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="DeletePinnedMessage",
+                service_name="chatto.api.v1.RoomService",
+                input=chatto_dot_api_dot_v1_dot_rooms__pb2.DeletePinnedMessageRequest,
+                output=chatto_dot_api_dot_v1_dot_rooms__pb2.DeletePinnedMessageResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
     async def update_typing_indicator(
         self,
         request: chatto_dot_api_dot_v1_dot_rooms__pb2.UpdateTypingIndicatorRequest,
@@ -763,6 +862,12 @@ class RoomServiceSync(Protocol):
     def list_bans(self, request: chatto_dot_api_dot_v1_dot_rooms__pb2.ListBansRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_rooms__pb2.ListBansResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def list_room_attachments(self, request: chatto_dot_api_dot_v1_dot_rooms__pb2.ListRoomAttachmentsRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_rooms__pb2.ListRoomAttachmentsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def list_pinned_messages(self, request: chatto_dot_api_dot_v1_dot_rooms__pb2.ListPinnedMessagesRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_rooms__pb2.ListPinnedMessagesResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def create_pinned_message(self, request: chatto_dot_api_dot_v1_dot_rooms__pb2.CreatePinnedMessageRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_rooms__pb2.CreatePinnedMessageResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def delete_pinned_message(self, request: chatto_dot_api_dot_v1_dot_rooms__pb2.DeletePinnedMessageRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_rooms__pb2.DeletePinnedMessageResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def update_typing_indicator(self, request: chatto_dot_api_dot_v1_dot_rooms__pb2.UpdateTypingIndicatorRequest, ctx: RequestContext) -> chatto_dot_api_dot_v1_dot_rooms__pb2.UpdateTypingIndicatorResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
@@ -931,6 +1036,36 @@ class RoomServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=service.list_room_attachments,
+                ),
+                "/chatto.api.v1.RoomService/ListPinnedMessages": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="ListPinnedMessages",
+                        service_name="chatto.api.v1.RoomService",
+                        input=chatto_dot_api_dot_v1_dot_rooms__pb2.ListPinnedMessagesRequest,
+                        output=chatto_dot_api_dot_v1_dot_rooms__pb2.ListPinnedMessagesResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.list_pinned_messages,
+                ),
+                "/chatto.api.v1.RoomService/CreatePinnedMessage": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="CreatePinnedMessage",
+                        service_name="chatto.api.v1.RoomService",
+                        input=chatto_dot_api_dot_v1_dot_rooms__pb2.CreatePinnedMessageRequest,
+                        output=chatto_dot_api_dot_v1_dot_rooms__pb2.CreatePinnedMessageResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.create_pinned_message,
+                ),
+                "/chatto.api.v1.RoomService/DeletePinnedMessage": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="DeletePinnedMessage",
+                        service_name="chatto.api.v1.RoomService",
+                        input=chatto_dot_api_dot_v1_dot_rooms__pb2.DeletePinnedMessageRequest,
+                        output=chatto_dot_api_dot_v1_dot_rooms__pb2.DeletePinnedMessageResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.delete_pinned_message,
                 ),
                 "/chatto.api.v1.RoomService/UpdateTypingIndicator": EndpointSync.unary(
                     method=MethodInfo(
@@ -1299,6 +1434,66 @@ class RoomServiceClientSync(ConnectClientSync):
                 service_name="chatto.api.v1.RoomService",
                 input=chatto_dot_api_dot_v1_dot_rooms__pb2.ListRoomAttachmentsRequest,
                 output=chatto_dot_api_dot_v1_dot_rooms__pb2.ListRoomAttachmentsResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def list_pinned_messages(
+        self,
+        request: chatto_dot_api_dot_v1_dot_rooms__pb2.ListPinnedMessagesRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_api_dot_v1_dot_rooms__pb2.ListPinnedMessagesResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListPinnedMessages",
+                service_name="chatto.api.v1.RoomService",
+                input=chatto_dot_api_dot_v1_dot_rooms__pb2.ListPinnedMessagesRequest,
+                output=chatto_dot_api_dot_v1_dot_rooms__pb2.ListPinnedMessagesResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def create_pinned_message(
+        self,
+        request: chatto_dot_api_dot_v1_dot_rooms__pb2.CreatePinnedMessageRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_api_dot_v1_dot_rooms__pb2.CreatePinnedMessageResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="CreatePinnedMessage",
+                service_name="chatto.api.v1.RoomService",
+                input=chatto_dot_api_dot_v1_dot_rooms__pb2.CreatePinnedMessageRequest,
+                output=chatto_dot_api_dot_v1_dot_rooms__pb2.CreatePinnedMessageResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def delete_pinned_message(
+        self,
+        request: chatto_dot_api_dot_v1_dot_rooms__pb2.DeletePinnedMessageRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_api_dot_v1_dot_rooms__pb2.DeletePinnedMessageResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="DeletePinnedMessage",
+                service_name="chatto.api.v1.RoomService",
+                input=chatto_dot_api_dot_v1_dot_rooms__pb2.DeletePinnedMessageRequest,
+                output=chatto_dot_api_dot_v1_dot_rooms__pb2.DeletePinnedMessageResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,

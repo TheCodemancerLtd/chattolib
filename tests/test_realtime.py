@@ -12,7 +12,9 @@ from chattolib.realtime import (
     ChattoRealtimeCloseError,
     ChattoRealtimeError,
     RealtimeEvent,
+    RealtimeProjectionEvent,
     _wrap_event,
+    _wrap_projection_event,
     realtime_url,
 )
 
@@ -26,27 +28,42 @@ def test_realtime_url_http_to_ws():
 
 
 def test_realtime_url_strips_trailing_slash():
-    assert (
-        realtime_url("https://chat.chatto.run/") == "wss://chat.chatto.run/api/realtime"
-    )
+    assert realtime_url("https://chat.chatto.run/") == "wss://chat.chatto.run/api/realtime"
 
 
-def test_wrap_event_message_posted():
+def test_wrap_event_user_typing():
     from chattolib._pb.chatto.realtime.v1 import realtime_pb2
 
     envelope = realtime_pb2.RealtimeEventEnvelope()
     envelope.id = "evt_1"
     envelope.actor_id = "u1"
-    envelope.message_posted.room_id = "r1"
-    envelope.message_posted.message_event_id = "e1"
+    envelope.user_typing.room_id = "r1"
 
     wrapped = _wrap_event(envelope)
     assert isinstance(wrapped, RealtimeEvent)
     assert wrapped.id == "evt_1"
-    assert wrapped.kind == "message_posted"
+    assert wrapped.kind == "user_typing"
     assert wrapped.actor_id == "u1"
     assert wrapped.payload.room_id == "r1"
-    assert wrapped.payload.message_event_id == "e1"
+
+
+def test_wrap_projection_event():
+    from chattolib._pb.chatto.realtime.v1 import realtime_pb2
+
+    envelope = realtime_pb2.RealtimeProjectionEvent()
+    envelope.id = "proj_1"
+    envelope.resume_cursor = "cur_1"
+    op = envelope.operations.add()
+    op.room_remove.room_id = "r1"
+    op2 = envelope.operations.add()
+    op2.reset.SetInParent()
+
+    wrapped = _wrap_projection_event(envelope)
+    assert isinstance(wrapped, RealtimeProjectionEvent)
+    assert wrapped.id == "proj_1"
+    assert wrapped.resume_cursor == "cur_1"
+    assert [o.operation for o in wrapped.operations] == ["room_remove", "reset"]
+    assert wrapped.operations[0].payload.room_id == "r1"
 
 
 def test_wrap_event_presence_changed():
