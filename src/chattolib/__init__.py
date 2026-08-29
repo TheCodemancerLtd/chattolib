@@ -10,6 +10,12 @@ from chattolib.realtime import (
     ServerHello,
     stream_events,
 )
+
+try:  # the bot framework needs the optional realtime extra
+    from chattolib.bot import Bot, BotError
+except ImportError:  # pragma: no cover - realtime extra not installed
+    Bot = None  # type: ignore[assignment,misc]
+    BotError = None  # type: ignore[assignment,misc]
 from chattolib.types import (
     ActiveCall,
     AdminMember,
@@ -73,6 +79,8 @@ from chattolib.types import (
 )
 
 __all__ = [
+    "Bot",
+    "BotError",
     "ChattoClient",
     "ChattoError",
     "ChattoConnectError",
