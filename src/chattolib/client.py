@@ -94,6 +94,7 @@ from chattolib.types import (
     LinkedExternalIdentity,
     LinkPreview,
     Message,
+    Neighbor,
     NotificationLevel,
     NotificationOccurrence,
     NotificationOccurrencesPage,
@@ -281,6 +282,19 @@ class ChattoClient:
             ServerLogin.parse(pb_to_dict(resp.login)),
         )
 
+    async def list_neighbors(self) -> list[str]:
+        """Public Neighbor directory: the advertised canonical server origins.
+
+        Does not require auth. The response has no ordering contract.
+        """
+        resp = await self._rpc(
+            self._svc.server_discovery.list_neighbors(
+                discovery_server_pb2.ListNeighborsRequest(),
+                headers=self._headers(),
+            )
+        )
+        return list(resp.origins)
+
     async def get_motd(self) -> str | None:
         resp = await self._rpc(
             self._svc.server.get_motd(server_state_pb2.GetMotdRequest(), headers=self._headers())
@@ -388,12 +402,15 @@ class ChattoClient:
         *,
         timezone: str | None = None,
         time_format: TimeFormat | None = None,
+        share_timezone: bool | None = None,
     ) -> UserSettings:
         req = account_pb2.UpdateSettingsRequest()
         if timezone is not None:
             req.timezone = timezone
         if time_format is not None:
             req.time_format = time_format.value
+        if share_timezone is not None:
+            req.share_timezone = share_timezone
         resp = await self._rpc(self._svc.account.update_settings(req, headers=self._headers()))
         return UserSettings.parse(pb_to_dict(resp.settings))
 
@@ -1747,6 +1764,64 @@ class ChattoClient:
             )
         )
         return list(resp.blocked_usernames)
+
+    # --- Admin: neighbors ---------------------------------------------
+
+    async def admin_list_neighbors(self) -> list[Neighbor]:
+        """List configured Neighbors. Requires ``server.manage-neighbors``."""
+        resp = await self._rpc(
+            self._svc.admin_server.list_neighbors(
+                admin_server_pb2.ListNeighborsRequest(),
+                headers=self._headers(),
+            )
+        )
+        data = pb_to_dict(resp)
+        return [n for n in (Neighbor.parse(x) for x in data.get("neighbors") or []) if n]
+
+    async def admin_get_neighbor(self, neighbor_id: str) -> Neighbor | None:
+        """Get one configured Neighbor. Requires ``server.manage-neighbors``."""
+        resp = await self._rpc(
+            self._svc.admin_server.get_neighbor(
+                admin_server_pb2.GetNeighborRequest(neighbor_id=neighbor_id),
+                headers=self._headers(),
+            )
+        )
+        return Neighbor.parse(pb_to_dict(resp).get("neighbor"))
+
+    async def admin_create_neighbor(self, origin: str) -> Neighbor:
+        """Advertise one server origin. Requires ``server.manage-neighbors``."""
+        resp = await self._rpc(
+            self._svc.admin_server.create_neighbor(
+                admin_server_pb2.CreateNeighborRequest(origin=origin),
+                headers=self._headers(),
+            )
+        )
+        neighbor = Neighbor.parse(pb_to_dict(resp).get("neighbor"))
+        assert neighbor is not None
+        return neighbor
+
+    async def admin_update_neighbor(self, neighbor_id: str, origin: str, revision: str) -> Neighbor:
+        """Change one advertised origin. Requires ``server.manage-neighbors``."""
+        resp = await self._rpc(
+            self._svc.admin_server.update_neighbor(
+                admin_server_pb2.UpdateNeighborRequest(
+                    neighbor_id=neighbor_id, origin=origin, revision=revision
+                ),
+                headers=self._headers(),
+            )
+        )
+        neighbor = Neighbor.parse(pb_to_dict(resp).get("neighbor"))
+        assert neighbor is not None
+        return neighbor
+
+    async def admin_delete_neighbor(self, neighbor_id: str, revision: str) -> None:
+        """Stop advertising one origin. Requires ``server.manage-neighbors``."""
+        await self._rpc(
+            self._svc.admin_server.delete_neighbor(
+                admin_server_pb2.DeleteNeighborRequest(neighbor_id=neighbor_id, revision=revision),
+                headers=self._headers(),
+            )
+        )
 
     # --- Admin: room layout & sidebar links ---------------------------
 

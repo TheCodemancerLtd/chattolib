@@ -27,29 +27,29 @@ from chatto.api.v1 import users_pb2 as chatto_dot_api_dot_v1_dot_users__pb2
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1a\x63hatto/api/v1/viewer.proto\x12\rchatto.api.v1\x1a\x1f\x63hatto/api/v1/permissions.proto\x1a\x19\x63hatto/api/v1/users.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"b\n\x0cUserSettings\x12\x15\n\x08timezone\x18\x01 \x01(\tH\x00\x88\x01\x01\x12.\n\x0btime_format\x18\x02 \x01(\x0e\x32\x19.chatto.api.v1.TimeFormatB\x0b\n\t_timezone\"\xb8\x02\n\nViewerUser\x12\x1a\n\x12has_verified_email\x18\x07 \x01(\x08\x12-\n\x08settings\x18\x08 \x01(\x0b\x32\x1b.chatto.api.v1.UserSettings\x12!\n\x19viewer_can_delete_account\x18\t \x01(\x08\x12\x35\n\x11last_login_change\x18\n \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12$\n\x07profile\x18\x0b \x01(\x0b\x32\x13.chatto.api.v1.User\x12\x14\n\x0chas_password\x18\x0c \x01(\x08J\x04\x08\x01\x10\x07R\x02idR\x05loginR\x0c\x64isplay_nameR\navatar_urlR\rcustom_statusR\x0fpresence_status\"i\n\x12ViewerCapabilities\x12.\n\x06grants\x18\x01 \x03(\x0b\x32\x1e.chatto.api.v1.CapabilityGrant\x12#\n\x1bhas_unread_followed_threads\x18\x02 \x01(\x08\"N\n\x17ServerViewerPermissions\x12\x33\n\x0bpermissions\x18\x01 \x03(\x0b\x32\x1e.chatto.api.v1.PermissionGrant\"-\n\x11ServerViewerState\x12\x18\n\x10has_unread_rooms\x18\x01 \x01(\x08\"\x12\n\x10GetViewerRequest\"\xbc\x02\n\x11GetViewerResponse\x12\'\n\x04user\x18\x01 \x01(\x0b\x32\x19.chatto.api.v1.ViewerUser\x12\x37\n\x0c\x63\x61pabilities\x18\x02 \x01(\x0b\x32!.chatto.api.v1.ViewerCapabilities\x12\x42\n\x12viewer_permissions\x18\x05 \x01(\x0b\x32&.chatto.api.v1.ServerViewerPermissions\x12\x36\n\x0cviewer_state\x18\x06 \x01(\x0b\x32 .chatto.api.v1.ServerViewerStateJ\x04\x08\x03\x10\x04J\x04\x08\x04\x10\x05R\x1eserver_notification_preferenceR\x1droom_notification_preferences*q\n\nTimeFormat\x12\x1b\n\x17TIME_FORMAT_UNSPECIFIED\x10\x00\x12\x14\n\x10TIME_FORMAT_AUTO\x10\x01\x12\x17\n\x13TIME_FORMAT_12_HOUR\x10\x02\x12\x17\n\x13TIME_FORMAT_24_HOUR\x10\x03\x32_\n\rViewerService\x12N\n\tGetViewer\x12\x1f.chatto.api.v1.GetViewerRequest\x1a .chatto.api.v1.GetViewerResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1a\x63hatto/api/v1/viewer.proto\x12\rchatto.api.v1\x1a\x1f\x63hatto/api/v1/permissions.proto\x1a\x19\x63hatto/api/v1/users.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x92\x01\n\x0cUserSettings\x12\x15\n\x08timezone\x18\x01 \x01(\tH\x00\x88\x01\x01\x12.\n\x0btime_format\x18\x02 \x01(\x0e\x32\x19.chatto.api.v1.TimeFormat\x12\x1b\n\x0eshare_timezone\x18\x03 \x01(\x08H\x01\x88\x01\x01\x42\x0b\n\t_timezoneB\x11\n\x0f_share_timezone\"\xb8\x02\n\nViewerUser\x12\x1a\n\x12has_verified_email\x18\x07 \x01(\x08\x12-\n\x08settings\x18\x08 \x01(\x0b\x32\x1b.chatto.api.v1.UserSettings\x12!\n\x19viewer_can_delete_account\x18\t \x01(\x08\x12\x35\n\x11last_login_change\x18\n \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12$\n\x07profile\x18\x0b \x01(\x0b\x32\x13.chatto.api.v1.User\x12\x14\n\x0chas_password\x18\x0c \x01(\x08J\x04\x08\x01\x10\x07R\x02idR\x05loginR\x0c\x64isplay_nameR\navatar_urlR\rcustom_statusR\x0fpresence_status\"i\n\x12ViewerCapabilities\x12.\n\x06grants\x18\x01 \x03(\x0b\x32\x1e.chatto.api.v1.CapabilityGrant\x12#\n\x1bhas_unread_followed_threads\x18\x02 \x01(\x08\"N\n\x17ServerViewerPermissions\x12\x33\n\x0bpermissions\x18\x01 \x03(\x0b\x32\x1e.chatto.api.v1.PermissionGrant\"-\n\x11ServerViewerState\x12\x18\n\x10has_unread_rooms\x18\x01 \x01(\x08\"\x12\n\x10GetViewerRequest\"\xbc\x02\n\x11GetViewerResponse\x12\'\n\x04user\x18\x01 \x01(\x0b\x32\x19.chatto.api.v1.ViewerUser\x12\x37\n\x0c\x63\x61pabilities\x18\x02 \x01(\x0b\x32!.chatto.api.v1.ViewerCapabilities\x12\x42\n\x12viewer_permissions\x18\x05 \x01(\x0b\x32&.chatto.api.v1.ServerViewerPermissions\x12\x36\n\x0cviewer_state\x18\x06 \x01(\x0b\x32 .chatto.api.v1.ServerViewerStateJ\x04\x08\x03\x10\x04J\x04\x08\x04\x10\x05R\x1eserver_notification_preferenceR\x1droom_notification_preferences*q\n\nTimeFormat\x12\x1b\n\x17TIME_FORMAT_UNSPECIFIED\x10\x00\x12\x14\n\x10TIME_FORMAT_AUTO\x10\x01\x12\x17\n\x13TIME_FORMAT_12_HOUR\x10\x02\x12\x17\n\x13TIME_FORMAT_24_HOUR\x10\x03\x32_\n\rViewerService\x12N\n\tGetViewer\x12\x1f.chatto.api.v1.GetViewerRequest\x1a .chatto.api.v1.GetViewerResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'chatto.api.v1.viewer_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_TIMEFORMAT']._serialized_start=1126
-  _globals['_TIMEFORMAT']._serialized_end=1239
-  _globals['_USERSETTINGS']._serialized_start=138
-  _globals['_USERSETTINGS']._serialized_end=236
-  _globals['_VIEWERUSER']._serialized_start=239
-  _globals['_VIEWERUSER']._serialized_end=551
-  _globals['_VIEWERCAPABILITIES']._serialized_start=553
-  _globals['_VIEWERCAPABILITIES']._serialized_end=658
-  _globals['_SERVERVIEWERPERMISSIONS']._serialized_start=660
-  _globals['_SERVERVIEWERPERMISSIONS']._serialized_end=738
-  _globals['_SERVERVIEWERSTATE']._serialized_start=740
-  _globals['_SERVERVIEWERSTATE']._serialized_end=785
-  _globals['_GETVIEWERREQUEST']._serialized_start=787
-  _globals['_GETVIEWERREQUEST']._serialized_end=805
-  _globals['_GETVIEWERRESPONSE']._serialized_start=808
-  _globals['_GETVIEWERRESPONSE']._serialized_end=1124
-  _globals['_VIEWERSERVICE']._serialized_start=1241
-  _globals['_VIEWERSERVICE']._serialized_end=1336
+  _globals['_TIMEFORMAT']._serialized_start=1175
+  _globals['_TIMEFORMAT']._serialized_end=1288
+  _globals['_USERSETTINGS']._serialized_start=139
+  _globals['_USERSETTINGS']._serialized_end=285
+  _globals['_VIEWERUSER']._serialized_start=288
+  _globals['_VIEWERUSER']._serialized_end=600
+  _globals['_VIEWERCAPABILITIES']._serialized_start=602
+  _globals['_VIEWERCAPABILITIES']._serialized_end=707
+  _globals['_SERVERVIEWERPERMISSIONS']._serialized_start=709
+  _globals['_SERVERVIEWERPERMISSIONS']._serialized_end=787
+  _globals['_SERVERVIEWERSTATE']._serialized_start=789
+  _globals['_SERVERVIEWERSTATE']._serialized_end=834
+  _globals['_GETVIEWERREQUEST']._serialized_start=836
+  _globals['_GETVIEWERREQUEST']._serialized_end=854
+  _globals['_GETVIEWERRESPONSE']._serialized_start=857
+  _globals['_GETVIEWERRESPONSE']._serialized_end=1173
+  _globals['_VIEWERSERVICE']._serialized_start=1290
+  _globals['_VIEWERSERVICE']._serialized_end=1385
 # @@protoc_insertion_point(module_scope)

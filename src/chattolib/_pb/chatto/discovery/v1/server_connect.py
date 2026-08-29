@@ -20,6 +20,9 @@ class ServerDiscoveryService(Protocol):
     async def get_server(self, request: chatto_dot_discovery_dot_v1_dot_server__pb2.GetServerRequest, ctx: RequestContext) -> chatto_dot_discovery_dot_v1_dot_server__pb2.GetServerResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
+    async def list_neighbors(self, request: chatto_dot_discovery_dot_v1_dot_server__pb2.ListNeighborsRequest, ctx: RequestContext) -> chatto_dot_discovery_dot_v1_dot_server__pb2.ListNeighborsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
 
 class ServerDiscoveryServiceASGIApplication(ConnectASGIApplication[ServerDiscoveryService]):
     def __init__(self, service: ServerDiscoveryService | AsyncGenerator[ServerDiscoveryService], *, interceptors: Iterable[Interceptor]=(), read_max_bytes: int | None = None, compressions: Iterable[Compression] | None = None) -> None:
@@ -35,6 +38,16 @@ class ServerDiscoveryServiceASGIApplication(ConnectASGIApplication[ServerDiscove
                         idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
                     ),
                     function=svc.get_server,
+                ),
+                "/chatto.discovery.v1.ServerDiscoveryService/ListNeighbors": Endpoint.unary(
+                    method=MethodInfo(
+                        name="ListNeighbors",
+                        service_name="chatto.discovery.v1.ServerDiscoveryService",
+                        input=chatto_dot_discovery_dot_v1_dot_server__pb2.ListNeighborsRequest,
+                        output=chatto_dot_discovery_dot_v1_dot_server__pb2.ListNeighborsResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=svc.list_neighbors,
                 ),
             },
             interceptors=interceptors,
@@ -71,9 +84,33 @@ class ServerDiscoveryServiceClient(ConnectClient):
             use_get=use_get,
         )
 
+    async def list_neighbors(
+        self,
+        request: chatto_dot_discovery_dot_v1_dot_server__pb2.ListNeighborsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> chatto_dot_discovery_dot_v1_dot_server__pb2.ListNeighborsResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListNeighbors",
+                service_name="chatto.discovery.v1.ServerDiscoveryService",
+                input=chatto_dot_discovery_dot_v1_dot_server__pb2.ListNeighborsRequest,
+                output=chatto_dot_discovery_dot_v1_dot_server__pb2.ListNeighborsResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
 
 class ServerDiscoveryServiceSync(Protocol):
     def get_server(self, request: chatto_dot_discovery_dot_v1_dot_server__pb2.GetServerRequest, ctx: RequestContext) -> chatto_dot_discovery_dot_v1_dot_server__pb2.GetServerResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def list_neighbors(self, request: chatto_dot_discovery_dot_v1_dot_server__pb2.ListNeighborsRequest, ctx: RequestContext) -> chatto_dot_discovery_dot_v1_dot_server__pb2.ListNeighborsResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
 
@@ -90,6 +127,16 @@ class ServerDiscoveryServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
                     ),
                     function=service.get_server,
+                ),
+                "/chatto.discovery.v1.ServerDiscoveryService/ListNeighbors": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="ListNeighbors",
+                        service_name="chatto.discovery.v1.ServerDiscoveryService",
+                        input=chatto_dot_discovery_dot_v1_dot_server__pb2.ListNeighborsRequest,
+                        output=chatto_dot_discovery_dot_v1_dot_server__pb2.ListNeighborsResponse,
+                        idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+                    ),
+                    function=service.list_neighbors,
                 ),
             },
             interceptors=interceptors,
@@ -119,6 +166,28 @@ class ServerDiscoveryServiceClientSync(ConnectClientSync):
                 service_name="chatto.discovery.v1.ServerDiscoveryService",
                 input=chatto_dot_discovery_dot_v1_dot_server__pb2.GetServerRequest,
                 output=chatto_dot_discovery_dot_v1_dot_server__pb2.GetServerResponse,
+                idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+            use_get=use_get,
+        )
+
+    def list_neighbors(
+        self,
+        request: chatto_dot_discovery_dot_v1_dot_server__pb2.ListNeighborsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+        use_get: bool = False,
+    ) -> chatto_dot_discovery_dot_v1_dot_server__pb2.ListNeighborsResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListNeighbors",
+                service_name="chatto.discovery.v1.ServerDiscoveryService",
+                input=chatto_dot_discovery_dot_v1_dot_server__pb2.ListNeighborsRequest,
+                output=chatto_dot_discovery_dot_v1_dot_server__pb2.ListNeighborsResponse,
                 idempotency_level=IdempotencyLevel.NO_SIDE_EFFECTS,
             ),
             headers=headers,

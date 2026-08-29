@@ -191,6 +191,7 @@ class User:
 class UserSettings:
     timezone: str | None = None
     time_format: TimeFormat = TimeFormat.UNSPECIFIED
+    share_timezone: bool = False
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> UserSettings:
@@ -198,6 +199,7 @@ class UserSettings:
         return cls(
             timezone=data.get("timezone"),
             time_format=_parse_enum(TimeFormat, data.get("timeFormat"), TimeFormat.UNSPECIFIED),  # type: ignore[arg-type]
+            share_timezone=bool(data.get("shareTimezone", False)),
         )
 
 
@@ -307,6 +309,29 @@ class ServerLogin:
             direct_registration_enabled=bool(data.get("directRegistrationEnabled", False)),
             providers=[ProviderMetadata.parse(p) for p in data.get("providers") or []],
             authorize_url=data.get("authorizeUrl", ""),
+        )
+
+
+@dataclass
+class Neighbor:
+    """One server advertised in the public Neighbor directory.
+
+    ``origin`` is the canonical HTTP(S) origin; ``revision`` is an opaque
+    token required to update or delete the entry (admin side).
+    """
+
+    id: str
+    origin: str
+    revision: str = ""
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> Neighbor | None:
+        if not data:
+            return None
+        return cls(
+            id=data.get("id", ""),
+            origin=data.get("origin", ""),
+            revision=data.get("revision", ""),
         )
 
 

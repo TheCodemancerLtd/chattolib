@@ -41,6 +41,21 @@ class AdminServerService(Protocol):
     async def update_blocked_usernames(self, request: chatto_dot_admin_dot_v1_dot_server__pb2.UpdateBlockedUsernamesRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_server__pb2.UpdateBlockedUsernamesResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
+    async def list_neighbors(self, request: chatto_dot_admin_dot_v1_dot_server__pb2.ListNeighborsRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_server__pb2.ListNeighborsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def get_neighbor(self, request: chatto_dot_admin_dot_v1_dot_server__pb2.GetNeighborRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_server__pb2.GetNeighborResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def create_neighbor(self, request: chatto_dot_admin_dot_v1_dot_server__pb2.CreateNeighborRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_server__pb2.CreateNeighborResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def update_neighbor(self, request: chatto_dot_admin_dot_v1_dot_server__pb2.UpdateNeighborRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_server__pb2.UpdateNeighborResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
+    async def delete_neighbor(self, request: chatto_dot_admin_dot_v1_dot_server__pb2.DeleteNeighborRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_server__pb2.DeleteNeighborResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+
 
 class AdminServerServiceASGIApplication(ConnectASGIApplication[AdminServerService]):
     def __init__(self, service: AdminServerService | AsyncGenerator[AdminServerService], *, interceptors: Iterable[Interceptor]=(), read_max_bytes: int | None = None, compressions: Iterable[Compression] | None = None) -> None:
@@ -126,6 +141,56 @@ class AdminServerServiceASGIApplication(ConnectASGIApplication[AdminServerServic
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=svc.update_blocked_usernames,
+                ),
+                "/chatto.admin.v1.AdminServerService/ListNeighbors": Endpoint.unary(
+                    method=MethodInfo(
+                        name="ListNeighbors",
+                        service_name="chatto.admin.v1.AdminServerService",
+                        input=chatto_dot_admin_dot_v1_dot_server__pb2.ListNeighborsRequest,
+                        output=chatto_dot_admin_dot_v1_dot_server__pb2.ListNeighborsResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.list_neighbors,
+                ),
+                "/chatto.admin.v1.AdminServerService/GetNeighbor": Endpoint.unary(
+                    method=MethodInfo(
+                        name="GetNeighbor",
+                        service_name="chatto.admin.v1.AdminServerService",
+                        input=chatto_dot_admin_dot_v1_dot_server__pb2.GetNeighborRequest,
+                        output=chatto_dot_admin_dot_v1_dot_server__pb2.GetNeighborResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.get_neighbor,
+                ),
+                "/chatto.admin.v1.AdminServerService/CreateNeighbor": Endpoint.unary(
+                    method=MethodInfo(
+                        name="CreateNeighbor",
+                        service_name="chatto.admin.v1.AdminServerService",
+                        input=chatto_dot_admin_dot_v1_dot_server__pb2.CreateNeighborRequest,
+                        output=chatto_dot_admin_dot_v1_dot_server__pb2.CreateNeighborResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.create_neighbor,
+                ),
+                "/chatto.admin.v1.AdminServerService/UpdateNeighbor": Endpoint.unary(
+                    method=MethodInfo(
+                        name="UpdateNeighbor",
+                        service_name="chatto.admin.v1.AdminServerService",
+                        input=chatto_dot_admin_dot_v1_dot_server__pb2.UpdateNeighborRequest,
+                        output=chatto_dot_admin_dot_v1_dot_server__pb2.UpdateNeighborResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.update_neighbor,
+                ),
+                "/chatto.admin.v1.AdminServerService/DeleteNeighbor": Endpoint.unary(
+                    method=MethodInfo(
+                        name="DeleteNeighbor",
+                        service_name="chatto.admin.v1.AdminServerService",
+                        input=chatto_dot_admin_dot_v1_dot_server__pb2.DeleteNeighborRequest,
+                        output=chatto_dot_admin_dot_v1_dot_server__pb2.DeleteNeighborResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.delete_neighbor,
                 ),
             },
             interceptors=interceptors,
@@ -300,6 +365,106 @@ class AdminServerServiceClient(ConnectClient):
             timeout_ms=timeout_ms,
         )
 
+    async def list_neighbors(
+        self,
+        request: chatto_dot_admin_dot_v1_dot_server__pb2.ListNeighborsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_admin_dot_v1_dot_server__pb2.ListNeighborsResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListNeighbors",
+                service_name="chatto.admin.v1.AdminServerService",
+                input=chatto_dot_admin_dot_v1_dot_server__pb2.ListNeighborsRequest,
+                output=chatto_dot_admin_dot_v1_dot_server__pb2.ListNeighborsResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def get_neighbor(
+        self,
+        request: chatto_dot_admin_dot_v1_dot_server__pb2.GetNeighborRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_admin_dot_v1_dot_server__pb2.GetNeighborResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetNeighbor",
+                service_name="chatto.admin.v1.AdminServerService",
+                input=chatto_dot_admin_dot_v1_dot_server__pb2.GetNeighborRequest,
+                output=chatto_dot_admin_dot_v1_dot_server__pb2.GetNeighborResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def create_neighbor(
+        self,
+        request: chatto_dot_admin_dot_v1_dot_server__pb2.CreateNeighborRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_admin_dot_v1_dot_server__pb2.CreateNeighborResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="CreateNeighbor",
+                service_name="chatto.admin.v1.AdminServerService",
+                input=chatto_dot_admin_dot_v1_dot_server__pb2.CreateNeighborRequest,
+                output=chatto_dot_admin_dot_v1_dot_server__pb2.CreateNeighborResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def update_neighbor(
+        self,
+        request: chatto_dot_admin_dot_v1_dot_server__pb2.UpdateNeighborRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_admin_dot_v1_dot_server__pb2.UpdateNeighborResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="UpdateNeighbor",
+                service_name="chatto.admin.v1.AdminServerService",
+                input=chatto_dot_admin_dot_v1_dot_server__pb2.UpdateNeighborRequest,
+                output=chatto_dot_admin_dot_v1_dot_server__pb2.UpdateNeighborResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def delete_neighbor(
+        self,
+        request: chatto_dot_admin_dot_v1_dot_server__pb2.DeleteNeighborRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_admin_dot_v1_dot_server__pb2.DeleteNeighborResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="DeleteNeighbor",
+                service_name="chatto.admin.v1.AdminServerService",
+                input=chatto_dot_admin_dot_v1_dot_server__pb2.DeleteNeighborRequest,
+                output=chatto_dot_admin_dot_v1_dot_server__pb2.DeleteNeighborResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
 
 class AdminServerServiceSync(Protocol):
     def get_server_config(self, request: chatto_dot_admin_dot_v1_dot_server__pb2.GetServerConfigRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_server__pb2.GetServerConfigResponse:
@@ -317,6 +482,16 @@ class AdminServerServiceSync(Protocol):
     def get_server_security_config(self, request: chatto_dot_admin_dot_v1_dot_server__pb2.GetServerSecurityConfigRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_server__pb2.GetServerSecurityConfigResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
     def update_blocked_usernames(self, request: chatto_dot_admin_dot_v1_dot_server__pb2.UpdateBlockedUsernamesRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_server__pb2.UpdateBlockedUsernamesResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def list_neighbors(self, request: chatto_dot_admin_dot_v1_dot_server__pb2.ListNeighborsRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_server__pb2.ListNeighborsResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def get_neighbor(self, request: chatto_dot_admin_dot_v1_dot_server__pb2.GetNeighborRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_server__pb2.GetNeighborResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def create_neighbor(self, request: chatto_dot_admin_dot_v1_dot_server__pb2.CreateNeighborRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_server__pb2.CreateNeighborResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def update_neighbor(self, request: chatto_dot_admin_dot_v1_dot_server__pb2.UpdateNeighborRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_server__pb2.UpdateNeighborResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
+    def delete_neighbor(self, request: chatto_dot_admin_dot_v1_dot_server__pb2.DeleteNeighborRequest, ctx: RequestContext) -> chatto_dot_admin_dot_v1_dot_server__pb2.DeleteNeighborResponse:
         raise ConnectError(Code.UNIMPLEMENTED, "Not implemented")
 
 
@@ -403,6 +578,56 @@ class AdminServerServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=service.update_blocked_usernames,
+                ),
+                "/chatto.admin.v1.AdminServerService/ListNeighbors": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="ListNeighbors",
+                        service_name="chatto.admin.v1.AdminServerService",
+                        input=chatto_dot_admin_dot_v1_dot_server__pb2.ListNeighborsRequest,
+                        output=chatto_dot_admin_dot_v1_dot_server__pb2.ListNeighborsResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.list_neighbors,
+                ),
+                "/chatto.admin.v1.AdminServerService/GetNeighbor": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="GetNeighbor",
+                        service_name="chatto.admin.v1.AdminServerService",
+                        input=chatto_dot_admin_dot_v1_dot_server__pb2.GetNeighborRequest,
+                        output=chatto_dot_admin_dot_v1_dot_server__pb2.GetNeighborResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.get_neighbor,
+                ),
+                "/chatto.admin.v1.AdminServerService/CreateNeighbor": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="CreateNeighbor",
+                        service_name="chatto.admin.v1.AdminServerService",
+                        input=chatto_dot_admin_dot_v1_dot_server__pb2.CreateNeighborRequest,
+                        output=chatto_dot_admin_dot_v1_dot_server__pb2.CreateNeighborResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.create_neighbor,
+                ),
+                "/chatto.admin.v1.AdminServerService/UpdateNeighbor": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="UpdateNeighbor",
+                        service_name="chatto.admin.v1.AdminServerService",
+                        input=chatto_dot_admin_dot_v1_dot_server__pb2.UpdateNeighborRequest,
+                        output=chatto_dot_admin_dot_v1_dot_server__pb2.UpdateNeighborResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.update_neighbor,
+                ),
+                "/chatto.admin.v1.AdminServerService/DeleteNeighbor": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="DeleteNeighbor",
+                        service_name="chatto.admin.v1.AdminServerService",
+                        input=chatto_dot_admin_dot_v1_dot_server__pb2.DeleteNeighborRequest,
+                        output=chatto_dot_admin_dot_v1_dot_server__pb2.DeleteNeighborResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.delete_neighbor,
                 ),
             },
             interceptors=interceptors,
@@ -571,6 +796,106 @@ class AdminServerServiceClientSync(ConnectClientSync):
                 service_name="chatto.admin.v1.AdminServerService",
                 input=chatto_dot_admin_dot_v1_dot_server__pb2.UpdateBlockedUsernamesRequest,
                 output=chatto_dot_admin_dot_v1_dot_server__pb2.UpdateBlockedUsernamesResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def list_neighbors(
+        self,
+        request: chatto_dot_admin_dot_v1_dot_server__pb2.ListNeighborsRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_admin_dot_v1_dot_server__pb2.ListNeighborsResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListNeighbors",
+                service_name="chatto.admin.v1.AdminServerService",
+                input=chatto_dot_admin_dot_v1_dot_server__pb2.ListNeighborsRequest,
+                output=chatto_dot_admin_dot_v1_dot_server__pb2.ListNeighborsResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def get_neighbor(
+        self,
+        request: chatto_dot_admin_dot_v1_dot_server__pb2.GetNeighborRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_admin_dot_v1_dot_server__pb2.GetNeighborResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetNeighbor",
+                service_name="chatto.admin.v1.AdminServerService",
+                input=chatto_dot_admin_dot_v1_dot_server__pb2.GetNeighborRequest,
+                output=chatto_dot_admin_dot_v1_dot_server__pb2.GetNeighborResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def create_neighbor(
+        self,
+        request: chatto_dot_admin_dot_v1_dot_server__pb2.CreateNeighborRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_admin_dot_v1_dot_server__pb2.CreateNeighborResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="CreateNeighbor",
+                service_name="chatto.admin.v1.AdminServerService",
+                input=chatto_dot_admin_dot_v1_dot_server__pb2.CreateNeighborRequest,
+                output=chatto_dot_admin_dot_v1_dot_server__pb2.CreateNeighborResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def update_neighbor(
+        self,
+        request: chatto_dot_admin_dot_v1_dot_server__pb2.UpdateNeighborRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_admin_dot_v1_dot_server__pb2.UpdateNeighborResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="UpdateNeighbor",
+                service_name="chatto.admin.v1.AdminServerService",
+                input=chatto_dot_admin_dot_v1_dot_server__pb2.UpdateNeighborRequest,
+                output=chatto_dot_admin_dot_v1_dot_server__pb2.UpdateNeighborResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    def delete_neighbor(
+        self,
+        request: chatto_dot_admin_dot_v1_dot_server__pb2.DeleteNeighborRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> chatto_dot_admin_dot_v1_dot_server__pb2.DeleteNeighborResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="DeleteNeighbor",
+                service_name="chatto.admin.v1.AdminServerService",
+                input=chatto_dot_admin_dot_v1_dot_server__pb2.DeleteNeighborRequest,
+                output=chatto_dot_admin_dot_v1_dot_server__pb2.DeleteNeighborResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,

@@ -762,3 +762,75 @@ async def test_admin_update_server_config(client):
 
     assert config.server_name == "MyServer"
     assert profile.version == "0.4.2"
+
+
+# --- Neighbors (0.5.0-alpha.3) -----------------------------------------
+
+
+async def test_list_neighbors_public(client):
+    resp = discovery_server_pb2.ListNeighborsResponse()
+    resp.origins.extend(["https://a.example", "https://b.example"])
+    _mock_method(client, "server_discovery", "list_neighbors", resp)
+
+    async with client:
+        origins = await client.list_neighbors()
+
+    assert origins == ["https://a.example", "https://b.example"]
+
+
+async def test_admin_neighbor_crud(client):
+    list_resp = admin_server_pb2.ListNeighborsResponse()
+    n = list_resp.neighbors.add()
+    n.id = "n1"
+    n.origin = "https://a.example"
+    n.revision = "rev1"
+    _mock_method(client, "admin_server", "list_neighbors", list_resp)
+
+    get_resp = admin_server_pb2.GetNeighborResponse()
+    get_resp.neighbor.id = "n1"
+    get_resp.neighbor.origin = "https://a.example"
+    get_resp.neighbor.revision = "rev1"
+    _mock_method(client, "admin_server", "get_neighbor", get_resp)
+
+    create_resp = admin_server_pb2.CreateNeighborResponse()
+    create_resp.neighbor.id = "n2"
+    create_resp.neighbor.origin = "https://b.example"
+    create_resp.neighbor.revision = "rev2"
+    _mock_method(client, "admin_server", "create_neighbor", create_resp)
+
+    update_resp = admin_server_pb2.UpdateNeighborResponse()
+    update_resp.neighbor.id = "n2"
+    update_resp.neighbor.origin = "https://b2.example"
+    update_resp.neighbor.revision = "rev3"
+    _mock_method(client, "admin_server", "update_neighbor", update_resp)
+
+    del_resp = admin_server_pb2.DeleteNeighborResponse()
+    _mock_method(client, "admin_server", "delete_neighbor", del_resp)
+
+    async with client:
+        listed = await client.admin_list_neighbors()
+        assert [x.origin for x in listed] == ["https://a.example"]
+
+        got = await client.admin_get_neighbor("n1")
+        assert got is not None and got.revision == "rev1"
+
+        created = await client.admin_create_neighbor("https://b.example")
+        assert created.id == "n2" and created.revision == "rev2"
+
+        updated = await client.admin_update_neighbor("n2", "https://b2.example", "rev2")
+        assert updated.origin == "https://b2.example" and updated.revision == "rev3"
+
+        await client.admin_delete_neighbor("n2", "rev3")
+
+
+async def test_update_settings_share_timezone(client):
+    resp = account_pb2.UpdateSettingsResponse()
+    resp.settings.timezone = "Europe/Berlin"
+    resp.settings.share_timezone = True
+    _mock_method(client, "account", "update_settings", resp)
+
+    async with client:
+        settings = await client.update_settings(timezone="Europe/Berlin", share_timezone=True)
+
+    assert settings.timezone == "Europe/Berlin"
+    assert settings.share_timezone is True
