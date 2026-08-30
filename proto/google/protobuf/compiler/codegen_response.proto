@@ -1,0 +1,18 @@
+// Vendored subset of google/protobuf/compiler/codegen_response.proto.
+// The plugin writes a CodeGeneratorResponse to stdout; protoc reads the
+// `file` entries. Field numbers match the canonical proto.
+syntax = "proto2";
+package google.protobuf.compiler;
+import "codegen_request.proto";
+
+message CodeGeneratorResponse {
+  optional string error = 1;
+  optional string generated_code_info = 2;
+  repeated File file = 15;
+
+  message File {
+    optional string name = 1;
+    optional string insertion_point = 2;
+    optional string content = 15;
+  }
+}
