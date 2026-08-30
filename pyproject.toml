@@ -31,9 +31,6 @@ dependencies = [
 [project.urls]
 Homepage = "https://chat.chatto.run"
 
-[project.scripts]
-protoc-gen-chattolib = "chattolib._protoc_plugin:main"
-
 [project.optional-dependencies]
 realtime = [
     "websockets>=13.0",
