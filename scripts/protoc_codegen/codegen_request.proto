@@ -1,0 +1,13 @@
+// Vendored CodeGeneratorRequest (google/protobuf/compiler/codegen_request.proto).
+// Reuses the canonical FileDescriptorProto from the installed protobuf package
+// so the field numbers always match what `protoc` actually serializes.
+syntax = "proto2";
+package google.protobuf.compiler;
+import "google/protobuf/descriptor.proto";
+
+message CodeGeneratorRequest {
+  repeated string file_to_generate = 1;
+  optional string parameter = 2;
+  optional string language = 3;
+  repeated google.protobuf.FileDescriptorProto proto_file = 15;
+}

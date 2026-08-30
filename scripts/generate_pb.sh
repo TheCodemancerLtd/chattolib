@@ -17,9 +17,8 @@
 #
 # Requirements:
 #   - protoc on PATH
-#   - protoc-gen-connect-python on PATH (install via
-#     `pip install protoc-gen-connect-python`, which chattolib pins under
-#     the `[realtime]` extra)
+#   - protoc-gen-chattolib on PATH (bundled with chattolib itself — run
+#     `pip install -e .` and it is on PATH; no separate install needed)
 #   - curl on PATH
 #
 # Run from the repo root:  ./scripts/generate_pb.sh
@@ -107,15 +106,20 @@ protoc --proto_path=proto \
     --python_out=src/chattolib/_pb \
     "${proto_files[@]}"
 
-# Only run the connect-python plugin when it is available. The realtime
-# WebSocket path only needs the pb2 files; every request/response service is
-# strongly typed via the connect stubs.
-if command -v protoc-gen-connect-python >/dev/null; then
-    protoc --proto_path=proto \
-        --connect-python_out=src/chattolib/_pb \
+# Generate the Connect client stubs with chattolib's own plugin. The
+# realtime proto has no services, so it yields only *_pb2.py (above).
+# The plugin is a standalone script (scripts/protoc-gen-chattolib) loaded by
+# file path, so it runs even before the stubs it generates exist. We expose it
+# on PATH via a temp bin dir for the duration of this protoc invocation.
+if [ -f "$repo_root/scripts/protoc-gen-chattolib" ]; then
+    _plugin_bin=$(mktemp -d)
+    ln -s "$repo_root/scripts/protoc-gen-chattolib" "$_plugin_bin/protoc-gen-chattolib"
+    PATH="$_plugin_bin:$PATH" protoc --proto_path=proto \
+        --chattolib_out=src/chattolib/_pb \
         "${proto_files[@]}"
+    rm -rf "$_plugin_bin"
 else
-    echo "protoc-gen-connect-python not on PATH; skipped connect stubs" >&2
+    echo "protoc-gen-chattolib not found; skipped connect stubs" >&2
 fi
 
 # Add __init__.py at every level so the generated modules form a package.

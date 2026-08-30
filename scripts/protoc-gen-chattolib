@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+"""Standalone launcher for the chattolib protoc plugin.
+
+Loaded by file path (not via `import chattolib`) so running it never triggers
+``chattolib/__init__.py`` — which eagerly imports the client and its generated
+stubs. That matters for bootstrap: this plugin *generates* those stubs, so it
+must run before they exist. ``protoc`` finds it on PATH and invokes it with
+``--chattolib_out``.
+
+The plugin path is resolved from the launcher's *real* location (this file may
+be reached through a symlink), so it works from any PATH entry.
+"""
+import importlib.util
+import os
+import sys
+
+_here = os.path.dirname(os.path.realpath(__file__))  # .../scripts
+_plugin = os.path.join(_here, os.pardir, "src", "chattolib", "_protoc_plugin.py")
+_plugin = os.path.abspath(_plugin)
+
+spec = importlib.util.spec_from_file_location("_chattolib_protoc_plugin", _plugin)
+mod = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(mod)  # type: ignore[union-attr]
+sys.exit(mod.main())

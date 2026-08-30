@@ -1,7 +1,27 @@
 """The plugin turns a CodeGeneratorRequest into async+sync client stubs."""
 
-from chattolib._pb.google.protobuf import protoc_gen_request_pb2 as g
+import importlib.util
+import os
+
 from chattolib._protoc_plugin import generate
+
+_CODEGEN_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "src",
+    "chattolib",
+    "_codegen",
+)
+
+
+def _load(name):
+    path = os.path.join(_CODEGEN_DIR, f"{name}.py")
+    spec = importlib.util.spec_from_file_location(f"_test_codegen_{name}", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)  # type: ignore[union-attr]
+    return mod
+
+
+g = _load("protoc_gen_request_pb2")
 
 
 def _request_with_room_service() -> g.CodeGeneratorRequest:
