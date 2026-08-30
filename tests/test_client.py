@@ -41,6 +41,7 @@ from chattolib._pb.chatto.api.v1 import (
 from chattolib._pb.chatto.discovery.v1 import server_pb2 as discovery_server_pb2
 from chattolib.client import ChattoClient
 from chattolib.types import (
+    AdminRoomLayoutItemKind,
     ImageFitMode,
     ImageTransformOptions,
     NotificationLevel,
@@ -690,6 +691,57 @@ async def test_admin_create_sidebar_link(client):
         result = await client.admin_create_sidebar_link("g1", "Docs", "https://x")
 
     assert result == {"id": "sl1", "label": "Docs", "url": "https://x"}
+
+
+async def test_admin_move_room_group(client):
+    resp = room_layout_pb2.MoveRoomGroupResponse()
+    g = resp.groups.add()
+    g.id = "g1"
+    g.name = "General"
+    mock = _mock_method(client, "admin_room_layout", "move_room_group", resp)
+
+    async with client:
+        groups = await client.admin_move_room_group("g1", before_group_id="g2")
+
+    assert [g.id for g in groups] == ["g1"]
+    sent = mock.call_args.args[0]
+    assert sent.group_id == "g1"
+    assert sent.before_group_id == "g2"
+
+
+async def test_admin_move_room_group_to_end(client):
+    resp = room_layout_pb2.MoveRoomGroupResponse()
+    mock = _mock_method(client, "admin_room_layout", "move_room_group", resp)
+
+    async with client:
+        await client.admin_move_room_group("g1")
+
+    sent = mock.call_args.args[0]
+    assert sent.group_id == "g1"
+    assert not sent.HasField("before_group_id")
+
+
+async def test_admin_move_sidebar_item(client):
+    resp = room_layout_pb2.MoveSidebarItemResponse()
+    resp.group.id = "g1"
+    resp.group.name = "General"
+    mock = _mock_method(client, "admin_room_layout", "move_sidebar_item", resp)
+
+    async with client:
+        group = await client.admin_move_sidebar_item(
+            (AdminRoomLayoutItemKind.SIDEBAR_LINK, "sl1"),
+            "g1",
+            before=(AdminRoomLayoutItemKind.ROOM, "r1"),
+        )
+
+    assert group.id == "g1"
+    sent = mock.call_args.args[0]
+    item_kind = room_layout_pb2.AdminRoomLayoutItemKind
+    assert sent.item.id == "sl1"
+    assert sent.item.kind == item_kind.ADMIN_ROOM_LAYOUT_ITEM_KIND_SIDEBAR_LINK
+    assert sent.before.id == "r1"
+    assert sent.before.kind == item_kind.ADMIN_ROOM_LAYOUT_ITEM_KIND_ROOM
+    assert sent.group_id == "g1"
 
 
 async def test_admin_update_server_config(client):

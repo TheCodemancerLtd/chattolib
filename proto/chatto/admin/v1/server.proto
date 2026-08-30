@@ -142,6 +142,9 @@ message UpdateBlockedUsernamesResponse {
 
 // One server advertised in the public Neighbor directory.
 message Neighbor {
+  reserved 4;
+  reserved "testimonial";
+
   // Stable opaque resource ID.
   string id = 1;
   // Canonical HTTP or HTTPS server origin.
@@ -170,6 +173,9 @@ message GetNeighborResponse {
 
 // Request to advertise one server origin.
 message CreateNeighborRequest {
+  reserved 2;
+  reserved "testimonial";
+
   string origin = 1 [(buf.validate.field).string = {min_len: 1, max_len: 2048}];
 }
 
@@ -180,6 +186,9 @@ message CreateNeighborResponse {
 
 // Request to change one advertised server origin.
 message UpdateNeighborRequest {
+  reserved 4;
+  reserved "testimonial";
+
   string neighbor_id = 1 [(buf.validate.field).string = {min_len: 1, max_len: 64}];
   string origin = 2 [(buf.validate.field).string = {min_len: 1, max_len: 2048}];
   string revision = 3 [(buf.validate.field).string = {min_len: 1, max_len: 64}];
@@ -225,10 +234,11 @@ service AdminServerService {
   rpc ListNeighbors(ListNeighborsRequest) returns (ListNeighborsResponse);
   // Gets one configured Neighbor. This RPC requires server.manage-neighbors.
   rpc GetNeighbor(GetNeighborRequest) returns (GetNeighborResponse);
-  // Advertises one server origin. This RPC requires server.manage-neighbors.
+  // Advertises one server origin. The origin must not identify this server.
+  // This RPC requires server.manage-neighbors.
   rpc CreateNeighbor(CreateNeighborRequest) returns (CreateNeighborResponse);
-  // Changes one advertised server origin. This RPC requires
-  // server.manage-neighbors.
+  // Changes one advertised server origin. The new origin must not identify
+  // this server. This RPC requires server.manage-neighbors.
   rpc UpdateNeighbor(UpdateNeighborRequest) returns (UpdateNeighborResponse);
   // Stops advertising one server origin. This RPC requires
   // server.manage-neighbors.

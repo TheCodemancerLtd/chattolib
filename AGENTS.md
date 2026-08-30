@@ -104,7 +104,7 @@ to its grants.
 | Assets | `AssetService` | `GetAsset`, `BatchGetAssets` |
 | Asset uploads | `AssetUploadService` | `CreateUpload`, `UploadChunk`, `GetUpload`, `CompleteUpload`, `CancelUpload`. `upload_attachment(room, path)` helper computes SHA-256, chunks, and completes in one call. |
 | Admin: server | `chatto.admin.v1.AdminServerService` | `GetServerConfig`, `UpdateServerConfig`, `UploadServerLogo`, `DeleteServerLogo`, `UploadServerBanner`, `DeleteServerBanner`, `GetServerSecurityConfig`, `UpdateBlockedUsernames` |
-| Admin: room layout | `chatto.admin.v1.AdminRoomLayoutService` | `ListRoomGroups`, `Create/Update/Delete/ReorderRoomGroup(s)`, `MoveRoomToGroup`, `ReorderSidebarItemsInGroup`, `Create/Update/Delete/MoveSidebarLink(ToGroup)` |
+| Admin: room layout | `chatto.admin.v1.AdminRoomLayoutService` | `ListRoomGroups`, `Create/Update/Delete/ReorderRoomGroup(s)`, `MoveRoomGroup`, `MoveRoomToGroup`, `ReorderSidebarItemsInGroup`, `MoveSidebarItem`, `Create/Update/Delete/MoveSidebarLink(ToGroup)` |
 | Admin: users | `chatto.admin.v1.AdminUserService` | `ListMembers`, `GetMember`, `BatchGetMembers`, `AssignRole`, `RevokeRole`, `UpdateUser`, `UpdateUserPassword`, `ClearUsernameCooldown`, `DeleteUser` |
 | Admin: roles | `chatto.admin.v1.AdminRoleService` | `ListRoles`, `GetRole`, `CreateRole`, `UpdateRole`, `DeleteRole`, `ReorderRoles` |
 | Admin: event log | `chatto.admin.v1.AdminEventLogService` | `ListEvents`, `ListEventTypes`, `GetEvent` (raw response) |

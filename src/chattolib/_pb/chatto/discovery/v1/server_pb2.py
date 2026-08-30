@@ -26,7 +26,7 @@ from chatto.api.v1 import server_pb2 as chatto_dot_api_dot_v1_dot_server__pb2
 from google.protobuf import descriptor_pb2 as google_dot_protobuf_dot_descriptor__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n chatto/discovery/v1/server.proto\x12\x13\x63hatto.discovery.v1\x1a\x1a\x63hatto/api/v1/server.proto\x1a google/protobuf/descriptor.proto\"\x12\n\x10GetServerRequest\"s\n\x11GetServerResponse\x12\x33\n\x07profile\x18\x01 \x01(\x0b\x32\".chatto.api.v1.ServerPublicProfile\x12)\n\x05login\x18\x02 \x01(\x0b\x32\x1a.chatto.api.v1.ServerLogin\"\x16\n\x14ListNeighborsRequest\"(\n\x15ListNeighborsResponse\x12\x0f\n\x07origins\x18\x01 \x03(\t2\xe6\x01\n\x16ServerDiscoveryService\x12_\n\tGetServer\x12%.chatto.discovery.v1.GetServerRequest\x1a&.chatto.discovery.v1.GetServerResponse\"\x03\x90\x02\x01\x12k\n\rListNeighbors\x12).chatto.discovery.v1.ListNeighborsRequest\x1a*.chatto.discovery.v1.ListNeighborsResponse\"\x03\x90\x02\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n chatto/discovery/v1/server.proto\x12\x13\x63hatto.discovery.v1\x1a\x1a\x63hatto/api/v1/server.proto\x1a google/protobuf/descriptor.proto\"\x12\n\x10GetServerRequest\"s\n\x11GetServerResponse\x12\x33\n\x07profile\x18\x01 \x01(\x0b\x32\".chatto.api.v1.ServerPublicProfile\x12)\n\x05login\x18\x02 \x01(\x0b\x32\x1a.chatto.api.v1.ServerLogin\"\x16\n\x14ListNeighborsRequest\"9\n\x15ListNeighborsResponse\x12\x0f\n\x07origins\x18\x01 \x03(\tJ\x04\x08\x02\x10\x03R\tneighbors2\xe6\x01\n\x16ServerDiscoveryService\x12_\n\tGetServer\x12%.chatto.discovery.v1.GetServerRequest\x1a&.chatto.discovery.v1.GetServerResponse\"\x03\x90\x02\x01\x12k\n\rListNeighbors\x12).chatto.discovery.v1.ListNeighborsRequest\x1a*.chatto.discovery.v1.ListNeighborsResponse\"\x03\x90\x02\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -44,7 +44,7 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_LISTNEIGHBORSREQUEST']._serialized_start=256
   _globals['_LISTNEIGHBORSREQUEST']._serialized_end=278
   _globals['_LISTNEIGHBORSRESPONSE']._serialized_start=280
-  _globals['_LISTNEIGHBORSRESPONSE']._serialized_end=320
-  _globals['_SERVERDISCOVERYSERVICE']._serialized_start=323
-  _globals['_SERVERDISCOVERYSERVICE']._serialized_end=553
+  _globals['_LISTNEIGHBORSRESPONSE']._serialized_end=337
+  _globals['_SERVERDISCOVERYSERVICE']._serialized_start=340
+  _globals['_SERVERDISCOVERYSERVICE']._serialized_end=570
 # @@protoc_insertion_point(module_scope)
