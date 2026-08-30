@@ -1,10 +1,10 @@
 """Main async client for the Chatto Connect API.
 
 Chatto migrated from GraphQL to a protobuf-first Connect API in v0.4.x
-(see ADR-042). The client speaks Connect binary protobuf via the official
-``connectrpc`` Python package and the generated service stubs under
-``chattolib._pb`` for all request/response operations. Realtime events
-live in ``chattolib.realtime``.
+(see ADR-042). The client speaks Connect binary protobuf over a
+hand-rolled transport (``chattolib._connect``) and the generated service
+stubs under ``chattolib._pb`` for all request/response operations. Realtime
+events live in ``chattolib.realtime``.
 """
 
 # mypy: disable-error-code="no-any-return"
@@ -21,10 +21,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, TypeVar
 
-# ConnectError isn't re-exported publicly by connectrpc.__init__; import from
-# its submodule so the top-level import path stays clean for callers.
-from connectrpc.errors import ConnectError  # noqa: E402
-
+# ConnectError is raised by our hand-rolled Connect client (chattolib._connect);
+# catch it here to translate into the library's public exception hierarchy.
+from chattolib._connect import ConnectError  # noqa: E402
 from chattolib._pb.chatto.admin.v1 import (
     event_log_pb2,
     room_layout_pb2,

@@ -3,14 +3,15 @@
 
 Chatto's public API is a ConnectRPC service surface. ``chattolib.client``
 speaks to it through generated service stubs (see ``chattolib._pb``) driven
-by the official ``connectrpc`` Python package.
+by chattolib's own hand-rolled Connect transport (``chattolib._connect``),
+so the library has no third-party Connect dependency.
 
 This module exposes:
 
 * :func:`build_service_clients` — one call, one ``base_url`` argument,
   returns a ``ServiceClients`` object with a typed field per Chatto service.
 * :func:`translate_connect_error` — translates a
-  ``connectrpc.errors.ConnectError`` into the library's public exception
+  ``chattolib._connect.ConnectError`` into the library's public exception
   hierarchy (:class:`chattolib.exceptions.ChattoAuthError` /
   :class:`chattolib.exceptions.ChattoConnectError`).
 * :func:`pb_to_dict` — turns a protobuf response into the camelCase JSON
@@ -25,12 +26,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from connectrpc.code import Code
-from connectrpc.compat import google_protobuf_binary_codec
-from connectrpc.errors import ConnectError
 from google.protobuf.json_format import MessageToDict
 from google.protobuf.message import Message
 
+from chattolib._connect import Code, ConnectError, google_protobuf_binary_codec
 from chattolib._pb.chatto.admin.v1.diagnostics_connect import (
     AdminDiagnosticsServiceClient,
 )
@@ -149,7 +148,7 @@ def build_service_clients(base_url: str) -> ServiceClients:
 
 
 def translate_connect_error(exc: ConnectError) -> Exception:
-    """Convert a ``connectrpc`` error into chattolib's exception hierarchy."""
+    """Convert a Connect transport error into chattolib's exception hierarchy."""
     if exc.code == Code.UNAUTHENTICATED:
         return ChattoAuthError(str(exc))
     return ChattoConnectError(
