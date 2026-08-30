@@ -67,6 +67,15 @@ warn_unused_configs = true
 exclude = ["src/chattolib/_pb", "src/chattolib/_codegen"]
 
 [[tool.mypy.overrides]]
-module = ["chattolib._pb.*", "chattolib._codegen.*", "websockets.*"]
+# Generated protobuf modules and third-party libs that ship no type info are
+# treated as untyped: protobuf bundles no .pyi/py.typed, and websockets is only
+# used behind the [realtime] extra. ignore_missing_imports keeps mypy from
+# flagging the `import google.protobuf...` lines in the hand-written transport.
+module = [
+    "chattolib._pb.*",
+    "chattolib._codegen.*",
+    "google.protobuf.*",
+    "websockets.*",
+]
 follow_imports = "skip"
 ignore_missing_imports = true
