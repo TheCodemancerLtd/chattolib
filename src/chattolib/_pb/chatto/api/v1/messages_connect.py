@@ -3,17 +3,19 @@
 # source: chatto/api/v1/messages.proto
 
 import chatto.api.v1.messages_pb2 as _pb2
+import chatto.api.v1.link_previews_pb2 as _pb2_link_previews
+import chatto.api.v1.reactions_pb2 as _pb2_reactions
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class MessageServiceClient(ConnectClient):
-    async def fetch_link_preview(self, request: _pb2.FetchLinkPreviewRequest, *, headers: dict[str, str] | None = None) -> _pb2.FetchLinkPreviewResponse:
+    async def fetch_link_preview(self, request: _pb2_link_previews.FetchLinkPreviewRequest, *, headers: dict[str, str] | None = None) -> _pb2_link_previews.FetchLinkPreviewResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="FetchLinkPreview",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.FetchLinkPreviewRequest,
-                output=_pb2.FetchLinkPreviewResponse,
+                input=_pb2_link_previews.FetchLinkPreviewRequest,
+                output=_pb2_link_previews.FetchLinkPreviewResponse,
             ),
             headers=headers,
         )
@@ -102,40 +104,40 @@ class MessageServiceClient(ConnectClient):
             headers=headers,
         )
 
-    async def add_reaction(self, request: _pb2.AddReactionRequest, *, headers: dict[str, str] | None = None) -> _pb2.AddReactionResponse:
+    async def add_reaction(self, request: _pb2_reactions.AddReactionRequest, *, headers: dict[str, str] | None = None) -> _pb2_reactions.AddReactionResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="AddReaction",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.AddReactionRequest,
-                output=_pb2.AddReactionResponse,
+                input=_pb2_reactions.AddReactionRequest,
+                output=_pb2_reactions.AddReactionResponse,
             ),
             headers=headers,
         )
 
-    async def remove_reaction(self, request: _pb2.RemoveReactionRequest, *, headers: dict[str, str] | None = None) -> _pb2.RemoveReactionResponse:
+    async def remove_reaction(self, request: _pb2_reactions.RemoveReactionRequest, *, headers: dict[str, str] | None = None) -> _pb2_reactions.RemoveReactionResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="RemoveReaction",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.RemoveReactionRequest,
-                output=_pb2.RemoveReactionResponse,
+                input=_pb2_reactions.RemoveReactionRequest,
+                output=_pb2_reactions.RemoveReactionResponse,
             ),
             headers=headers,
         )
 
 class MessageServiceClientSync(ConnectClientSync):
 
-    def fetch_link_preview(self, request: _pb2.FetchLinkPreviewRequest, *, headers: dict[str, str] | None = None) -> _pb2.FetchLinkPreviewResponse:
+    def fetch_link_preview(self, request: _pb2_link_previews.FetchLinkPreviewRequest, *, headers: dict[str, str] | None = None) -> _pb2_link_previews.FetchLinkPreviewResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="FetchLinkPreview",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.FetchLinkPreviewRequest,
-                output=_pb2.FetchLinkPreviewResponse,
+                input=_pb2_link_previews.FetchLinkPreviewRequest,
+                output=_pb2_link_previews.FetchLinkPreviewResponse,
             ),
             headers=headers,
         )
@@ -224,26 +226,26 @@ class MessageServiceClientSync(ConnectClientSync):
             headers=headers,
         )
 
-    def add_reaction(self, request: _pb2.AddReactionRequest, *, headers: dict[str, str] | None = None) -> _pb2.AddReactionResponse:
+    def add_reaction(self, request: _pb2_reactions.AddReactionRequest, *, headers: dict[str, str] | None = None) -> _pb2_reactions.AddReactionResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="AddReaction",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.AddReactionRequest,
-                output=_pb2.AddReactionResponse,
+                input=_pb2_reactions.AddReactionRequest,
+                output=_pb2_reactions.AddReactionResponse,
             ),
             headers=headers,
         )
 
-    def remove_reaction(self, request: _pb2.RemoveReactionRequest, *, headers: dict[str, str] | None = None) -> _pb2.RemoveReactionResponse:
+    def remove_reaction(self, request: _pb2_reactions.RemoveReactionRequest, *, headers: dict[str, str] | None = None) -> _pb2_reactions.RemoveReactionResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="RemoveReaction",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.RemoveReactionRequest,
-                output=_pb2.RemoveReactionResponse,
+                input=_pb2_reactions.RemoveReactionRequest,
+                output=_pb2_reactions.RemoveReactionResponse,
             ),
             headers=headers,
         )

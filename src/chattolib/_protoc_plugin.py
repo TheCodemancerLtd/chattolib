@@ -63,41 +63,99 @@ def _method_name(m: Any) -> str:
     return "".join(out)
 
 
-def _service_preamble(fd: Any) -> str:
-    """The shared header + imports for a generated module (emitted once)."""
-    pb2_module = fd.name[: -len(".proto")].replace("/", ".") + "_pb2"
-    return "\n".join(
-        [
-            _HEADER,
-            f"# source: {fd.name}",
-            "",
-            f"import {pb2_module} as _pb2",
-            "from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo",
-            "",
-            "",
-        ]
-    )
+def _message_owner(request: Any) -> dict[str, str]:
+    """Map each fully-qualified message name to the proto file that defines it.
+
+    A service's RPC can reference a request/response message that is defined in
+    a *different* ``.proto`` file than the service itself (e.g. ``MyAccountService
+    .UpdatePresence`` in ``account.proto`` uses ``UpdatePresenceRequest`` from
+    ``presence.proto``). To emit a correct import for each, we need to know which
+    proto owns each message. We scan every ``FileDescriptorProto`` in the request
+    (including nested messages) to build that map.
+    """
+    owner: dict[str, str] = {}
+
+    def _walk(file_name: str, pkg: str, message_type: Any) -> None:
+        for mt in message_type:
+            fqn = f"{pkg}.{mt.name}" if pkg else mt.name
+            owner.setdefault(fqn, file_name)
+            _walk(file_name, f"{pkg}.{mt.name}" if pkg else mt.name, mt.nested_type)
+
+    for fd in request.proto_file:
+        _walk(fd.name, fd.package, fd.message_type)
+
+    return owner
 
 
-def _service_body(fd: Any, svc: Any) -> str:
+def _module_alias(proto_name: str, current_proto: str) -> str:
+    """A stable import alias for a proto's ``_pb2`` module.
+
+    The proto being generated is always ``_pb2`` (so same-file references are
+    unchanged); any other referenced proto gets ``_pb2_<last-path-segment>``.
+    """
+    if proto_name == current_proto:
+        return "_pb2"
+    stem = proto_name[: -len(".proto")].rsplit("/", 1)[-1]
+    return f"_pb2_{stem}"
+
+
+def _pb2_module(proto_name: str) -> str:
+    """The dotted import path for a proto's generated ``_pb2`` module."""
+    return proto_name[: -len(".proto")].replace("/", ".") + "_pb2"
+
+
+def _service_preamble(fd: Any, extra_modules: list[str]) -> str:
+    """The shared header + imports for a generated module (emitted once).
+
+    ``extra_modules`` are proto file names (other than ``fd.name``) whose
+    messages this file's services reference; each gets its own import so a
+    cross-file RPC points at the module that actually defines its messages.
+    """
+    lines = [
+        _HEADER,
+        f"# source: {fd.name}",
+        "",
+        f"import {_pb2_module(fd.name)} as _pb2",
+    ]
+    for mod in extra_modules:
+        lines.append(f"import {_pb2_module(mod)} as {_module_alias(mod, fd.name)}")
+    lines += [
+        "from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo",
+        "",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def _service_body(fd: Any, svc: Any, owner: dict[str, str]) -> str:
     """Render one service's async + sync client classes (no preamble)."""
     pkg = fd.package
     base = f"{pkg}.{svc.name}" if pkg else svc.name
+
+    def _alias(fqn: str) -> str:
+        """The import alias to use for a fully-qualified message name."""
+        proto = owner.get(fqn, fd.name)
+        return _module_alias(proto, fd.name)
+
     lines: list[str] = [f"class {svc.name}Client(ConnectClient):"]
     for m in svc.method:
         mn = _method_name(m)
-        in_name = m.input_type.lstrip(".").split(".")[-1]
-        out_name = m.output_type.lstrip(".").split(".")[-1]
+        in_fqn = m.input_type.lstrip(".")
+        out_fqn = m.output_type.lstrip(".")
+        in_name = in_fqn.split(".")[-1]
+        out_name = out_fqn.split(".")[-1]
+        in_alias = _alias(in_fqn)
+        out_alias = _alias(out_fqn)
         lines += [
-            f"    async def {mn}(self, request: _pb2.{in_name}, *,"
-            f" headers: dict[str, str] | None = None) -> _pb2.{out_name}:",
+            f"    async def {mn}(self, request: {in_alias}.{in_name}, *,"
+            f" headers: dict[str, str] | None = None) -> {out_alias}.{out_name}:",
             "        return await self.execute_unary(",
             "            request=request,",
             "            method=MethodInfo(",
             f'                name="{m.name}",',
             f'                service_name="{base}",',
-            f"                input=_pb2.{in_name},",
-            f"                output=_pb2.{out_name},",
+            f"                input={in_alias}.{in_name},",
+            f"                output={out_alias}.{out_name},",
             "            ),",
             "            headers=headers,",
             "        )",
@@ -106,18 +164,22 @@ def _service_body(fd: Any, svc: Any) -> str:
     lines += [f"class {svc.name}ClientSync(ConnectClientSync):", ""]
     for m in svc.method:
         mn = _method_name(m)
-        in_name = m.input_type.lstrip(".").split(".")[-1]
-        out_name = m.output_type.lstrip(".").split(".")[-1]
+        in_fqn = m.input_type.lstrip(".")
+        out_fqn = m.output_type.lstrip(".")
+        in_name = in_fqn.split(".")[-1]
+        out_name = out_fqn.split(".")[-1]
+        in_alias = _alias(in_fqn)
+        out_alias = _alias(out_fqn)
         lines += [
-            f"    def {mn}(self, request: _pb2.{in_name}, *,"
-            f" headers: dict[str, str] | None = None) -> _pb2.{out_name}:",
+            f"    def {mn}(self, request: {in_alias}.{in_name}, *,"
+            f" headers: dict[str, str] | None = None) -> {out_alias}.{out_name}:",
             "        return self.execute_unary(",
             "            request=request,",
             "            method=MethodInfo(",
             f'                name="{m.name}",',
             f'                service_name="{base}",',
-            f"                input=_pb2.{in_name},",
-            f"                output=_pb2.{out_name},",
+            f"                input={in_alias}.{in_name},",
+            f"                output={out_alias}.{out_name},",
             "            ),",
             "            headers=headers,",
             "        )",
@@ -135,20 +197,30 @@ def generate(request: g.CodeGeneratorRequest) -> r.CodeGeneratorResponse:
     # file_to_generate is a repeated *string* (proto file names), not a list of
     # message objects — match by string membership.
     to_generate = set(request.file_to_generate)
+    owner = _message_owner(request)
     for fd in request.proto_file:
         if fd.name not in to_generate:
             continue
         services = [svc for svc in fd.service if svc.method]
         if not services:
             continue
+        # Collect the other proto files this file's services reference (for
+        # cross-file RPC messages), in first-seen order, deduplicated.
+        extra: list[str] = []
+        for svc in services:
+            for m in svc.method:
+                for fqn in (m.input_type.lstrip("."), m.output_type.lstrip(".")):
+                    proto = owner.get(fqn, fd.name)
+                    if proto != fd.name and proto not in extra:
+                        extra.append(proto)
         # One file per proto, containing every service it declares (e.g.
         # notifications.proto -> NotificationServiceClient and
         # NotificationPolicyServiceClient in the same module), matching the
         # historical connectrpc layout.
         out = resp.file.add()
         out.name = fd.name.replace(".proto", "_connect.py")
-        out.content = _service_preamble(fd) + "\n".join(
-            _service_body(fd, svc) for svc in services
+        out.content = _service_preamble(fd, extra) + "\n".join(
+            _service_body(fd, svc, owner) for svc in services
         )
     return resp
 

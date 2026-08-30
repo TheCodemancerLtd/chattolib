@@ -3,6 +3,9 @@
 # source: chatto/api/v1/rooms.proto
 
 import chatto.api.v1.rooms_pb2 as _pb2
+import chatto.api.v1.member_directory_pb2 as _pb2_member_directory
+import chatto.api.v1.room_timeline_pb2 as _pb2_room_timeline
+import chatto.api.v1.read_state_pb2 as _pb2_read_state
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class RoomServiceClient(ConnectClient):
@@ -102,38 +105,38 @@ class RoomServiceClient(ConnectClient):
             headers=headers,
         )
 
-    async def list_members(self, request: _pb2.ListRoomMembersRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListRoomMembersResponse:
+    async def list_members(self, request: _pb2_member_directory.ListRoomMembersRequest, *, headers: dict[str, str] | None = None) -> _pb2_member_directory.ListRoomMembersResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListMembers",
                 service_name="chatto.api.v1.RoomService",
-                input=_pb2.ListRoomMembersRequest,
-                output=_pb2.ListRoomMembersResponse,
+                input=_pb2_member_directory.ListRoomMembersRequest,
+                output=_pb2_member_directory.ListRoomMembersResponse,
             ),
             headers=headers,
         )
 
-    async def get_member(self, request: _pb2.GetRoomMemberRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRoomMemberResponse:
+    async def get_member(self, request: _pb2_member_directory.GetRoomMemberRequest, *, headers: dict[str, str] | None = None) -> _pb2_member_directory.GetRoomMemberResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetMember",
                 service_name="chatto.api.v1.RoomService",
-                input=_pb2.GetRoomMemberRequest,
-                output=_pb2.GetRoomMemberResponse,
+                input=_pb2_member_directory.GetRoomMemberRequest,
+                output=_pb2_member_directory.GetRoomMemberResponse,
             ),
             headers=headers,
         )
 
-    async def batch_get_members(self, request: _pb2.BatchGetRoomMembersRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetRoomMembersResponse:
+    async def batch_get_members(self, request: _pb2_member_directory.BatchGetRoomMembersRequest, *, headers: dict[str, str] | None = None) -> _pb2_member_directory.BatchGetRoomMembersResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetMembers",
                 service_name="chatto.api.v1.RoomService",
-                input=_pb2.BatchGetRoomMembersRequest,
-                output=_pb2.BatchGetRoomMembersResponse,
+                input=_pb2_member_directory.BatchGetRoomMembersRequest,
+                output=_pb2_member_directory.BatchGetRoomMembersResponse,
             ),
             headers=headers,
         )
@@ -234,38 +237,38 @@ class RoomServiceClient(ConnectClient):
             headers=headers,
         )
 
-    async def get_room_events(self, request: _pb2.GetRoomEventsRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRoomEventsResponse:
+    async def get_room_events(self, request: _pb2_room_timeline.GetRoomEventsRequest, *, headers: dict[str, str] | None = None) -> _pb2_room_timeline.GetRoomEventsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRoomEvents",
                 service_name="chatto.api.v1.RoomService",
-                input=_pb2.GetRoomEventsRequest,
-                output=_pb2.GetRoomEventsResponse,
+                input=_pb2_room_timeline.GetRoomEventsRequest,
+                output=_pb2_room_timeline.GetRoomEventsResponse,
             ),
             headers=headers,
         )
 
-    async def get_room_events_around(self, request: _pb2.GetRoomEventsAroundRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRoomEventsAroundResponse:
+    async def get_room_events_around(self, request: _pb2_room_timeline.GetRoomEventsAroundRequest, *, headers: dict[str, str] | None = None) -> _pb2_room_timeline.GetRoomEventsAroundResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRoomEventsAround",
                 service_name="chatto.api.v1.RoomService",
-                input=_pb2.GetRoomEventsAroundRequest,
-                output=_pb2.GetRoomEventsAroundResponse,
+                input=_pb2_room_timeline.GetRoomEventsAroundRequest,
+                output=_pb2_room_timeline.GetRoomEventsAroundResponse,
             ),
             headers=headers,
         )
 
-    async def mark_room_as_read(self, request: _pb2.MarkRoomAsReadRequest, *, headers: dict[str, str] | None = None) -> _pb2.MarkRoomAsReadResponse:
+    async def mark_room_as_read(self, request: _pb2_read_state.MarkRoomAsReadRequest, *, headers: dict[str, str] | None = None) -> _pb2_read_state.MarkRoomAsReadResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="MarkRoomAsRead",
                 service_name="chatto.api.v1.RoomService",
-                input=_pb2.MarkRoomAsReadRequest,
-                output=_pb2.MarkRoomAsReadResponse,
+                input=_pb2_read_state.MarkRoomAsReadRequest,
+                output=_pb2_read_state.MarkRoomAsReadResponse,
             ),
             headers=headers,
         )
@@ -392,38 +395,38 @@ class RoomServiceClientSync(ConnectClientSync):
             headers=headers,
         )
 
-    def list_members(self, request: _pb2.ListRoomMembersRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListRoomMembersResponse:
+    def list_members(self, request: _pb2_member_directory.ListRoomMembersRequest, *, headers: dict[str, str] | None = None) -> _pb2_member_directory.ListRoomMembersResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListMembers",
                 service_name="chatto.api.v1.RoomService",
-                input=_pb2.ListRoomMembersRequest,
-                output=_pb2.ListRoomMembersResponse,
+                input=_pb2_member_directory.ListRoomMembersRequest,
+                output=_pb2_member_directory.ListRoomMembersResponse,
             ),
             headers=headers,
         )
 
-    def get_member(self, request: _pb2.GetRoomMemberRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRoomMemberResponse:
+    def get_member(self, request: _pb2_member_directory.GetRoomMemberRequest, *, headers: dict[str, str] | None = None) -> _pb2_member_directory.GetRoomMemberResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetMember",
                 service_name="chatto.api.v1.RoomService",
-                input=_pb2.GetRoomMemberRequest,
-                output=_pb2.GetRoomMemberResponse,
+                input=_pb2_member_directory.GetRoomMemberRequest,
+                output=_pb2_member_directory.GetRoomMemberResponse,
             ),
             headers=headers,
         )
 
-    def batch_get_members(self, request: _pb2.BatchGetRoomMembersRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetRoomMembersResponse:
+    def batch_get_members(self, request: _pb2_member_directory.BatchGetRoomMembersRequest, *, headers: dict[str, str] | None = None) -> _pb2_member_directory.BatchGetRoomMembersResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetMembers",
                 service_name="chatto.api.v1.RoomService",
-                input=_pb2.BatchGetRoomMembersRequest,
-                output=_pb2.BatchGetRoomMembersResponse,
+                input=_pb2_member_directory.BatchGetRoomMembersRequest,
+                output=_pb2_member_directory.BatchGetRoomMembersResponse,
             ),
             headers=headers,
         )
@@ -524,38 +527,38 @@ class RoomServiceClientSync(ConnectClientSync):
             headers=headers,
         )
 
-    def get_room_events(self, request: _pb2.GetRoomEventsRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRoomEventsResponse:
+    def get_room_events(self, request: _pb2_room_timeline.GetRoomEventsRequest, *, headers: dict[str, str] | None = None) -> _pb2_room_timeline.GetRoomEventsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRoomEvents",
                 service_name="chatto.api.v1.RoomService",
-                input=_pb2.GetRoomEventsRequest,
-                output=_pb2.GetRoomEventsResponse,
+                input=_pb2_room_timeline.GetRoomEventsRequest,
+                output=_pb2_room_timeline.GetRoomEventsResponse,
             ),
             headers=headers,
         )
 
-    def get_room_events_around(self, request: _pb2.GetRoomEventsAroundRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRoomEventsAroundResponse:
+    def get_room_events_around(self, request: _pb2_room_timeline.GetRoomEventsAroundRequest, *, headers: dict[str, str] | None = None) -> _pb2_room_timeline.GetRoomEventsAroundResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRoomEventsAround",
                 service_name="chatto.api.v1.RoomService",
-                input=_pb2.GetRoomEventsAroundRequest,
-                output=_pb2.GetRoomEventsAroundResponse,
+                input=_pb2_room_timeline.GetRoomEventsAroundRequest,
+                output=_pb2_room_timeline.GetRoomEventsAroundResponse,
             ),
             headers=headers,
         )
 
-    def mark_room_as_read(self, request: _pb2.MarkRoomAsReadRequest, *, headers: dict[str, str] | None = None) -> _pb2.MarkRoomAsReadResponse:
+    def mark_room_as_read(self, request: _pb2_read_state.MarkRoomAsReadRequest, *, headers: dict[str, str] | None = None) -> _pb2_read_state.MarkRoomAsReadResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="MarkRoomAsRead",
                 service_name="chatto.api.v1.RoomService",
-                input=_pb2.MarkRoomAsReadRequest,
-                output=_pb2.MarkRoomAsReadResponse,
+                input=_pb2_read_state.MarkRoomAsReadRequest,
+                output=_pb2_read_state.MarkRoomAsReadResponse,
             ),
             headers=headers,
         )

@@ -70,3 +70,54 @@ def test_skips_files_without_services():
     fd.message_type.add().name = "RealtimeClientFrame"  # messages, no service
     resp = generate(req)
     assert len(resp.file) == 0
+
+
+def _request_with_cross_file_rpc() -> g.CodeGeneratorRequest:
+    """A service in account.proto whose UpdatePresence RPC uses a message that
+    is defined in presence.proto — the cross-file case the plugin must handle."""
+    req = g.CodeGeneratorRequest()
+    req.file_to_generate.append("chatto/api/v1/account.proto")
+
+    # account.proto: declares the service + its own UpdateProfile messages.
+    acc = req.proto_file.add()
+    acc.name = "chatto/api/v1/account.proto"
+    acc.package = "chatto.api.v1"
+    acc.message_type.add().name = "UpdateProfileRequest"
+    acc.message_type.add().name = "UpdateProfileResponse"
+    svc = acc.service.add()
+    svc.name = "MyAccountService"
+    m = svc.method.add()
+    m.name = "UpdatePresence"
+    m.input_type = ".chatto.api.v1.UpdatePresenceRequest"
+    m.output_type = ".chatto.api.v1.UpdatePresenceResponse"
+    m2 = svc.method.add()
+    m2.name = "UpdateProfile"
+    m2.input_type = ".chatto.api.v1.UpdateProfileRequest"
+    m2.output_type = ".chatto.api.v1.UpdateProfileResponse"
+
+    # presence.proto: defines the UpdatePresence request/response.
+    pres = req.proto_file.add()
+    pres.name = "chatto/api/v1/presence.proto"
+    pres.package = "chatto.api.v1"
+    pres.message_type.add().name = "UpdatePresenceRequest"
+    pres.message_type.add().name = "UpdatePresenceResponse"
+    return req
+
+
+def test_cross_file_rpc_uses_the_defining_module():
+    resp = generate(_request_with_cross_file_rpc())
+    assert len(resp.file) == 1
+    content = resp.file[0].content
+    # The account_pb2 import is still there for the same-file messages.
+    assert "import chatto.api.v1.account_pb2 as _pb2" in content
+    # The presence messages must be imported from their own module and the
+    # UpdatePresence method must reference *that* module, not _pb2.
+    assert "import chatto.api.v1.presence_pb2 as _pb2_presence" in content
+    assert "_pb2_presence.UpdatePresenceRequest" in content
+    assert "_pb2_presence.UpdatePresenceResponse" in content
+    # The same-file method keeps using the plain _pb2 alias.
+    assert "_pb2.UpdateProfileRequest" in content
+    # Crucially: UpdatePresenceRequest must NOT be referenced via _pb2 (the
+    # original bug was `_pb2.UpdatePresenceRequest` -> AttributeError).
+    assert "_pb2.UpdatePresenceRequest" not in content
+    assert "_pb2.UpdatePresenceResponse" not in content

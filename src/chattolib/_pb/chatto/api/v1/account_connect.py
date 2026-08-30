@@ -3,6 +3,9 @@
 # source: chatto/api/v1/account.proto
 
 import chatto.api.v1.account_pb2 as _pb2
+import chatto.api.v1.external_identities_pb2 as _pb2_external_identities
+import chatto.api.v1.presence_pb2 as _pb2_presence
+import chatto.api.v1.user_status_pb2 as _pb2_user_status
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class MyAccountServiceClient(ConnectClient):
@@ -66,74 +69,74 @@ class MyAccountServiceClient(ConnectClient):
             headers=headers,
         )
 
-    async def list_external_identities(self, request: _pb2.ListExternalIdentitiesRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListExternalIdentitiesResponse:
+    async def list_external_identities(self, request: _pb2_external_identities.ListExternalIdentitiesRequest, *, headers: dict[str, str] | None = None) -> _pb2_external_identities.ListExternalIdentitiesResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListExternalIdentities",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.ListExternalIdentitiesRequest,
-                output=_pb2.ListExternalIdentitiesResponse,
+                input=_pb2_external_identities.ListExternalIdentitiesRequest,
+                output=_pb2_external_identities.ListExternalIdentitiesResponse,
             ),
             headers=headers,
         )
 
-    async def start_external_identity_link(self, request: _pb2.StartExternalIdentityLinkRequest, *, headers: dict[str, str] | None = None) -> _pb2.StartExternalIdentityLinkResponse:
+    async def start_external_identity_link(self, request: _pb2_external_identities.StartExternalIdentityLinkRequest, *, headers: dict[str, str] | None = None) -> _pb2_external_identities.StartExternalIdentityLinkResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="StartExternalIdentityLink",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.StartExternalIdentityLinkRequest,
-                output=_pb2.StartExternalIdentityLinkResponse,
+                input=_pb2_external_identities.StartExternalIdentityLinkRequest,
+                output=_pb2_external_identities.StartExternalIdentityLinkResponse,
             ),
             headers=headers,
         )
 
-    async def disconnect_external_identity(self, request: _pb2.DisconnectExternalIdentityRequest, *, headers: dict[str, str] | None = None) -> _pb2.DisconnectExternalIdentityResponse:
+    async def disconnect_external_identity(self, request: _pb2_external_identities.DisconnectExternalIdentityRequest, *, headers: dict[str, str] | None = None) -> _pb2_external_identities.DisconnectExternalIdentityResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DisconnectExternalIdentity",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.DisconnectExternalIdentityRequest,
-                output=_pb2.DisconnectExternalIdentityResponse,
+                input=_pb2_external_identities.DisconnectExternalIdentityRequest,
+                output=_pb2_external_identities.DisconnectExternalIdentityResponse,
             ),
             headers=headers,
         )
 
-    async def update_presence(self, request: _pb2.UpdatePresenceRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdatePresenceResponse:
+    async def update_presence(self, request: _pb2_presence.UpdatePresenceRequest, *, headers: dict[str, str] | None = None) -> _pb2_presence.UpdatePresenceResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdatePresence",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.UpdatePresenceRequest,
-                output=_pb2.UpdatePresenceResponse,
+                input=_pb2_presence.UpdatePresenceRequest,
+                output=_pb2_presence.UpdatePresenceResponse,
             ),
             headers=headers,
         )
 
-    async def update_custom_status(self, request: _pb2.UpdateCustomStatusRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateCustomStatusResponse:
+    async def update_custom_status(self, request: _pb2_user_status.UpdateCustomStatusRequest, *, headers: dict[str, str] | None = None) -> _pb2_user_status.UpdateCustomStatusResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateCustomStatus",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.UpdateCustomStatusRequest,
-                output=_pb2.UpdateCustomStatusResponse,
+                input=_pb2_user_status.UpdateCustomStatusRequest,
+                output=_pb2_user_status.UpdateCustomStatusResponse,
             ),
             headers=headers,
         )
 
-    async def delete_custom_status(self, request: _pb2.DeleteCustomStatusRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteCustomStatusResponse:
+    async def delete_custom_status(self, request: _pb2_user_status.DeleteCustomStatusRequest, *, headers: dict[str, str] | None = None) -> _pb2_user_status.DeleteCustomStatusResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteCustomStatus",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.DeleteCustomStatusRequest,
-                output=_pb2.DeleteCustomStatusResponse,
+                input=_pb2_user_status.DeleteCustomStatusRequest,
+                output=_pb2_user_status.DeleteCustomStatusResponse,
             ),
             headers=headers,
         )
@@ -224,74 +227,74 @@ class MyAccountServiceClientSync(ConnectClientSync):
             headers=headers,
         )
 
-    def list_external_identities(self, request: _pb2.ListExternalIdentitiesRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListExternalIdentitiesResponse:
+    def list_external_identities(self, request: _pb2_external_identities.ListExternalIdentitiesRequest, *, headers: dict[str, str] | None = None) -> _pb2_external_identities.ListExternalIdentitiesResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListExternalIdentities",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.ListExternalIdentitiesRequest,
-                output=_pb2.ListExternalIdentitiesResponse,
+                input=_pb2_external_identities.ListExternalIdentitiesRequest,
+                output=_pb2_external_identities.ListExternalIdentitiesResponse,
             ),
             headers=headers,
         )
 
-    def start_external_identity_link(self, request: _pb2.StartExternalIdentityLinkRequest, *, headers: dict[str, str] | None = None) -> _pb2.StartExternalIdentityLinkResponse:
+    def start_external_identity_link(self, request: _pb2_external_identities.StartExternalIdentityLinkRequest, *, headers: dict[str, str] | None = None) -> _pb2_external_identities.StartExternalIdentityLinkResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="StartExternalIdentityLink",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.StartExternalIdentityLinkRequest,
-                output=_pb2.StartExternalIdentityLinkResponse,
+                input=_pb2_external_identities.StartExternalIdentityLinkRequest,
+                output=_pb2_external_identities.StartExternalIdentityLinkResponse,
             ),
             headers=headers,
         )
 
-    def disconnect_external_identity(self, request: _pb2.DisconnectExternalIdentityRequest, *, headers: dict[str, str] | None = None) -> _pb2.DisconnectExternalIdentityResponse:
+    def disconnect_external_identity(self, request: _pb2_external_identities.DisconnectExternalIdentityRequest, *, headers: dict[str, str] | None = None) -> _pb2_external_identities.DisconnectExternalIdentityResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DisconnectExternalIdentity",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.DisconnectExternalIdentityRequest,
-                output=_pb2.DisconnectExternalIdentityResponse,
+                input=_pb2_external_identities.DisconnectExternalIdentityRequest,
+                output=_pb2_external_identities.DisconnectExternalIdentityResponse,
             ),
             headers=headers,
         )
 
-    def update_presence(self, request: _pb2.UpdatePresenceRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdatePresenceResponse:
+    def update_presence(self, request: _pb2_presence.UpdatePresenceRequest, *, headers: dict[str, str] | None = None) -> _pb2_presence.UpdatePresenceResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdatePresence",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.UpdatePresenceRequest,
-                output=_pb2.UpdatePresenceResponse,
+                input=_pb2_presence.UpdatePresenceRequest,
+                output=_pb2_presence.UpdatePresenceResponse,
             ),
             headers=headers,
         )
 
-    def update_custom_status(self, request: _pb2.UpdateCustomStatusRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateCustomStatusResponse:
+    def update_custom_status(self, request: _pb2_user_status.UpdateCustomStatusRequest, *, headers: dict[str, str] | None = None) -> _pb2_user_status.UpdateCustomStatusResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateCustomStatus",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.UpdateCustomStatusRequest,
-                output=_pb2.UpdateCustomStatusResponse,
+                input=_pb2_user_status.UpdateCustomStatusRequest,
+                output=_pb2_user_status.UpdateCustomStatusResponse,
             ),
             headers=headers,
         )
 
-    def delete_custom_status(self, request: _pb2.DeleteCustomStatusRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteCustomStatusResponse:
+    def delete_custom_status(self, request: _pb2_user_status.DeleteCustomStatusRequest, *, headers: dict[str, str] | None = None) -> _pb2_user_status.DeleteCustomStatusResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteCustomStatus",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.DeleteCustomStatusRequest,
-                output=_pb2.DeleteCustomStatusResponse,
+                input=_pb2_user_status.DeleteCustomStatusRequest,
+                output=_pb2_user_status.DeleteCustomStatusResponse,
             ),
             headers=headers,
         )

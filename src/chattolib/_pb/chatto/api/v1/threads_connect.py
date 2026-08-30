@@ -3,6 +3,8 @@
 # source: chatto/api/v1/threads.proto
 
 import chatto.api.v1.threads_pb2 as _pb2
+import chatto.api.v1.room_timeline_pb2 as _pb2_room_timeline
+import chatto.api.v1.read_state_pb2 as _pb2_read_state
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class ThreadServiceClient(ConnectClient):
@@ -42,38 +44,38 @@ class ThreadServiceClient(ConnectClient):
             headers=headers,
         )
 
-    async def get_thread_events(self, request: _pb2.GetThreadEventsRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetThreadEventsResponse:
+    async def get_thread_events(self, request: _pb2_room_timeline.GetThreadEventsRequest, *, headers: dict[str, str] | None = None) -> _pb2_room_timeline.GetThreadEventsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetThreadEvents",
                 service_name="chatto.api.v1.ThreadService",
-                input=_pb2.GetThreadEventsRequest,
-                output=_pb2.GetThreadEventsResponse,
+                input=_pb2_room_timeline.GetThreadEventsRequest,
+                output=_pb2_room_timeline.GetThreadEventsResponse,
             ),
             headers=headers,
         )
 
-    async def get_thread_events_around(self, request: _pb2.GetThreadEventsAroundRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetThreadEventsAroundResponse:
+    async def get_thread_events_around(self, request: _pb2_room_timeline.GetThreadEventsAroundRequest, *, headers: dict[str, str] | None = None) -> _pb2_room_timeline.GetThreadEventsAroundResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetThreadEventsAround",
                 service_name="chatto.api.v1.ThreadService",
-                input=_pb2.GetThreadEventsAroundRequest,
-                output=_pb2.GetThreadEventsAroundResponse,
+                input=_pb2_room_timeline.GetThreadEventsAroundRequest,
+                output=_pb2_room_timeline.GetThreadEventsAroundResponse,
             ),
             headers=headers,
         )
 
-    async def mark_thread_as_read(self, request: _pb2.MarkThreadAsReadRequest, *, headers: dict[str, str] | None = None) -> _pb2.MarkThreadAsReadResponse:
+    async def mark_thread_as_read(self, request: _pb2_read_state.MarkThreadAsReadRequest, *, headers: dict[str, str] | None = None) -> _pb2_read_state.MarkThreadAsReadResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="MarkThreadAsRead",
                 service_name="chatto.api.v1.ThreadService",
-                input=_pb2.MarkThreadAsReadRequest,
-                output=_pb2.MarkThreadAsReadResponse,
+                input=_pb2_read_state.MarkThreadAsReadRequest,
+                output=_pb2_read_state.MarkThreadAsReadResponse,
             ),
             headers=headers,
         )
@@ -116,38 +118,38 @@ class ThreadServiceClientSync(ConnectClientSync):
             headers=headers,
         )
 
-    def get_thread_events(self, request: _pb2.GetThreadEventsRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetThreadEventsResponse:
+    def get_thread_events(self, request: _pb2_room_timeline.GetThreadEventsRequest, *, headers: dict[str, str] | None = None) -> _pb2_room_timeline.GetThreadEventsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetThreadEvents",
                 service_name="chatto.api.v1.ThreadService",
-                input=_pb2.GetThreadEventsRequest,
-                output=_pb2.GetThreadEventsResponse,
+                input=_pb2_room_timeline.GetThreadEventsRequest,
+                output=_pb2_room_timeline.GetThreadEventsResponse,
             ),
             headers=headers,
         )
 
-    def get_thread_events_around(self, request: _pb2.GetThreadEventsAroundRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetThreadEventsAroundResponse:
+    def get_thread_events_around(self, request: _pb2_room_timeline.GetThreadEventsAroundRequest, *, headers: dict[str, str] | None = None) -> _pb2_room_timeline.GetThreadEventsAroundResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetThreadEventsAround",
                 service_name="chatto.api.v1.ThreadService",
-                input=_pb2.GetThreadEventsAroundRequest,
-                output=_pb2.GetThreadEventsAroundResponse,
+                input=_pb2_room_timeline.GetThreadEventsAroundRequest,
+                output=_pb2_room_timeline.GetThreadEventsAroundResponse,
             ),
             headers=headers,
         )
 
-    def mark_thread_as_read(self, request: _pb2.MarkThreadAsReadRequest, *, headers: dict[str, str] | None = None) -> _pb2.MarkThreadAsReadResponse:
+    def mark_thread_as_read(self, request: _pb2_read_state.MarkThreadAsReadRequest, *, headers: dict[str, str] | None = None) -> _pb2_read_state.MarkThreadAsReadResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="MarkThreadAsRead",
                 service_name="chatto.api.v1.ThreadService",
-                input=_pb2.MarkThreadAsReadRequest,
-                output=_pb2.MarkThreadAsReadResponse,
+                input=_pb2_read_state.MarkThreadAsReadRequest,
+                output=_pb2_read_state.MarkThreadAsReadResponse,
             ),
             headers=headers,
         )
