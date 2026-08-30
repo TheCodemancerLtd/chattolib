@@ -1734,6 +1734,23 @@ class ChattoClient:
             if g is not None
         ]
 
+    async def admin_move_room_group(
+        self, group_id: str, before_group_id: str | None = None
+    ) -> list[AdminRoomLayoutGroup]:
+        """Move one room group before another (or to the end if omitted)."""
+        req = room_layout_pb2.MoveRoomGroupRequest(group_id=group_id)
+        if before_group_id is not None:
+            req.before_group_id = before_group_id
+        resp = await self._rpc(
+            self._svc.admin_room_layout.move_room_group(req, headers=self._headers())
+        )
+        data = pb_to_dict(resp)
+        return [
+            g
+            for g in (AdminRoomLayoutGroup.parse(row) for row in data.get("groups") or [])
+            if g is not None
+        ]
+
     async def admin_move_room_to_group(self, room_id: str, group_id: str) -> Room:
         resp = await self._rpc(
             self._svc.admin_room_layout.move_room_to_group(
@@ -1757,6 +1774,31 @@ class ChattoClient:
             item.id = item_id
         resp = await self._rpc(
             self._svc.admin_room_layout.reorder_sidebar_items_in_group(req, headers=self._headers())
+        )
+        group = AdminRoomLayoutGroup.parse(pb_to_dict(resp.group))
+        assert group is not None
+        return group
+
+    async def admin_move_sidebar_item(
+        self,
+        item: tuple[AdminRoomLayoutItemKind, str],
+        group_id: str,
+        before: tuple[AdminRoomLayoutItemKind, str] | None = None,
+    ) -> AdminRoomLayoutGroup:
+        """Move one room or sidebar link to a position in a room group.
+
+        ``item`` is the ``(kind, id)`` of the entry to move; ``before`` is the
+        ``(kind, id)`` of the entry it should be placed ahead of (omit to place
+        it last in ``group_id``).
+        """
+        req = room_layout_pb2.MoveSidebarItemRequest(group_id=group_id)
+        req.item.kind = item[0].value
+        req.item.id = item[1]
+        if before is not None:
+            req.before.kind = before[0].value
+            req.before.id = before[1]
+        resp = await self._rpc(
+            self._svc.admin_room_layout.move_sidebar_item(req, headers=self._headers())
         )
         group = AdminRoomLayoutGroup.parse(pb_to_dict(resp.group))
         assert group is not None

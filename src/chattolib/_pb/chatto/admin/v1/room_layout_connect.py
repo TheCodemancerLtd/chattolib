@@ -90,6 +90,18 @@ class AdminRoomLayoutServiceClient(ConnectClient):
             headers=headers,
         )
 
+    async def move_room_group(self, request: _pb2.MoveRoomGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.MoveRoomGroupResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="MoveRoomGroup",
+                service_name="chatto.admin.v1.AdminRoomLayoutService",
+                input=_pb2.MoveRoomGroupRequest,
+                output=_pb2.MoveRoomGroupResponse,
+            ),
+            headers=headers,
+        )
+
     async def move_room_to_group(self, request: _pb2.MoveRoomToGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.MoveRoomToGroupResponse:
         return await self.execute_unary(
             request=request,
@@ -110,6 +122,18 @@ class AdminRoomLayoutServiceClient(ConnectClient):
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
                 input=_pb2.ReorderSidebarItemsInGroupRequest,
                 output=_pb2.ReorderSidebarItemsInGroupResponse,
+            ),
+            headers=headers,
+        )
+
+    async def move_sidebar_item(self, request: _pb2.MoveSidebarItemRequest, *, headers: dict[str, str] | None = None) -> _pb2.MoveSidebarItemResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="MoveSidebarItem",
+                service_name="chatto.admin.v1.AdminRoomLayoutService",
+                input=_pb2.MoveSidebarItemRequest,
+                output=_pb2.MoveSidebarItemResponse,
             ),
             headers=headers,
         )
@@ -248,6 +272,18 @@ class AdminRoomLayoutServiceClientSync(ConnectClientSync):
             headers=headers,
         )
 
+    def move_room_group(self, request: _pb2.MoveRoomGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.MoveRoomGroupResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="MoveRoomGroup",
+                service_name="chatto.admin.v1.AdminRoomLayoutService",
+                input=_pb2.MoveRoomGroupRequest,
+                output=_pb2.MoveRoomGroupResponse,
+            ),
+            headers=headers,
+        )
+
     def move_room_to_group(self, request: _pb2.MoveRoomToGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.MoveRoomToGroupResponse:
         return self.execute_unary(
             request=request,
@@ -268,6 +304,18 @@ class AdminRoomLayoutServiceClientSync(ConnectClientSync):
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
                 input=_pb2.ReorderSidebarItemsInGroupRequest,
                 output=_pb2.ReorderSidebarItemsInGroupResponse,
+            ),
+            headers=headers,
+        )
+
+    def move_sidebar_item(self, request: _pb2.MoveSidebarItemRequest, *, headers: dict[str, str] | None = None) -> _pb2.MoveSidebarItemResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="MoveSidebarItem",
+                service_name="chatto.admin.v1.AdminRoomLayoutService",
+                input=_pb2.MoveSidebarItemRequest,
+                output=_pb2.MoveSidebarItemResponse,
             ),
             headers=headers,
         )

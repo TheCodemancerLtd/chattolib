@@ -20,9 +20,12 @@ message GetServerResponse {
 // Request for the public Neighbor directory.
 message ListNeighborsRequest {}
 
-// Publicly advertised canonical server origins. The response has no ordering
-// contract.
+// Publicly advertised servers. The response has no ordering contract.
 message ListNeighborsResponse {
+  reserved 2;
+  reserved "neighbors";
+
+  // Canonical origins of the advertised servers.
   repeated string origins = 1;
 }
 
