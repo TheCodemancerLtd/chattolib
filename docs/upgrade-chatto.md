@@ -118,7 +118,7 @@ asyncio.run(main())
 "
 ```
 
-Integration tests (`tests/test_integration.py`) are skipped without `CHATTO_LOGIN` / `CHATTO_PASSWORD` — that's fine; the public `GetServer` round-trip is enough to confirm nothing wire-level is broken.
+The live bot tests (`tests/test_bot_integration.py`) are skipped without `CHATTO_BOT_KEY` — that's fine; the public `GetServer` round-trip (which runs unconditionally) is enough to confirm nothing wire-level is broken. Set `CHATTO_BOT_KEY` and `CHATTO_BASE_URL` to run them against a real server.
 
 ## 7. Commit and push
 

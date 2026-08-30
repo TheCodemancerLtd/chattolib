@@ -7,6 +7,11 @@
 > official [`connectrpc`](https://pypi.org/project/connectrpc/) Python
 > package; the realtime channel is a binary protobuf WebSocket at
 > `/api/realtime` (needs the ``[realtime]`` extra).
+>
+> **chattolib is a bot library.** It drives *bot* accounts, which
+> authenticate with a key used directly as a bearer token (no password,
+> no `/auth/login` round-trip). Normal humans use the Chatto web app; you
+> reach the API here as a bot. See the [bot guide](docs/bots.md).
 
 ## Install
 
@@ -20,23 +25,29 @@ pip install chattolib
 import asyncio
 from chattolib import ChattoClient
 
+
 async def main():
     # Public discovery — no auth required
     async with ChattoClient() as anon:
         profile, login = await anon.get_server()
         print(f"Chatto {profile.version}: {profile.name}")
 
-    # Authenticated calls
-    async with await ChattoClient.login("username", "password") as client:
+    # Authenticated calls — a bot key is used directly as a bearer token
+    async with ChattoClient(token="cht_BK_...") as client:
         me = await client.me()
-        print(f"Logged in as {me.display_name}")
+        print(f"Authenticated as {me.display_name}")
 
         for entry in await client.list_rooms():
             if entry.room:
                 print(f"  - {entry.room.name}")
 
+
 asyncio.run(main())
 ```
+
+For a full bot (event handlers, `say`/`reply`/`react`, presence, auto-join),
+use the higher-level :class:`~chattolib.bot.Bot` facade — see
+[docs/bots.md](docs/bots.md).
 
 ## Realtime
 
@@ -51,7 +62,7 @@ Then stream live events:
 ```python
 from chattolib import stream_events
 
-async with await ChattoClient.login("username", "password") as client:
+async with ChattoClient(token="cht_BK_...") as client:
     async for event in stream_events(client):
         print(event.kind, event.actor_id, event.payload)
 ```

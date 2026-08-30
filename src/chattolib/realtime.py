@@ -7,7 +7,7 @@ the caller's authorized live-event stream, and yields decoded events.
 
 Usage::
 
-    async with await ChattoClient.login(...) as client:
+    async with ChattoClient(token="cht_...") as client:
         async for event in stream_events(client):
             print(event.kind, event.payload)
 

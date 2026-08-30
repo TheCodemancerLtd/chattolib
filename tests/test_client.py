@@ -10,9 +10,7 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock
 
-import httpx
 import pytest
-import respx
 
 from chattolib._pb.chatto.admin.v1 import (
     room_layout_pb2,
@@ -24,7 +22,6 @@ from chattolib._pb.chatto.api.v1 import (
     account_pb2,
     asset_uploads_pb2,
     attachments_pb2,
-    external_identities_pb2,
     member_directory_pb2,
     messages_pb2,
     notification_preferences_pb2,
@@ -43,7 +40,6 @@ from chattolib._pb.chatto.api.v1 import (
 )
 from chattolib._pb.chatto.discovery.v1 import server_pb2 as discovery_server_pb2
 from chattolib.client import ChattoClient
-from chattolib.exceptions import ChattoAuthError
 from chattolib.types import (
     ImageFitMode,
     ImageTransformOptions,
@@ -66,33 +62,6 @@ def _mock_method(client: ChattoClient, service: str, method: str, response):
     svc = getattr(client._svc, service)
     setattr(svc, method, AsyncMock(return_value=response))
     return getattr(svc, method)
-
-
-# --- Login flow ---------------------------------------------------------
-
-
-async def test_login_and_capture_session():
-    with respx.mock(base_url=BASE) as api:
-        api.post("/auth/login").mock(
-            return_value=httpx.Response(
-                200,
-                json={"success": True, "token": "cht_abc123"},
-                headers={"set-cookie": "chatto_session=xyz; Path=/; HttpOnly"},
-            )
-        )
-        c = await ChattoClient.login("alice", "password123")
-        assert c.token == "cht_abc123"
-        assert c.session_cookie == "xyz"
-        await c.close()
-
-
-async def test_login_invalid():
-    with respx.mock(base_url=BASE) as api:
-        api.post("/auth/login").mock(
-            return_value=httpx.Response(401, json={"error": "Invalid credentials"})
-        )
-        with pytest.raises(ChattoAuthError, match="Invalid credentials"):
-            await ChattoClient.login("bad", "creds")
 
 
 # --- Server discovery ---------------------------------------------------
@@ -679,32 +648,6 @@ async def test_asset_upload_end_to_end(client, tmp_path):
 
 
 # --- External identities --------------------------------------------
-
-
-async def test_list_external_identities(client):
-    resp = external_identities_pb2.ListExternalIdentitiesResponse()
-    p = resp.providers.add()
-    p.provider.id = "github"
-    p.provider.type = "github"
-    p.provider.label = "GitHub"
-    p.provider.login_url = "/auth/github/login"
-    p.link_url = "/auth/github/link"
-    p.linked = True
-    p.linked_identity_subject_hash = "sha_xyz"
-    li = resp.linked_identities.add()
-    li.provider_id = "github"
-    li.provider_type = "github"
-    li.provider_label = "GitHub"
-    li.subject_hash = "sha_xyz"
-    _mock_method(client, "account", "list_external_identities", resp)
-
-    async with client:
-        providers, linked = await client.list_external_identities()
-
-    assert providers[0].linked is True
-    assert providers[0].provider is not None
-    assert providers[0].provider.id == "github"
-    assert linked[0].subject_hash == "sha_xyz"
 
 
 # --- Admin (structural smoke tests) ----------------------------------

@@ -67,9 +67,6 @@ from chattolib._pb.chatto.api.v1.server_state_connect import ServerServiceClient
 from chattolib._pb.chatto.api.v1.threads_connect import ThreadServiceClient
 from chattolib._pb.chatto.api.v1.viewer_connect import ViewerServiceClient
 from chattolib._pb.chatto.api.v1.voice_calls_connect import VoiceCallServiceClient
-from chattolib._pb.chatto.auth.v1.external_identity_auth_connect import (
-    ExternalIdentityAuthServiceClient,
-)
 from chattolib._pb.chatto.discovery.v1.server_connect import (
     ServerDiscoveryServiceClient,
 )
@@ -98,7 +95,6 @@ class ServiceClients:
     assets: AssetServiceClient
     asset_uploads: AssetUploadServiceClient
     voice_calls: VoiceCallServiceClient
-    external_auth: ExternalIdentityAuthServiceClient
     admin_server: AdminServerServiceClient
     admin_room_layout: AdminRoomLayoutServiceClient
     admin_users: AdminUserServiceClient
@@ -142,7 +138,6 @@ def build_service_clients(base_url: str) -> ServiceClients:
         assets=make(AssetServiceClient),
         asset_uploads=make(AssetUploadServiceClient),
         voice_calls=make(VoiceCallServiceClient),
-        external_auth=make(ExternalIdentityAuthServiceClient),
         admin_server=make(AdminServerServiceClient),
         admin_room_layout=make(AdminRoomLayoutServiceClient),
         admin_users=make(AdminUserServiceClient),

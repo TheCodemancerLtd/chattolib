@@ -21,8 +21,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, TypeVar
 
-import httpx
-
 # ConnectError isn't re-exported publicly by connectrpc.__init__; import from
 # its submodule so the top-level import path stays clean for callers.
 from connectrpc.errors import ConnectError  # noqa: E402
@@ -48,7 +46,6 @@ from chattolib._pb.chatto.api.v1 import (
     asset_uploads_pb2,
     attachments_pb2,
     common_pb2,
-    external_identities_pb2,
     link_previews_pb2,
     member_directory_pb2,
     messages_pb2,
@@ -69,7 +66,6 @@ from chattolib._pb.chatto.api.v1 import (
     viewer_pb2,
     voice_calls_pb2,
 )
-from chattolib._pb.chatto.auth.v1 import external_identity_auth_pb2
 from chattolib._pb.chatto.discovery.v1 import server_pb2 as discovery_server_pb2
 from chattolib._transport import (
     ServiceClients,
@@ -87,11 +83,9 @@ from chattolib.types import (
     Asset,
     AssetUpload,
     DirectoryMember,
-    ExternalIdentityProvider,
     FollowedThread,
     FollowedThreadsPage,
     ImageTransformOptions,
-    LinkedExternalIdentity,
     LinkPreview,
     Message,
     Neighbor,
@@ -182,41 +176,6 @@ class ChattoClient:
         self._session_cookie = session_cookie
         self._svc = service_clients or build_service_clients(self._base_url)
         self._owns_clients = service_clients is None
-
-    @classmethod
-    async def login(
-        cls,
-        login: str,
-        password: str,
-        *,
-        base_url: str = DEFAULT_BASE_URL,
-    ) -> ChattoClient:
-        """Authenticate with username and password, returning a connected client.
-
-        Uses Chatto's ``/auth/login`` HTTP endpoint (which is still exposed
-        alongside the Connect API) and captures both the returned bearer token
-        and any ``chatto_session`` cookie.
-        """
-        base = base_url.rstrip("/")
-        async with httpx.AsyncClient() as http:
-            resp = await http.post(
-                f"{base}/auth/login",
-                json={"login": login, "password": password},
-            )
-            if resp.status_code == 401:
-                raise ChattoAuthError("Invalid credentials")
-            resp.raise_for_status()
-            body = resp.json()
-
-        token = body.get("token")
-        session_cookie = None
-        if "set-cookie" in resp.headers:
-            for cookie_header in resp.headers.get_list("set-cookie"):
-                if cookie_header.startswith("chatto_session="):
-                    session_cookie = cookie_header.split(";")[0].split("=", 1)[1]
-                    break
-
-        return cls(token=token, base_url=base_url, session_cookie=session_cookie)
 
     async def __aenter__(self) -> ChattoClient:
         return self
@@ -384,19 +343,6 @@ class ChattoClient:
         assert user is not None
         return user
 
-    async def update_password(self, new_password: str, current_password: str = "") -> User:
-        resp = await self._rpc(
-            self._svc.account.update_password(
-                account_pb2.UpdatePasswordRequest(
-                    password=new_password, current_password=current_password
-                ),
-                headers=self._headers(),
-            )
-        )
-        user = User.parse(pb_to_dict(resp.user))
-        assert user is not None
-        return user
-
     async def update_settings(
         self,
         *,
@@ -450,24 +396,6 @@ class ChattoClient:
             )
         )
         return pb_to_dict(resp)
-
-    async def request_account_deletion(self) -> str:
-        resp = await self._rpc(
-            self._svc.account.request_account_deletion(
-                account_pb2.RequestAccountDeletionRequest(),
-                headers=self._headers(),
-            )
-        )
-        return resp.confirmation_token
-
-    async def delete_my_account(self, confirmation_token: str) -> bool:
-        resp = await self._rpc(
-            self._svc.account.delete_my_account(
-                account_pb2.DeleteMyAccountRequest(confirmation_token=confirmation_token),
-                headers=self._headers(),
-            )
-        )
-        return resp.deleted
 
     # --- Users ----------------------------------------------------------
 
@@ -1508,95 +1436,6 @@ class ChattoClient:
         if asset is None:
             raise ChattoError("upload completed but server returned no asset")
         return asset
-
-    # --- MyAccount external identities --------------------------------
-
-    async def list_external_identities(
-        self,
-    ) -> tuple[list[ExternalIdentityProvider], list[LinkedExternalIdentity]]:
-        resp = await self._rpc(
-            self._svc.account.list_external_identities(
-                external_identities_pb2.ListExternalIdentitiesRequest(),
-                headers=self._headers(),
-            )
-        )
-        data = pb_to_dict(resp)
-        providers = [ExternalIdentityProvider.parse(p) for p in data.get("providers") or []]
-        linked = [LinkedExternalIdentity.parse(li) for li in data.get("linkedIdentities") or []]
-        return providers, linked
-
-    async def start_external_identity_link(
-        self,
-        provider_id: str,
-        *,
-        redirect_path: str = "",
-        current_password: str = "",
-    ) -> str:
-        resp = await self._rpc(
-            self._svc.account.start_external_identity_link(
-                external_identities_pb2.StartExternalIdentityLinkRequest(
-                    provider_id=provider_id,
-                    redirect_path=redirect_path,
-                    current_password=current_password,
-                ),
-                headers=self._headers(),
-            )
-        )
-        return resp.start_url
-
-    async def disconnect_external_identity(
-        self, subject_hash: str, *, current_password: str = ""
-    ) -> bool:
-        resp = await self._rpc(
-            self._svc.account.disconnect_external_identity(
-                external_identities_pb2.DisconnectExternalIdentityRequest(
-                    subject_hash=subject_hash, current_password=current_password
-                ),
-                headers=self._headers(),
-            )
-        )
-        return resp.disconnected
-
-    # --- ExternalIdentityAuthService (public OAuth handoff) -----------
-
-    async def get_pending_external_identity(self, token: str) -> dict[str, Any]:
-        resp = await self._rpc(
-            self._svc.external_auth.get_pending_external_identity(
-                external_identity_auth_pb2.GetPendingExternalIdentityRequest(token=token),
-                headers=self._headers(),
-            )
-        )
-        return pb_to_dict(resp)
-
-    async def create_external_identity_account(self, token: str, login: str) -> dict[str, Any]:
-        resp = await self._rpc(
-            self._svc.external_auth.create_external_identity_account(
-                external_identity_auth_pb2.CreateExternalIdentityAccountRequest(
-                    token=token, login=login
-                ),
-                headers=self._headers(),
-            )
-        )
-        return pb_to_dict(resp)
-
-    async def confirm_external_identity_link(self, token: str) -> LinkedExternalIdentity | None:
-        resp = await self._rpc(
-            self._svc.external_auth.confirm_external_identity_link(
-                external_identity_auth_pb2.ConfirmExternalIdentityLinkRequest(token=token),
-                headers=self._headers(),
-            )
-        )
-        data = pb_to_dict(resp).get("linkedIdentity")
-        return LinkedExternalIdentity.parse(data) if data else None
-
-    async def cancel_external_identity_flow(self, token: str) -> bool:
-        resp = await self._rpc(
-            self._svc.external_auth.cancel_external_identity_flow(
-                external_identity_auth_pb2.CancelExternalIdentityFlowRequest(token=token),
-                headers=self._headers(),
-            )
-        )
-        return resp.cancelled
 
     # --- Voice calls ----------------------------------------------------
 

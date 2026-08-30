@@ -41,9 +41,8 @@ mypy src/chattolib
 The library uses the official **`connectrpc` Python package** for the
 request/response API surface: `_transport.build_service_clients(base_url)`
 instantiates one ConnectRPC service client per Chatto service, all sharing the
-same address and the `google.protobuf` binary codec. `httpx` remains for the
-one non-Connect endpoint (`/auth/login`). Realtime events use a separate
-binary-protobuf WebSocket protocol (`chatto.realtime.v1`) served at
+same address and the `google.protobuf` binary codec. Realtime events use a
+separate binary-protobuf WebSocket protocol (`chatto.realtime.v1`) served at
 `/api/realtime`, implemented in `realtime.py` on top of `websockets` and
 generated protobuf bindings.
 
@@ -76,7 +75,14 @@ generated protobuf bindings.
 
 ### Auth
 
-`ChattoClient.login(login, password, base_url=…)` still uses Chatto's non-Connect `/auth/login` HTTP endpoint. It captures both the returned bearer token and any `chatto_session` cookie, and every subsequent Connect call sends both.
+chattolib is a **bot** library. Bots authenticate with a **key** (e.g.
+`cht_BK_...`) used **directly as a bearer token** — there is no password
+login and no `/auth/login` round-trip. Construct a client with
+`ChattoClient(token="cht_BK_...")`, or use the higher-level
+`Bot.login(key, base_url=…)` facade (see `bot.py`). A bot is just a `User`
+with `is_bot=true` plus a set of capability grants; the Connect API enforces
+permissions per call, so a bot can invoke the same RPCs a human can, subject
+to its grants.
 
 ### Key services exposed by the client
 
@@ -85,10 +91,9 @@ generated protobuf bindings.
 | Discovery | `chatto.discovery.v1.ServerDiscoveryService` | `GetServer` (public) |
 | Server | `ServerService` | `GetMotd`, `GetRuntimeConfig` |
 | Viewer | `ViewerService` | `GetViewer` |
-| My account | `MyAccountService` | `UpdateProfile`, `UploadAvatar`, `DeleteAvatar`, `UpdatePassword`, `UpdateSettings`, `UpdatePresence`, `UpdateCustomStatus`, `DeleteCustomStatus`, `RequestAccountDeletion`, `DeleteMyAccount`, `ListExternalIdentities`, `StartExternalIdentityLink`, `DisconnectExternalIdentity` |
+| My account | `MyAccountService` | `UpdateProfile`, `UploadAvatar`, `DeleteAvatar`, `UpdateSettings`, `UpdatePresence`, `UpdateCustomStatus`, `DeleteCustomStatus` |
 | Users | `UserService` | `ListUsers`, `GetUser`, `BatchGetUsers` |
 | Roles | `RoleService` | `ListRoles`, `GetRole`, `BatchGetRoles` |
-| External identity auth (public) | `chatto.auth.v1.ExternalIdentityAuthService` | `GetPendingExternalIdentity`, `CreateExternalIdentityAccount`, `ConfirmExternalIdentityLink`, `CancelExternalIdentityFlow` |
 | Room directory | `RoomDirectoryService` | `ListRooms`, `ListRoomGroups`, `GetRoomGroup`, `BatchGetRoomGroups`, `GetRoom`, `BatchGetRooms` |
 | Rooms | `RoomService` | `CreateRoom`, `UpdateRoom`, `ArchiveRoom`, `UnarchiveRoom`, `JoinRoom`, `JoinRoomGroup`, `StartDM`, `LeaveRoom`, `AddMember`, `RemoveMember`, `ListMembers`, `GetMember`, `BatchGetMembers`, `BanMember`, `UnbanMember`, `ListBans`, `UpdateTypingIndicator`, `GetRoomEvents`, `GetRoomEventsAround`, `MarkRoomAsRead`, `ListRoomAttachments` |
 | Messages | `MessageService` | `FetchLinkPreview`, `CreateMessage`, `UpdateMessage`, `DeleteMessage`, `DeleteAttachment`, `DeleteLinkPreview`, `GetMessage`, `BatchGetMessages`, `AddReaction`, `RemoveReaction` |

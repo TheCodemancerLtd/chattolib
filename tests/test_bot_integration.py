@@ -26,7 +26,9 @@ import pytest
 
 from chattolib.bot import Bot, BotMessageEvent
 
-pytestmark = pytest.mark.skipif(
+# Applied to the two tests that need a bot key; the anonymous
+# test_public_server_metadata runs regardless.
+_requires_bot_key = pytest.mark.skipif(
     not os.environ.get("CHATTO_BOT_KEY"),
     reason="CHATTO_BOT_KEY env var required",
 )
@@ -105,6 +107,7 @@ async def _wait_for_event(
     return received
 
 
+@_requires_bot_key
 async def test_bot_receives_its_own_message():
     """Post a message and confirm it comes back over the realtime stream.
 
@@ -129,26 +132,28 @@ async def test_bot_receives_its_own_message():
         await bot.close()
 
 
-async def test_bot_receives_message_from_another_user():
-    """Receive a message posted by a *different* user (needs 2nd identity).
+@_requires_bot_key
+async def test_bot_receives_message_from_another_bot():
+    """Receive a message posted by a *different* bot (needs a 2nd bot key).
 
-    Skipped unless ``CHATTO_SECOND_LOGIN``/``CHATTO_SECOND_PASSWORD`` are set.
+    Normal humans talk to Chatto through the web app, not this library, so the
+    only "other identity" chattolib can express is a second bot. Skipped unless
+    ``CHATTO_SECOND_BOT_KEY`` is set.
     """
-    second_login = os.environ.get("CHATTO_SECOND_LOGIN")
-    second_password = os.environ.get("CHATTO_SECOND_PASSWORD")
-    if not second_login or not second_password:
-        pytest.skip("CHATTO_SECOND_LOGIN / CHATTO_SECOND_PASSWORD not set")
-
-    from chattolib.client import ChattoClient
+    second_key = os.environ.get("CHATTO_SECOND_BOT_KEY")
+    if not second_key:
+        pytest.skip("CHATTO_SECOND_BOT_KEY not set")
 
     bot = await _login_bot()
     try:
         target_id = await _pick_member_room_id(bot)
 
         async def trigger() -> None:
-            login = ChattoClient.login(second_login, second_password, base_url=BASE_URL)
-            async with await login as other:
-                await other.post_message(target_id, SENTINEL)
+            other = await Bot.login(second_key, base_url=BASE_URL)
+            try:
+                await other.say(target_id, SENTINEL)
+            finally:
+                await other.close()
 
         received = await _wait_for_event(
             bot,
@@ -156,7 +161,17 @@ async def test_bot_receives_message_from_another_user():
             trigger=trigger,
             matches=lambda e: e.message.actor_id != bot.user.id and e.room_id == target_id,
         )
-        assert len(received) >= 1, "bot did not receive the second user's message"
+        assert len(received) >= 1, "bot did not receive the other bot's message"
         assert received[0].message.actor_id != bot.user.id
     finally:
         await bot.close()
+
+
+async def test_public_server_metadata():
+    """Anonymous (no auth) server discovery still works — no bot key needed."""
+    from chattolib.client import ChattoClient
+
+    async with ChattoClient(base_url=BASE_URL) as anonymous:
+        profile, login = await anonymous.get_server()
+    assert profile.name
+    assert profile.version
