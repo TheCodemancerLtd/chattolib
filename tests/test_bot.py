@@ -19,6 +19,7 @@ from chattolib.bot import (
     Bot,
     BotMessageEvent,
     BotPresenceEvent,
+    BotRoomEvent,
     BotTypingEvent,
 )
 from chattolib.client import ChattoClient
@@ -133,6 +134,34 @@ async def test_dispatch_message_event():
     assert seen[0].message.body == "hello @felix_bot"
     assert seen[0].room_id == "r1"
     assert seen[0].is_mention  # body mentions the bot's login
+
+
+async def test_dispatch_room_lifecycle_event():
+    # Regression: room-lifecycle timeline events (room_created, user_joined_room,
+    # ...) carry a RoomTimelineRoomEvent with a `room_id` string, not a nested
+    # `room` message. The handler must build the Room from the id and must not
+    # raise (the old code called sub.HasField("room") on a field that doesn't
+    # exist, crashing the server task on retained-timeline replay).
+    bot = _bot()
+    seen: list[BotRoomEvent] = []
+
+    async def on_room(event: BotRoomEvent) -> None:
+        seen.append(event)
+
+    bot.on("room", on_room)
+
+    frame = realtime_pb2.RealtimeProjectionEvent()
+    frame.id = "p1"
+    op = frame.operations.add()
+    op.room_timeline_event_upsert.room_id = "r1"
+    evt = op.room_timeline_event_upsert.event
+    evt.room_created.room_id = "r1"
+
+    await bot._handle_projection(_wrap_projection_event(frame))
+    assert len(seen) == 1
+    assert seen[0].detail == "room_created"
+    assert seen[0].room is not None
+    assert seen[0].room.id == "r1"
 
 
 async def test_dispatch_presence_event():
