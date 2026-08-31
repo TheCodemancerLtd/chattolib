@@ -133,3 +133,7 @@ to its grants.
 - No more `motd` on the public profile; it is a separate authenticated RPC (`ServerService.GetMotd`).
 - Room groups can contain `SidebarLink` items (not just rooms). `RoomGroup.sidebar_links` exposes them.
 - **Never regenerate protos from `chattocorp/chatto@main`.** `scripts/generate_pb.sh` now defaults to `v<version>` (from `pyproject.toml`); override with `CHATTO_REF=<tag>` only when you know the deployed server has caught up. chattolib 0.4.19 shipped once from `main` and broke realtime for every downstream client because Chatto's main had a protocol-v2 rewrite that the deployed 0.4.19 server did not speak.
+
+### Known bugs
+
+- **`Bot._on_timeline_upsert` crashes on room-lifecycle events** (`chattolib-uuqm`). `RoomTimelineRoomEvent` has a `room_id` string field, not a nested `room` message. The handler calls `sub.HasField("room")` which raises a protobuf error. Affects `room_created`, `user_joined_room`, etc. Fix: use `sub.room_id` and build a minimal `Room` from it. Discovered 2026-08-31 during robochatto 0.5 upgrade testing.
