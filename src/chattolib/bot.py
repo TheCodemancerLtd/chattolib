@@ -602,8 +602,10 @@ class Bot:
         ):
             room = None
             sub = getattr(event, case, None)
-            if sub is not None and sub.HasField("room"):
-                room = Room.parse(_pb_to_dict(sub.room))
+            # RoomTimelineRoomEvent carries a plain proto3 `room_id` string
+            # (no presence), so test it by truthiness rather than HasField.
+            if sub is not None and sub.room_id:
+                room = Room.parse({"id": sub.room_id})
             await self._dispatch(BotRoomEvent(bot=self, kind="room", room=room, detail=case))
 
 
