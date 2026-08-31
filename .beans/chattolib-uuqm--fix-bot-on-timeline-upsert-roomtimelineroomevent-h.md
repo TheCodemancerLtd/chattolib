@@ -1,25 +1,20 @@
 ---
 # chattolib-uuqm
 title: 'Fix Bot._on_timeline_upsert: RoomTimelineRoomEvent has room_id not room'
-status: in-progress
+status: completed
 type: bug
+priority: normal
 created_at: 2026-08-31T13:12:27Z
-updated_at: 2026-08-31T13:12:27Z
+updated_at: 2026-08-31T13:18:42Z
 ---
 
-The _on_timeline_upsert handler in bot.py calls sub.HasField('room') for room-lifecycle events (room_created, user_joined_room, etc.), but the RoomTimelineRoomEvent protobuf only has a room_id string field, not a nested room message. This raises a protobuf error that crashes the server task, causing a crash-restart loop when combined with retained room timeline replay.
+## Resolution
 
-Fix: change sub.HasField('room') to sub.HasField('room_id') and build the Room from the ID string instead of a nested message.
+Fixed on main (commit a39cb6d). One refinement over the originally proposed patch: `RoomTimelineRoomEvent.room_id` is a plain proto3 string with no presence, so `sub.HasField("room_id")` would itself raise `ValueError`. The fix tests the string by truthiness instead:
 
-Discovered during robochatto 0.5 upgrade testing (2026-08-31). Local venv patch applied at robochatto/.venv/lib/python3.14/site-packages/chattolib/bot.py line ~603. The patch:
+    if sub is not None and sub.room_id:
+        room = Room.parse({"id": sub.room_id})
 
-    room = None
-    sub = getattr(event, case, None)
-    if sub is not None:
-        if sub.HasField("room_id") and sub.room_id:
-            room = Room.parse({"id": sub.room_id})
-    await self._dispatch(BotRoomEvent(bot=self, kind="room", room=room, detail=case))
+Added regression test `test_dispatch_room_lifecycle_event` (builds a room_created upsert, asserts a BotRoomEvent with the room id is dispatched, no raise). Verified it fails against the old code with the exact "room does not have presence" ValueError and passes with the fix. Full suite green (74 passed), ruff + mypy clean.
 
-Replaces the old:
-    if sub is not None and sub.HasField("room"):
-        room = Room.parse(_pb_to_dict(sub.room))
+Note: this is a runtime fix to already-shipped code; it will ride in the next release. The robochatto local-venv patch is now superseded by this.
