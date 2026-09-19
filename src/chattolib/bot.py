@@ -1,7 +1,7 @@
 """A small, opinionated framework for building bots on Chatto.
 
-Chatto 0.5.0 introduced *bot accounts*: user identities flagged ``is_bot``
-that authenticate with a **key** (e.g. ``cht_BK_...``) rather than a
+Chatto 0.5.0 introduced *bot accounts*: user identities flagged as bots that
+authenticate with a **key** (e.g. ``cht_BK_...``) rather than a
 username/password. The key is used **directly as a bearer token** — there is
 no ``/auth/login`` round-trip — and it resolves to a ``User`` with a
 capability grant set.
@@ -15,9 +15,14 @@ library for bots by adding three things on top of the raw client:
   routes incoming events (messages, reactions, mentions, presence, typing,
   room changes) to the async handlers you register.
 * **Flattened verbs** — :meth:`Bot.say`, :meth:`Bot.reply`,
-  :meth:`Bot.react`, :meth:`Bot.set_status`, :meth:`Bot.join_room`,
+  :meth:`Bot.react`, :method:`Bot.set_status`, :meth:`Bot.join_room`,
   :meth:`Bot.create_room`, and friends, so a bot's "brain" reads like
   natural language instead of protobuf plumbing.
+
+In the protocol-4 realtime channel, live events are thin, caller-scoped hints
+(identifiers rather than full resources). Where a handler needs the full
+resource (e.g. the body of a posted message), the bot hydrates it on demand
+through the corresponding ConnectRPC.
 
 A minimal bot::
 
@@ -55,7 +60,6 @@ from chattolib.realtime import (
     ChattoRealtimeError,
     RealtimeConnection,
     RealtimeEvent,
-    RealtimeProjectionEvent,
     stream_events,
 )
 from chattolib.types import (
@@ -91,6 +95,26 @@ __all__ = [
     "BotUserEvent",
 ]
 
+# Oneof ``event`` cases that map onto a :class:`BotRoomEvent`.
+_ROOM_EVENT_KINDS = frozenset(
+    {
+        "room_created",
+        "room_updated",
+        "room_deleted",
+        "room_archived",
+        "room_unarchived",
+        "room_universal_changed",
+        "room_slow_mode_changed",
+        "room_threading_mode_changed",
+        "user_joined_room",
+        "user_left_room",
+    }
+)
+# Oneof ``event`` cases that map onto a :class:`BotUserEvent`.
+_USER_EVENT_KINDS = frozenset(
+    {"user_account_created", "user_profile_changed", "user_account_deleted"}
+)
+
 
 class BotError(ChattoError):
     """Raised for bot-framework-level errors (bad handlers, bad keys, ...)."""
@@ -119,11 +143,11 @@ class BotEvent:
 
 @dataclass
 class BotMessageEvent(BotEvent):
-    """A new or updated message in a room the bot can see.
+    """A new message in a room the bot can see.
 
-    ``message`` is the full :class:`Message`. ``actor`` is the author's
-    :class:`User` when the server included it; otherwise ``None`` (hydrate
-    with ``await bot.get_user(message.actor_id)`` if you need it).
+    ``message`` is the full :class:`Message`, hydrated from the server when
+    this event was dispatched. ``actor`` is the author's :class:`User` when
+    it could be resolved; otherwise ``None``.
     """
 
     message: Message
@@ -178,12 +202,12 @@ class BotRoomEvent(BotEvent):
     """A room lifecycle change (created, updated, archived, member join/...)."""
 
     room: Room | None = None
-    detail: str = ""  # e.g. "created", "updated", "archived", "user_joined"
+    detail: str = ""  # e.g. "created", "updated", "archived", "user_joined_room"
 
 
 @dataclass
 class BotUserEvent(BotEvent):
-    """A user profile upsert or removal observed in the projection."""
+    """A user account was created, changed, or deleted."""
 
     user: User | None = None
     removed: bool = False
@@ -331,8 +355,6 @@ class Bot:
 
                 logging.exception("bot handler for %r raised", event.kind)
 
-    # -- the run loop ------------------------------------------------------
-
     # -- verbs: messaging --------------------------------------------------
 
     async def say(self, room_id: str, body: str = "", *, join_if_needed: bool = True) -> Message:
@@ -381,12 +403,12 @@ class Bot:
     # -- verbs: presence & status -----------------------------------------
 
     async def set_presence(self, status: PresenceStatus) -> PresenceStatus:
-        """Set the bot's presence (``ONLINE`` / ``IDLE`` / ``DO_NOT_DISTURB``)."""
-        return await self._client.update_presence(status)
+        """Set the bot's presence (``ONLINE`` / ``AWAY`` / ``DO_NOT_DISTURB``)."""
+        return await self._client.set_presence(status)
 
     async def set_status(self, emoji: str, text: str) -> dict[str, Any]:
         """Set the bot's custom status (e.g. a "working on X" note)."""
-        return await self._client.update_custom_status(emoji, text)
+        return await self._client.set_custom_status(emoji, text)
 
     async def clear_status(self) -> dict[str, Any]:
         """Clear the bot's custom status."""
@@ -441,9 +463,9 @@ class Bot:
                 continue
         return joined
 
-    async def leave_room(self, room_id: str) -> bool:
+    async def leave_room(self, room_id: str) -> None:
         """Leave a room."""
-        return await self._client.leave_room(room_id)
+        await self._client.leave_room(room_id)
 
     async def create_room(
         self,
@@ -472,14 +494,14 @@ class Bot:
         self,
         *,
         resume_cursor: str | None = None,
-        retained_room_ids: list[str] | None = None,
         until: asyncio.Event | None = None,
     ) -> None:
         """Connect the realtime stream and dispatch events until it closes.
 
-        Reconnects automatically (with the last ``resume_cursor``) when the
-        server drops the connection, unless a fatal protocol error is raised.
-        Pass ``until`` to stop the loop on an external signal.
+        Reconnects automatically (resuming from the last received
+        ``resume_cursor``) when the server sends a reconnectable close frame.
+        When the server terminates the session (or sends a non-reconnectable
+        close), the loop stops. Pass ``until`` to stop on an external signal.
         """
         self._running = True
         cursor = resume_cursor
@@ -487,38 +509,38 @@ class Bot:
             if until is not None and until.is_set():
                 break
             try:
-                async for frame in stream_events(
-                    self._client,
-                    resume_cursor=cursor,
-                    retained_room_ids=retained_room_ids,
-                ):
+                async for frame in stream_events(self._client, resume_cursor=cursor):
                     if until is not None and until.is_set():
                         break
-                    if isinstance(frame, RealtimeProjectionEvent):
-                        cursor = frame.resume_cursor or cursor
-                        await self._handle_projection(frame)
-                    else:
+                    if isinstance(frame, RealtimeEvent):
+                        if frame.cursor:
+                            cursor = frame.cursor
                         await self._handle_live(frame)
             except ChattoRealtimeCloseError as close:
                 if not close.reconnect:
-                    raise
-                # reconnectable close: loop again, resuming from the cursor
+                    # Session terminated or otherwise unrecoverable: stop.
+                    self._running = False
+                    break
+                # Reconnectable close: loop again, resuming from the cursor.
                 continue
             except ChattoRealtimeError:
                 raise
         self._running = False
 
+    # -- live-event dispatch -----------------------------------------------
+
     async def _handle_live(self, frame: RealtimeEvent) -> None:
-        if frame.kind == "presence_changed":
-            payload = frame.payload
-            event = BotPresenceEvent(
-                bot=self,
-                kind="presence",
-                user_id=payload.user_id,
-                status=_presence(payload.status),
+        kind = frame.kind
+        if kind == "presence_changed":
+            await self._dispatch(
+                BotPresenceEvent(
+                    bot=self,
+                    kind="presence",
+                    user_id=frame.actor_id or "",
+                    status=_presence(frame.payload.status),
+                )
             )
-            await self._dispatch(event)
-        elif frame.kind == "user_typing":
+        elif kind == "user_typing":
             payload = frame.payload
             await self._dispatch(
                 BotTypingEvent(
@@ -528,89 +550,58 @@ class Bot:
                     thread_root_event_id=payload.thread_root_event_id or None,
                 )
             )
-        elif frame.kind == "session_terminated":
-            self._running = False
-
-    async def _handle_projection(self, frame: RealtimeProjectionEvent) -> None:
-        for op in frame.operations:
-            case = op.operation
-            if case == "room_timeline_event_upsert":
-                await self._on_timeline_upsert(op)
-            elif case == "presences_replace":
-                for user_id, status in op.payload.statuses.items():
-                    await self._dispatch(
-                        BotPresenceEvent(
-                            bot=self,
-                            kind="presence",
-                            user_id=user_id,
-                            status=_presence(status),
-                        )
-                    )
-            elif case == "room_upsert":
-                room = op.payload.room
-                if room is not None:
-                    await self._dispatch(
-                        BotRoomEvent(
-                            bot=self,
-                            kind="room",
-                            room=Room.parse(_pb_to_dict(room)),
-                            detail="upsert",
-                        )
-                    )
-            elif case == "room_remove":
-                await self._dispatch(
-                    BotRoomEvent(bot=self, kind="room", room=None, detail="removed")
-                )
-            elif case == "user_upsert":
-                await self._dispatch(
-                    BotUserEvent(
-                        bot=self,
-                        kind="user",
-                        user=User.parse(_pb_to_dict(op.payload)),
-                    )
-                )
-            elif case == "user_remove":
-                await self._dispatch(BotUserEvent(bot=self, kind="user", user=None, removed=True))
-
-    async def _on_timeline_upsert(self, op: Any) -> None:
-        payload = op.payload
-        event = payload.event
-        case = event.WhichOneof("event") if event is not None else None
-        if case == "message_posted":
-            posted = event.message_posted
-            msg = Message.parse(_pb_to_dict(posted.message)) if posted.HasField("message") else None
-            if msg is None:
-                return
-            actor = None
-            includes = payload.includes
-            if includes is not None and msg.actor_id:
-                u = includes.users.get(msg.actor_id)
-                if u is not None:
-                    actor = User.parse(_pb_to_dict(u))
+        elif kind in ("reaction_added", "reaction_removed"):
+            payload = frame.payload
             await self._dispatch(
-                BotMessageEvent(bot=self, kind="message", message=msg, actor=actor)
+                BotReactionEvent(
+                    bot=self,
+                    kind="reaction",
+                    room_id=payload.room_id,
+                    message_event_id=payload.message_event_id,
+                    emoji=payload.emoji,
+                    user_id=frame.actor_id or "",
+                    added=kind == "reaction_added",
+                )
             )
-        elif case in (
-            "room_created",
-            "room_updated",
-            "room_deleted",
-            "room_archived",
-            "room_unarchived",
-            "room_threading_mode_changed",
-            "user_joined_room",
-            "user_left_room",
-        ):
-            room = None
-            sub = getattr(event, case, None)
-            # RoomTimelineRoomEvent carries a plain proto3 `room_id` string
-            # (no presence), so test it by truthiness rather than HasField.
-            if sub is not None and sub.room_id:
-                room = Room.parse({"id": sub.room_id})
-            await self._dispatch(BotRoomEvent(bot=self, kind="room", room=room, detail=case))
+        elif kind == "message_posted":
+            await self._on_message_posted(frame)
+        elif kind in _ROOM_EVENT_KINDS:
+            await self._on_room_event(frame)
+        elif kind in _USER_EVENT_KINDS:
+            await self._on_user_event(frame)
 
+    async def _on_message_posted(self, frame: RealtimeEvent) -> None:
+        # Protocol-4 events are thin hints; hydrate the full message so the
+        # handler gets a usable :class:`Message` (including the body).
+        payload = frame.payload
+        msg: Message | None = None
+        with contextlib.suppress(ChattoError):
+            msg = await self._client.get_message(payload.room_id, frame.id)
+        if msg is None:
+            return
+        await self._dispatch(BotMessageEvent(bot=self, kind="message", message=msg, actor=None))
 
-def _pb_to_dict(msg: Any) -> dict[str, Any]:
-    """Best-effort protobuf -> camelCase dict for the dataclass parsers."""
-    from chattolib._transport import pb_to_dict
+    async def _on_room_event(self, frame: RealtimeEvent) -> None:
+        payload = frame.payload
+        room_id = getattr(payload, "room_id", "")
+        if not room_id:
+            return
+        extra: dict[str, Any] = {}
+        if frame.kind == "room_created":
+            name = getattr(payload, "name", "")
+            if name:
+                extra["name"] = name
+        room = Room.parse({"id": room_id, **extra})
+        await self._dispatch(BotRoomEvent(bot=self, kind="room", room=room, detail=frame.kind))
 
-    return pb_to_dict(msg)
+    async def _on_user_event(self, frame: RealtimeEvent) -> None:
+        user_id = getattr(frame.payload, "user_id", "") or frame.actor_id or ""
+        removed = frame.kind == "user_account_deleted"
+        await self._dispatch(
+            BotUserEvent(
+                bot=self,
+                kind="user",
+                user=User.parse({"id": user_id}) if user_id else None,
+                removed=removed,
+            )
+        )

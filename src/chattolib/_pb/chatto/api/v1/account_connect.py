@@ -2,320 +2,395 @@
 
 # source: chatto/api/v1/account.proto
 
-import chatto.api.v1.account_pb2 as _pb2
+import chatto.api.v1.account_pb2 as chatto_api_v1_account_pb2
+import chatto.api.v1.external_identities_pb2 as chatto_api_v1_external_identities_pb2
+import chatto.api.v1.presence_pb2 as chatto_api_v1_presence_pb2
+import chatto.api.v1.user_status_pb2 as chatto_api_v1_user_status_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class MyAccountServiceClient(ConnectClient):
-    async def update_profile(self, request: _pb2.UpdateProfileRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateProfileResponse:
+    async def update_profile(self, request: chatto_api_v1_account_pb2.UpdateProfileRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.UpdateProfileResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateProfile",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.UpdateProfileRequest,
-                output=_pb2.UpdateProfileResponse,
+                input=chatto_api_v1_account_pb2.UpdateProfileRequest,
+                output=chatto_api_v1_account_pb2.UpdateProfileResponse,
             ),
             headers=headers,
         )
 
-    async def upload_avatar(self, request: _pb2.UploadAvatarRequest, *, headers: dict[str, str] | None = None) -> _pb2.UploadAvatarResponse:
+    async def change_password(self, request: chatto_api_v1_account_pb2.ChangePasswordRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.ChangePasswordResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="UploadAvatar",
+                name="ChangePassword",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.UploadAvatarRequest,
-                output=_pb2.UploadAvatarResponse,
+                input=chatto_api_v1_account_pb2.ChangePasswordRequest,
+                output=chatto_api_v1_account_pb2.ChangePasswordResponse,
             ),
             headers=headers,
         )
 
-    async def delete_avatar(self, request: _pb2.DeleteAvatarRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteAvatarResponse:
+    async def list_verified_emails(self, request: chatto_api_v1_account_pb2.ListVerifiedEmailsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.ListVerifiedEmailsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="DeleteAvatar",
+                name="ListVerifiedEmails",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.DeleteAvatarRequest,
-                output=_pb2.DeleteAvatarResponse,
+                input=chatto_api_v1_account_pb2.ListVerifiedEmailsRequest,
+                output=chatto_api_v1_account_pb2.ListVerifiedEmailsResponse,
             ),
             headers=headers,
         )
 
-    async def update_password(self, request: _pb2.UpdatePasswordRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdatePasswordResponse:
+    async def request_email_verification(self, request: chatto_api_v1_account_pb2.RequestEmailVerificationRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.RequestEmailVerificationResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="UpdatePassword",
+                name="RequestEmailVerification",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.UpdatePasswordRequest,
-                output=_pb2.UpdatePasswordResponse,
+                input=chatto_api_v1_account_pb2.RequestEmailVerificationRequest,
+                output=chatto_api_v1_account_pb2.RequestEmailVerificationResponse,
             ),
             headers=headers,
         )
 
-    async def update_settings(self, request: _pb2.UpdateSettingsRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateSettingsResponse:
+    async def confirm_email_verification(self, request: chatto_api_v1_account_pb2.ConfirmEmailVerificationRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.ConfirmEmailVerificationResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ConfirmEmailVerification",
+                service_name="chatto.api.v1.MyAccountService",
+                input=chatto_api_v1_account_pb2.ConfirmEmailVerificationRequest,
+                output=chatto_api_v1_account_pb2.ConfirmEmailVerificationResponse,
+            ),
+            headers=headers,
+        )
+
+    async def set_primary_email(self, request: chatto_api_v1_account_pb2.SetPrimaryEmailRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.SetPrimaryEmailResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="SetPrimaryEmail",
+                service_name="chatto.api.v1.MyAccountService",
+                input=chatto_api_v1_account_pb2.SetPrimaryEmailRequest,
+                output=chatto_api_v1_account_pb2.SetPrimaryEmailResponse,
+            ),
+            headers=headers,
+        )
+
+    async def get_settings(self, request: chatto_api_v1_account_pb2.GetSettingsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.GetSettingsResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetSettings",
+                service_name="chatto.api.v1.MyAccountService",
+                input=chatto_api_v1_account_pb2.GetSettingsRequest,
+                output=chatto_api_v1_account_pb2.GetSettingsResponse,
+            ),
+            headers=headers,
+        )
+
+    async def update_settings(self, request: chatto_api_v1_account_pb2.UpdateSettingsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.UpdateSettingsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateSettings",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.UpdateSettingsRequest,
-                output=_pb2.UpdateSettingsResponse,
+                input=chatto_api_v1_account_pb2.UpdateSettingsRequest,
+                output=chatto_api_v1_account_pb2.UpdateSettingsResponse,
             ),
             headers=headers,
         )
 
-    async def list_external_identities(self, request: _pb2.ListExternalIdentitiesRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListExternalIdentitiesResponse:
+    async def list_external_identities(self, request: chatto_api_v1_external_identities_pb2.ListExternalIdentitiesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_external_identities_pb2.ListExternalIdentitiesResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListExternalIdentities",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.ListExternalIdentitiesRequest,
-                output=_pb2.ListExternalIdentitiesResponse,
+                input=chatto_api_v1_external_identities_pb2.ListExternalIdentitiesRequest,
+                output=chatto_api_v1_external_identities_pb2.ListExternalIdentitiesResponse,
             ),
             headers=headers,
         )
 
-    async def start_external_identity_link(self, request: _pb2.StartExternalIdentityLinkRequest, *, headers: dict[str, str] | None = None) -> _pb2.StartExternalIdentityLinkResponse:
+    async def start_external_identity_link(self, request: chatto_api_v1_external_identities_pb2.StartExternalIdentityLinkRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_external_identities_pb2.StartExternalIdentityLinkResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="StartExternalIdentityLink",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.StartExternalIdentityLinkRequest,
-                output=_pb2.StartExternalIdentityLinkResponse,
+                input=chatto_api_v1_external_identities_pb2.StartExternalIdentityLinkRequest,
+                output=chatto_api_v1_external_identities_pb2.StartExternalIdentityLinkResponse,
             ),
             headers=headers,
         )
 
-    async def disconnect_external_identity(self, request: _pb2.DisconnectExternalIdentityRequest, *, headers: dict[str, str] | None = None) -> _pb2.DisconnectExternalIdentityResponse:
+    async def disconnect_external_identity(self, request: chatto_api_v1_external_identities_pb2.DisconnectExternalIdentityRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_external_identities_pb2.DisconnectExternalIdentityResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DisconnectExternalIdentity",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.DisconnectExternalIdentityRequest,
-                output=_pb2.DisconnectExternalIdentityResponse,
+                input=chatto_api_v1_external_identities_pb2.DisconnectExternalIdentityRequest,
+                output=chatto_api_v1_external_identities_pb2.DisconnectExternalIdentityResponse,
             ),
             headers=headers,
         )
 
-    async def update_presence(self, request: _pb2.UpdatePresenceRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdatePresenceResponse:
+    async def set_presence(self, request: chatto_api_v1_presence_pb2.SetPresenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_presence_pb2.SetPresenceResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="UpdatePresence",
+                name="SetPresence",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.UpdatePresenceRequest,
-                output=_pb2.UpdatePresenceResponse,
+                input=chatto_api_v1_presence_pb2.SetPresenceRequest,
+                output=chatto_api_v1_presence_pb2.SetPresenceResponse,
             ),
             headers=headers,
         )
 
-    async def update_custom_status(self, request: _pb2.UpdateCustomStatusRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateCustomStatusResponse:
+    async def set_custom_status(self, request: chatto_api_v1_user_status_pb2.SetCustomStatusRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_user_status_pb2.SetCustomStatusResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="UpdateCustomStatus",
+                name="SetCustomStatus",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.UpdateCustomStatusRequest,
-                output=_pb2.UpdateCustomStatusResponse,
+                input=chatto_api_v1_user_status_pb2.SetCustomStatusRequest,
+                output=chatto_api_v1_user_status_pb2.SetCustomStatusResponse,
             ),
             headers=headers,
         )
 
-    async def delete_custom_status(self, request: _pb2.DeleteCustomStatusRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteCustomStatusResponse:
+    async def delete_custom_status(self, request: chatto_api_v1_user_status_pb2.DeleteCustomStatusRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_user_status_pb2.DeleteCustomStatusResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteCustomStatus",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.DeleteCustomStatusRequest,
-                output=_pb2.DeleteCustomStatusResponse,
+                input=chatto_api_v1_user_status_pb2.DeleteCustomStatusRequest,
+                output=chatto_api_v1_user_status_pb2.DeleteCustomStatusResponse,
             ),
             headers=headers,
         )
 
-    async def request_account_deletion(self, request: _pb2.RequestAccountDeletionRequest, *, headers: dict[str, str] | None = None) -> _pb2.RequestAccountDeletionResponse:
+    async def request_account_deletion(self, request: chatto_api_v1_account_pb2.RequestAccountDeletionRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.RequestAccountDeletionResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="RequestAccountDeletion",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.RequestAccountDeletionRequest,
-                output=_pb2.RequestAccountDeletionResponse,
+                input=chatto_api_v1_account_pb2.RequestAccountDeletionRequest,
+                output=chatto_api_v1_account_pb2.RequestAccountDeletionResponse,
             ),
             headers=headers,
         )
 
-    async def delete_my_account(self, request: _pb2.DeleteMyAccountRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteMyAccountResponse:
+    async def delete_my_account(self, request: chatto_api_v1_account_pb2.DeleteMyAccountRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.DeleteMyAccountResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteMyAccount",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.DeleteMyAccountRequest,
-                output=_pb2.DeleteMyAccountResponse,
+                input=chatto_api_v1_account_pb2.DeleteMyAccountRequest,
+                output=chatto_api_v1_account_pb2.DeleteMyAccountResponse,
             ),
             headers=headers,
         )
 
 class MyAccountServiceClientSync(ConnectClientSync):
 
-    def update_profile(self, request: _pb2.UpdateProfileRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateProfileResponse:
+    def update_profile(self, request: chatto_api_v1_account_pb2.UpdateProfileRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.UpdateProfileResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateProfile",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.UpdateProfileRequest,
-                output=_pb2.UpdateProfileResponse,
+                input=chatto_api_v1_account_pb2.UpdateProfileRequest,
+                output=chatto_api_v1_account_pb2.UpdateProfileResponse,
             ),
             headers=headers,
         )
 
-    def upload_avatar(self, request: _pb2.UploadAvatarRequest, *, headers: dict[str, str] | None = None) -> _pb2.UploadAvatarResponse:
+    def change_password(self, request: chatto_api_v1_account_pb2.ChangePasswordRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.ChangePasswordResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="UploadAvatar",
+                name="ChangePassword",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.UploadAvatarRequest,
-                output=_pb2.UploadAvatarResponse,
+                input=chatto_api_v1_account_pb2.ChangePasswordRequest,
+                output=chatto_api_v1_account_pb2.ChangePasswordResponse,
             ),
             headers=headers,
         )
 
-    def delete_avatar(self, request: _pb2.DeleteAvatarRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteAvatarResponse:
+    def list_verified_emails(self, request: chatto_api_v1_account_pb2.ListVerifiedEmailsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.ListVerifiedEmailsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="DeleteAvatar",
+                name="ListVerifiedEmails",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.DeleteAvatarRequest,
-                output=_pb2.DeleteAvatarResponse,
+                input=chatto_api_v1_account_pb2.ListVerifiedEmailsRequest,
+                output=chatto_api_v1_account_pb2.ListVerifiedEmailsResponse,
             ),
             headers=headers,
         )
 
-    def update_password(self, request: _pb2.UpdatePasswordRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdatePasswordResponse:
+    def request_email_verification(self, request: chatto_api_v1_account_pb2.RequestEmailVerificationRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.RequestEmailVerificationResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="UpdatePassword",
+                name="RequestEmailVerification",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.UpdatePasswordRequest,
-                output=_pb2.UpdatePasswordResponse,
+                input=chatto_api_v1_account_pb2.RequestEmailVerificationRequest,
+                output=chatto_api_v1_account_pb2.RequestEmailVerificationResponse,
             ),
             headers=headers,
         )
 
-    def update_settings(self, request: _pb2.UpdateSettingsRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateSettingsResponse:
+    def confirm_email_verification(self, request: chatto_api_v1_account_pb2.ConfirmEmailVerificationRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.ConfirmEmailVerificationResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ConfirmEmailVerification",
+                service_name="chatto.api.v1.MyAccountService",
+                input=chatto_api_v1_account_pb2.ConfirmEmailVerificationRequest,
+                output=chatto_api_v1_account_pb2.ConfirmEmailVerificationResponse,
+            ),
+            headers=headers,
+        )
+
+    def set_primary_email(self, request: chatto_api_v1_account_pb2.SetPrimaryEmailRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.SetPrimaryEmailResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="SetPrimaryEmail",
+                service_name="chatto.api.v1.MyAccountService",
+                input=chatto_api_v1_account_pb2.SetPrimaryEmailRequest,
+                output=chatto_api_v1_account_pb2.SetPrimaryEmailResponse,
+            ),
+            headers=headers,
+        )
+
+    def get_settings(self, request: chatto_api_v1_account_pb2.GetSettingsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.GetSettingsResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetSettings",
+                service_name="chatto.api.v1.MyAccountService",
+                input=chatto_api_v1_account_pb2.GetSettingsRequest,
+                output=chatto_api_v1_account_pb2.GetSettingsResponse,
+            ),
+            headers=headers,
+        )
+
+    def update_settings(self, request: chatto_api_v1_account_pb2.UpdateSettingsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.UpdateSettingsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateSettings",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.UpdateSettingsRequest,
-                output=_pb2.UpdateSettingsResponse,
+                input=chatto_api_v1_account_pb2.UpdateSettingsRequest,
+                output=chatto_api_v1_account_pb2.UpdateSettingsResponse,
             ),
             headers=headers,
         )
 
-    def list_external_identities(self, request: _pb2.ListExternalIdentitiesRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListExternalIdentitiesResponse:
+    def list_external_identities(self, request: chatto_api_v1_external_identities_pb2.ListExternalIdentitiesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_external_identities_pb2.ListExternalIdentitiesResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListExternalIdentities",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.ListExternalIdentitiesRequest,
-                output=_pb2.ListExternalIdentitiesResponse,
+                input=chatto_api_v1_external_identities_pb2.ListExternalIdentitiesRequest,
+                output=chatto_api_v1_external_identities_pb2.ListExternalIdentitiesResponse,
             ),
             headers=headers,
         )
 
-    def start_external_identity_link(self, request: _pb2.StartExternalIdentityLinkRequest, *, headers: dict[str, str] | None = None) -> _pb2.StartExternalIdentityLinkResponse:
+    def start_external_identity_link(self, request: chatto_api_v1_external_identities_pb2.StartExternalIdentityLinkRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_external_identities_pb2.StartExternalIdentityLinkResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="StartExternalIdentityLink",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.StartExternalIdentityLinkRequest,
-                output=_pb2.StartExternalIdentityLinkResponse,
+                input=chatto_api_v1_external_identities_pb2.StartExternalIdentityLinkRequest,
+                output=chatto_api_v1_external_identities_pb2.StartExternalIdentityLinkResponse,
             ),
             headers=headers,
         )
 
-    def disconnect_external_identity(self, request: _pb2.DisconnectExternalIdentityRequest, *, headers: dict[str, str] | None = None) -> _pb2.DisconnectExternalIdentityResponse:
+    def disconnect_external_identity(self, request: chatto_api_v1_external_identities_pb2.DisconnectExternalIdentityRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_external_identities_pb2.DisconnectExternalIdentityResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DisconnectExternalIdentity",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.DisconnectExternalIdentityRequest,
-                output=_pb2.DisconnectExternalIdentityResponse,
+                input=chatto_api_v1_external_identities_pb2.DisconnectExternalIdentityRequest,
+                output=chatto_api_v1_external_identities_pb2.DisconnectExternalIdentityResponse,
             ),
             headers=headers,
         )
 
-    def update_presence(self, request: _pb2.UpdatePresenceRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdatePresenceResponse:
+    def set_presence(self, request: chatto_api_v1_presence_pb2.SetPresenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_presence_pb2.SetPresenceResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="UpdatePresence",
+                name="SetPresence",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.UpdatePresenceRequest,
-                output=_pb2.UpdatePresenceResponse,
+                input=chatto_api_v1_presence_pb2.SetPresenceRequest,
+                output=chatto_api_v1_presence_pb2.SetPresenceResponse,
             ),
             headers=headers,
         )
 
-    def update_custom_status(self, request: _pb2.UpdateCustomStatusRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateCustomStatusResponse:
+    def set_custom_status(self, request: chatto_api_v1_user_status_pb2.SetCustomStatusRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_user_status_pb2.SetCustomStatusResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="UpdateCustomStatus",
+                name="SetCustomStatus",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.UpdateCustomStatusRequest,
-                output=_pb2.UpdateCustomStatusResponse,
+                input=chatto_api_v1_user_status_pb2.SetCustomStatusRequest,
+                output=chatto_api_v1_user_status_pb2.SetCustomStatusResponse,
             ),
             headers=headers,
         )
 
-    def delete_custom_status(self, request: _pb2.DeleteCustomStatusRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteCustomStatusResponse:
+    def delete_custom_status(self, request: chatto_api_v1_user_status_pb2.DeleteCustomStatusRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_user_status_pb2.DeleteCustomStatusResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteCustomStatus",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.DeleteCustomStatusRequest,
-                output=_pb2.DeleteCustomStatusResponse,
+                input=chatto_api_v1_user_status_pb2.DeleteCustomStatusRequest,
+                output=chatto_api_v1_user_status_pb2.DeleteCustomStatusResponse,
             ),
             headers=headers,
         )
 
-    def request_account_deletion(self, request: _pb2.RequestAccountDeletionRequest, *, headers: dict[str, str] | None = None) -> _pb2.RequestAccountDeletionResponse:
+    def request_account_deletion(self, request: chatto_api_v1_account_pb2.RequestAccountDeletionRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.RequestAccountDeletionResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="RequestAccountDeletion",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.RequestAccountDeletionRequest,
-                output=_pb2.RequestAccountDeletionResponse,
+                input=chatto_api_v1_account_pb2.RequestAccountDeletionRequest,
+                output=chatto_api_v1_account_pb2.RequestAccountDeletionResponse,
             ),
             headers=headers,
         )
 
-    def delete_my_account(self, request: _pb2.DeleteMyAccountRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteMyAccountResponse:
+    def delete_my_account(self, request: chatto_api_v1_account_pb2.DeleteMyAccountRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.DeleteMyAccountResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteMyAccount",
                 service_name="chatto.api.v1.MyAccountService",
-                input=_pb2.DeleteMyAccountRequest,
-                output=_pb2.DeleteMyAccountResponse,
+                input=chatto_api_v1_account_pb2.DeleteMyAccountRequest,
+                output=chatto_api_v1_account_pb2.DeleteMyAccountResponse,
             ),
             headers=headers,
         )

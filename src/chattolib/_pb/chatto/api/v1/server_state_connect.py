@@ -2,56 +2,80 @@
 
 # source: chatto/api/v1/server_state.proto
 
-import chatto.api.v1.server_state_pb2 as _pb2
+import chatto.api.v1.server_state_pb2 as chatto_api_v1_server_state_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class ServerServiceClient(ConnectClient):
-    async def get_motd(self, request: _pb2.GetMotdRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetMotdResponse:
+    async def get_server_profile(self, request: chatto_api_v1_server_state_pb2.GetServerProfileRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_server_state_pb2.GetServerProfileResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetServerProfile",
+                service_name="chatto.api.v1.ServerService",
+                input=chatto_api_v1_server_state_pb2.GetServerProfileRequest,
+                output=chatto_api_v1_server_state_pb2.GetServerProfileResponse,
+            ),
+            headers=headers,
+        )
+
+    async def get_motd(self, request: chatto_api_v1_server_state_pb2.GetMotdRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_server_state_pb2.GetMotdResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetMotd",
                 service_name="chatto.api.v1.ServerService",
-                input=_pb2.GetMotdRequest,
-                output=_pb2.GetMotdResponse,
+                input=chatto_api_v1_server_state_pb2.GetMotdRequest,
+                output=chatto_api_v1_server_state_pb2.GetMotdResponse,
             ),
             headers=headers,
         )
 
-    async def get_runtime_config(self, request: _pb2.GetRuntimeConfigRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRuntimeConfigResponse:
+    async def get_runtime_config(self, request: chatto_api_v1_server_state_pb2.GetRuntimeConfigRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_server_state_pb2.GetRuntimeConfigResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRuntimeConfig",
                 service_name="chatto.api.v1.ServerService",
-                input=_pb2.GetRuntimeConfigRequest,
-                output=_pb2.GetRuntimeConfigResponse,
+                input=chatto_api_v1_server_state_pb2.GetRuntimeConfigRequest,
+                output=chatto_api_v1_server_state_pb2.GetRuntimeConfigResponse,
             ),
             headers=headers,
         )
 
 class ServerServiceClientSync(ConnectClientSync):
 
-    def get_motd(self, request: _pb2.GetMotdRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetMotdResponse:
+    def get_server_profile(self, request: chatto_api_v1_server_state_pb2.GetServerProfileRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_server_state_pb2.GetServerProfileResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetServerProfile",
+                service_name="chatto.api.v1.ServerService",
+                input=chatto_api_v1_server_state_pb2.GetServerProfileRequest,
+                output=chatto_api_v1_server_state_pb2.GetServerProfileResponse,
+            ),
+            headers=headers,
+        )
+
+    def get_motd(self, request: chatto_api_v1_server_state_pb2.GetMotdRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_server_state_pb2.GetMotdResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetMotd",
                 service_name="chatto.api.v1.ServerService",
-                input=_pb2.GetMotdRequest,
-                output=_pb2.GetMotdResponse,
+                input=chatto_api_v1_server_state_pb2.GetMotdRequest,
+                output=chatto_api_v1_server_state_pb2.GetMotdResponse,
             ),
             headers=headers,
         )
 
-    def get_runtime_config(self, request: _pb2.GetRuntimeConfigRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRuntimeConfigResponse:
+    def get_runtime_config(self, request: chatto_api_v1_server_state_pb2.GetRuntimeConfigRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_server_state_pb2.GetRuntimeConfigResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRuntimeConfig",
                 service_name="chatto.api.v1.ServerService",
-                input=_pb2.GetRuntimeConfigRequest,
-                output=_pb2.GetRuntimeConfigResponse,
+                input=chatto_api_v1_server_state_pb2.GetRuntimeConfigRequest,
+                output=chatto_api_v1_server_state_pb2.GetRuntimeConfigResponse,
             ),
             headers=headers,
         )

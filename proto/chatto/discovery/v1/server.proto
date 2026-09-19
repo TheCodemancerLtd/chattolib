@@ -3,7 +3,6 @@ syntax = "proto3";
 package chatto.discovery.v1;
 
 import "chatto/api/v1/server.proto";
-import "google/protobuf/descriptor.proto";
 
 // Request for public server metadata.
 message GetServerRequest {}
@@ -15,6 +14,8 @@ message GetServerResponse {
   chatto.api.v1.ServerPublicProfile profile = 1;
   // Login and registration options.
   chatto.api.v1.ServerLogin login = 2;
+  // Whether first-run setup is available before normal registration.
+  bool setup_required = 3;
 }
 
 // Request for the public Neighbor directory.

@@ -2,80 +2,80 @@
 
 # source: chatto/admin/v1/event_log.proto
 
-import chatto.admin.v1.event_log_pb2 as _pb2
+import chatto.admin.v1.event_log_pb2 as chatto_admin_v1_event_log_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class AdminEventLogServiceClient(ConnectClient):
-    async def list_events(self, request: _pb2.ListEventsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListEventsResponse:
+    async def list_events(self, request: chatto_admin_v1_event_log_pb2.ListEventsRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_event_log_pb2.ListEventsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListEvents",
                 service_name="chatto.admin.v1.AdminEventLogService",
-                input=_pb2.ListEventsRequest,
-                output=_pb2.ListEventsResponse,
+                input=chatto_admin_v1_event_log_pb2.ListEventsRequest,
+                output=chatto_admin_v1_event_log_pb2.ListEventsResponse,
             ),
             headers=headers,
         )
 
-    async def list_event_types(self, request: _pb2.ListEventTypesRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListEventTypesResponse:
+    async def list_event_types(self, request: chatto_admin_v1_event_log_pb2.ListEventTypesRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_event_log_pb2.ListEventTypesResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListEventTypes",
                 service_name="chatto.admin.v1.AdminEventLogService",
-                input=_pb2.ListEventTypesRequest,
-                output=_pb2.ListEventTypesResponse,
+                input=chatto_admin_v1_event_log_pb2.ListEventTypesRequest,
+                output=chatto_admin_v1_event_log_pb2.ListEventTypesResponse,
             ),
             headers=headers,
         )
 
-    async def get_event(self, request: _pb2.GetEventRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetEventResponse:
+    async def get_event(self, request: chatto_admin_v1_event_log_pb2.GetEventRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_event_log_pb2.GetEventResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetEvent",
                 service_name="chatto.admin.v1.AdminEventLogService",
-                input=_pb2.GetEventRequest,
-                output=_pb2.GetEventResponse,
+                input=chatto_admin_v1_event_log_pb2.GetEventRequest,
+                output=chatto_admin_v1_event_log_pb2.GetEventResponse,
             ),
             headers=headers,
         )
 
 class AdminEventLogServiceClientSync(ConnectClientSync):
 
-    def list_events(self, request: _pb2.ListEventsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListEventsResponse:
+    def list_events(self, request: chatto_admin_v1_event_log_pb2.ListEventsRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_event_log_pb2.ListEventsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListEvents",
                 service_name="chatto.admin.v1.AdminEventLogService",
-                input=_pb2.ListEventsRequest,
-                output=_pb2.ListEventsResponse,
+                input=chatto_admin_v1_event_log_pb2.ListEventsRequest,
+                output=chatto_admin_v1_event_log_pb2.ListEventsResponse,
             ),
             headers=headers,
         )
 
-    def list_event_types(self, request: _pb2.ListEventTypesRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListEventTypesResponse:
+    def list_event_types(self, request: chatto_admin_v1_event_log_pb2.ListEventTypesRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_event_log_pb2.ListEventTypesResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListEventTypes",
                 service_name="chatto.admin.v1.AdminEventLogService",
-                input=_pb2.ListEventTypesRequest,
-                output=_pb2.ListEventTypesResponse,
+                input=chatto_admin_v1_event_log_pb2.ListEventTypesRequest,
+                output=chatto_admin_v1_event_log_pb2.ListEventTypesResponse,
             ),
             headers=headers,
         )
 
-    def get_event(self, request: _pb2.GetEventRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetEventResponse:
+    def get_event(self, request: chatto_admin_v1_event_log_pb2.GetEventRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_event_log_pb2.GetEventResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetEvent",
                 service_name="chatto.admin.v1.AdminEventLogService",
-                input=_pb2.GetEventRequest,
-                output=_pb2.GetEventResponse,
+                input=chatto_admin_v1_event_log_pb2.GetEventRequest,
+                output=chatto_admin_v1_event_log_pb2.GetEventResponse,
             ),
             headers=headers,
         )

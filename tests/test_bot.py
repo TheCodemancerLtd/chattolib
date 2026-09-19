@@ -1,37 +1,56 @@
 """Tests for the chattolib bot framework (chattolib.bot).
 
 The realtime WebSocket handshake is not exercised here (that is the job of
-the live integration test); instead we feed synthetic realtime frames through
-the dispatcher and assert the typed events and the convenience verbs.
+the live integration test); instead we feed synthetic protocol-4 realtime
+events through the dispatcher and assert the typed events and the
+convenience verbs.
 """
 
 from __future__ import annotations
 
 from unittest.mock import AsyncMock
 
-from chattolib._pb.chatto.api.v1 import (
-    messages_pb2,
-    presence_pb2,
-    rooms_pb2,
-)
-from chattolib._pb.chatto.realtime.v1 import realtime_pb2
+from chattolib._pb.chatto.api.v1 import messages_pb2, presence_pb2, rooms_pb2
+from chattolib._pb.chatto.realtime.v1 import events_pb2
 from chattolib.bot import (
     Bot,
     BotMessageEvent,
     BotPresenceEvent,
+    BotReactionEvent,
     BotRoomEvent,
     BotTypingEvent,
+    BotUserEvent,
 )
 from chattolib.client import ChattoClient
-from chattolib.realtime import _wrap_projection_event
-from chattolib.types import PresenceStatus, Room, User
+from chattolib.realtime import RealtimeEvent
+from chattolib.types import BotInfo, Message, PresenceStatus, Room, User
 
 
 def _bot() -> Bot:
     client = ChattoClient(token="cht_BK_test", base_url="https://example.test")
     bot = Bot.from_client(client)
-    bot._user = User(id="u_bot", login="felix_bot", display_name="Felix - the bot", is_bot=True)
+    bot._user = User(
+        id="u_bot",
+        login="felix_bot",
+        display_name="Felix - the bot",
+        bot=BotInfo(),
+    )
     return bot
+
+
+def _live(
+    kind: str, payload, *, actor_id: str | None = None, event_id: str = "e1"
+) -> RealtimeEvent:
+    """Build a protocol-4 :class:`RealtimeEvent` envelope for the dispatcher."""
+    return RealtimeEvent(
+        id=event_id,
+        created_at=None,
+        actor_id=actor_id,
+        cursor=None,
+        kind=kind,
+        payload=payload,
+        raw=None,
+    )
 
 
 def _mock(client: ChattoClient, service: str, method: str, response):
@@ -80,10 +99,10 @@ async def test_react_and_unreact():
 
 async def test_set_presence_and_status():
     bot = _bot()
-    bot.client.update_presence = AsyncMock(return_value=PresenceStatus.ONLINE)  # type: ignore[method-assign]
+    bot.client.set_presence = AsyncMock(return_value=PresenceStatus.ONLINE)  # type: ignore[method-assign]
     assert await bot.set_presence(PresenceStatus.ONLINE) is PresenceStatus.ONLINE
 
-    bot.client.update_custom_status = AsyncMock(return_value={"ok": True})  # type: ignore[method-assign]
+    bot.client.set_custom_status = AsyncMock(return_value={"ok": True})  # type: ignore[method-assign]
     assert await bot.set_status("🛠️", "working") == {"ok": True}
 
 
@@ -116,32 +135,35 @@ async def test_dispatch_message_event():
 
     bot.on("message", on_message)
 
-    # Build a projection frame carrying a message_posted timeline event.
-    frame = realtime_pb2.RealtimeProjectionEvent()
-    frame.id = "p1"
-    op = frame.operations.add()
-    op.room_timeline_event_upsert.room_id = "r1"
-    evt = op.room_timeline_event_upsert.event
-    mp = evt.message_posted
-    mp.message.id = "e1"
-    mp.message.room_id = "r1"
-    mp.message.body = "hello @felix_bot"
-    mp.message.actor_id = "u1"
-    mp.message.created_at.FromJsonString("2026-01-01T00:00:00Z")
+    # Protocol-4 message_posted is a thin hint; the bot hydrates the full
+    # message via get_message, so mock that to supply the body.
+    posted = events_pb2.MessagePostedEvent(room_id="r1", body_plaintext="hello @felix_bot")
+    msg = Message(id="e1", room_id="r1", created_at=None, actor_id="u1", body="hello @felix_bot")
+    bot.client.get_message = AsyncMock(return_value=msg)  # type: ignore[method-assign]
 
-    await bot._handle_projection(_wrap_projection_event(frame))
+    await bot._handle_live(_live("message_posted", posted, actor_id="u1"))
     assert len(seen) == 1
     assert seen[0].message.body == "hello @felix_bot"
     assert seen[0].room_id == "r1"
     assert seen[0].is_mention  # body mentions the bot's login
 
 
+async def test_dispatch_message_event_skips_when_hydration_fails():
+    bot = _bot()
+    seen: list[BotMessageEvent] = []
+
+    async def on_message(event: BotMessageEvent) -> None:
+        seen.append(event)
+
+    bot.on("message", on_message)
+    posted = events_pb2.MessagePostedEvent(room_id="r1")
+    bot.client.get_message = AsyncMock(return_value=None)  # type: ignore[method-assign]
+
+    await bot._handle_live(_live("message_posted", posted, actor_id="u1"))
+    assert seen == []
+
+
 async def test_dispatch_room_lifecycle_event():
-    # Regression: room-lifecycle timeline events (room_created, user_joined_room,
-    # ...) carry a RoomTimelineRoomEvent with a `room_id` string, not a nested
-    # `room` message. The handler must build the Room from the id and must not
-    # raise (the old code called sub.HasField("room") on a field that doesn't
-    # exist, crashing the server task on retained-timeline replay).
     bot = _bot()
     seen: list[BotRoomEvent] = []
 
@@ -150,14 +172,9 @@ async def test_dispatch_room_lifecycle_event():
 
     bot.on("room", on_room)
 
-    frame = realtime_pb2.RealtimeProjectionEvent()
-    frame.id = "p1"
-    op = frame.operations.add()
-    op.room_timeline_event_upsert.room_id = "r1"
-    evt = op.room_timeline_event_upsert.event
-    evt.room_created.room_id = "r1"
-
-    await bot._handle_projection(_wrap_projection_event(frame))
+    await bot._handle_live(
+        _live("room_created", events_pb2.RoomCreatedEvent(room_id="r1", name="general"))
+    )
     assert len(seen) == 1
     assert seen[0].detail == "room_created"
     assert seen[0].room is not None
@@ -173,15 +190,29 @@ async def test_dispatch_presence_event():
 
     bot.on("presence", on_presence)
 
-    frame = realtime_pb2.RealtimeProjectionEvent()
-    frame.id = "p2"
-    op = frame.operations.add()
-    op.presences_replace.statuses["u1"] = presence_pb2.PresenceStatus.PRESENCE_STATUS_ONLINE
-
-    await bot._handle_projection(_wrap_projection_event(frame))
+    payload = events_pb2.PresenceChangedEvent()
+    payload.status = presence_pb2.PresenceStatus.PRESENCE_STATUS_ONLINE
+    await bot._handle_live(_live("presence_changed", payload, actor_id="u1"))
     assert len(seen) == 1
     assert seen[0].user_id == "u1"
     assert seen[0].status is PresenceStatus.ONLINE
+
+
+async def test_dispatch_reaction_event():
+    bot = _bot()
+    seen: list[BotReactionEvent] = []
+
+    async def on_reaction(event: BotReactionEvent) -> None:
+        seen.append(event)
+
+    bot.on("reaction", on_reaction)
+
+    payload = events_pb2.ReactionAddedEvent(room_id="r1", message_event_id="e1", emoji="👍")
+    await bot._handle_live(_live("reaction_added", payload, actor_id="u1"))
+    assert len(seen) == 1
+    assert seen[0].emoji == "👍"
+    assert seen[0].user_id == "u1"
+    assert seen[0].added is True
 
 
 async def test_dispatch_live_typing():
@@ -193,19 +224,27 @@ async def test_dispatch_live_typing():
 
     bot.on("typing", on_typing)
 
-    from chattolib.realtime import RealtimeEvent
-
-    live = RealtimeEvent(
-        id="evt",
-        created_at=None,
-        actor_id="u1",
-        kind="user_typing",
-        payload=realtime_pb2.RealtimeTypingEvent(room_id="r1"),
-        raw=None,
+    await bot._handle_live(
+        _live("user_typing", events_pb2.UserTypingEvent(room_id="r1"), actor_id="u1")
     )
-    await bot._handle_live(live)
     assert len(seen) == 1
     assert seen[0].room_id == "r1"
+
+
+async def test_dispatch_user_event():
+    bot = _bot()
+    seen: list[BotUserEvent] = []
+
+    async def on_user(event: BotUserEvent) -> None:
+        seen.append(event)
+
+    bot.on("user", on_user)
+
+    await bot._handle_live(
+        _live("user_account_deleted", events_pb2.UserAccountDeletedEvent(user_id="u1"))
+    )
+    assert len(seen) == 1
+    assert seen[0].removed is True
 
 
 async def test_wildcard_handler_receives_all():
@@ -217,11 +256,9 @@ async def test_wildcard_handler_receives_all():
 
     bot.on("*", on_any)
 
-    frame = realtime_pb2.RealtimeProjectionEvent()
-    frame.id = "p3"
-    op = frame.operations.add()
-    op.presences_replace.statuses["u1"] = presence_pb2.PresenceStatus.PRESENCE_STATUS_AWAY
-    await bot._handle_projection(_wrap_projection_event(frame))
+    payload = events_pb2.PresenceChangedEvent()
+    payload.status = presence_pb2.PresenceStatus.PRESENCE_STATUS_AWAY
+    await bot._handle_live(_live("presence_changed", payload, actor_id="u1"))
     assert seen == ["presence"]
 
 
@@ -238,35 +275,17 @@ async def test_a_failing_handler_does_not_stop_the_loop():
     bot.on("presence", bad)
     bot.on("presence", good)
 
-    frame = realtime_pb2.RealtimeProjectionEvent()
-    frame.id = "p4"
-    op = frame.operations.add()
-    op.presences_replace.statuses["u1"] = presence_pb2.PresenceStatus.PRESENCE_STATUS_ONLINE
-    await bot._handle_projection(_wrap_projection_event(frame))
+    payload = events_pb2.PresenceChangedEvent()
+    payload.status = presence_pb2.PresenceStatus.PRESENCE_STATUS_ONLINE
+    await bot._handle_live(_live("presence_changed", payload, actor_id="u1"))
     assert calls == [1]  # the good handler still ran after the bad one raised
 
 
 # --- group-aware joining & auto-join say() ------------------------------
 
 
-def _group_response(group_id: str, room_ids: list[str], *, member: bool = True):
-    from chattolib._pb.chatto.api.v1 import room_directory_pb2
-
-    resp = room_directory_pb2.ListRoomGroupsResponse()
-    g = resp.groups.add()
-    g.id = group_id
-    g.name = "Group " + group_id
-    for rid in room_ids:
-        item = g.items.add()
-        item.room.id = rid
-        item.viewer_state.is_member = member
-    return resp
-
-
 async def test_join_room_group():
     bot = _bot()
-    from chattolib._pb.chatto.api.v1 import rooms_pb2
-
     join_resp = rooms_pb2.JoinRoomGroupResponse()
     join_resp.joined_room_ids.extend(["r1", "r2"])
     m = _mock(bot.client, "rooms", "join_room_group", join_resp)
@@ -276,55 +295,8 @@ async def test_join_room_group():
     m.assert_awaited_once()
 
 
-async def test_join_all_rooms_groups_then_ungrouped():
-    bot = _bot()
-    from chattolib._pb.chatto.api.v1 import room_directory_pb2, rooms_pb2
-
-    # Two groups: g1 has r1,r2 (already members), g2 has r3 (not a member).
-    groups_resp = room_directory_pb2.ListRoomGroupsResponse()
-    g1 = groups_resp.groups.add()
-    g1.id = "g1"
-    for rid in ("r1", "r2"):
-        it = g1.items.add()
-        it.room.room.id = rid
-        it.room.viewer_state.is_member = True
-    g2 = groups_resp.groups.add()
-    g2.id = "g2"
-    it = g2.items.add()
-    it.room.room.id = "r3"
-    it.room.viewer_state.is_member = False
-    _mock(bot.client, "room_directory", "list_room_groups", groups_resp)
-
-    # join_room_group: g1 no-op, g2 joins r3.
-    jg = rooms_pb2.JoinRoomGroupResponse()
-    jg.joined_room_ids.extend(["r3"])
-    bot.client.join_room_group = AsyncMock(return_value=["r3"])  # type: ignore[method-assign]
-
-    # list_rooms returns the ungrouped room r4 (not a member) plus the group rooms.
-    rooms_resp = room_directory_pb2.ListRoomsResponse()
-    for rid, member in (("r1", True), ("r2", True), ("r3", True), ("r4", False)):
-        row = rooms_resp.rooms.add()
-        row.room.id = rid
-        row.viewer_state.is_member = member
-    _mock(bot.client, "room_directory", "list_rooms", rooms_resp)
-
-    # r4 is ungrouped and not a member -> join_room is called for it.
-    from chattolib.types import Room
-
-    async def fake_join_room(room_id):
-        return Room(id=room_id)
-
-    bot.client.join_room = fake_join_room  # type: ignore[method-assign]
-
-    joined = await bot.join_all_rooms()
-    # r3 from the group join + r4 from the individual join.
-    assert "r3" in joined and "r4" in joined
-    assert fake_join_room is bot.client.join_room
-
-
 async def test_say_auto_joins_when_not_member():
     bot = _bot()
-    from chattolib._pb.chatto.api.v1 import messages_pb2, rooms_pb2
     from chattolib.exceptions import ChattoConnectError
 
     post = messages_pb2.CreateMessageResponse()

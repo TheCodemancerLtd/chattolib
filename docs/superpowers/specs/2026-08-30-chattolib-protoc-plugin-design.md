@@ -122,28 +122,37 @@ For a service `chatto.api.v1.RoomService` in `rooms.proto`, the plugin emits
 import chatto.api.v1.rooms_pb2 as _pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
+
 class RoomServiceClient(ConnectClient):
-    async def join_room(self, request: _pb2.JoinRoomRequest, *,
-                        headers: dict[str, str] | None = None) -> _pb2.JoinRoomResponse:
+    async def join_room(
+        self, request: _pb2.JoinRoomRequest, *, headers: dict[str, str] | None = None
+    ) -> _pb2.JoinRoomResponse:
         return await self.execute_unary(
             request=request,
-            method=MethodInfo(name="JoinRoom",
-                               service_name="chatto.api.v1.RoomService",
-                               input=_pb2.JoinRoomRequest,
-                               output=_pb2.JoinRoomResponse),
+            method=MethodInfo(
+                name="JoinRoom",
+                service_name="chatto.api.v1.RoomService",
+                input=_pb2.JoinRoomRequest,
+                output=_pb2.JoinRoomResponse,
+            ),
             headers=headers,
         )
+
     # ... one method per RPC ...
 
+
 class RoomServiceClientSync(ConnectClientSync):
-    def join_room(self, request: _pb2.JoinRoomRequest, *,
-                  headers: dict[str, str] | None = None) -> _pb2.JoinRoomResponse:
+    def join_room(
+        self, request: _pb2.JoinRoomRequest, *, headers: dict[str, str] | None = None
+    ) -> _pb2.JoinRoomResponse:
         return self.execute_unary(
             request=request,
-            method=MethodInfo(name="JoinRoom",
-                               service_name="chatto.api.v1.RoomService",
-                               input=_pb2.JoinRoomRequest,
-                               output=_pb2.JoinRoomResponse),
+            method=MethodInfo(
+                name="JoinRoom",
+                service_name="chatto.api.v1.RoomService",
+                input=_pb2.JoinRoomRequest,
+                output=_pb2.JoinRoomResponse,
+            ),
             headers=headers,
         )
 ```

@@ -2,32 +2,32 @@
 
 # source: chatto/admin/v1/diagnostics.proto
 
-import chatto.admin.v1.diagnostics_pb2 as _pb2
+import chatto.admin.v1.diagnostics_pb2 as chatto_admin_v1_diagnostics_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class AdminDiagnosticsServiceClient(ConnectClient):
-    async def get_system_info(self, request: _pb2.GetSystemInfoRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetSystemInfoResponse:
+    async def get_system_info(self, request: chatto_admin_v1_diagnostics_pb2.GetSystemInfoRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_diagnostics_pb2.GetSystemInfoResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetSystemInfo",
                 service_name="chatto.admin.v1.AdminDiagnosticsService",
-                input=_pb2.GetSystemInfoRequest,
-                output=_pb2.GetSystemInfoResponse,
+                input=chatto_admin_v1_diagnostics_pb2.GetSystemInfoRequest,
+                output=chatto_admin_v1_diagnostics_pb2.GetSystemInfoResponse,
             ),
             headers=headers,
         )
 
 class AdminDiagnosticsServiceClientSync(ConnectClientSync):
 
-    def get_system_info(self, request: _pb2.GetSystemInfoRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetSystemInfoResponse:
+    def get_system_info(self, request: chatto_admin_v1_diagnostics_pb2.GetSystemInfoRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_diagnostics_pb2.GetSystemInfoResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetSystemInfo",
                 service_name="chatto.admin.v1.AdminDiagnosticsService",
-                input=_pb2.GetSystemInfoRequest,
-                output=_pb2.GetSystemInfoResponse,
+                input=chatto_admin_v1_diagnostics_pb2.GetSystemInfoRequest,
+                output=chatto_admin_v1_diagnostics_pb2.GetSystemInfoResponse,
             ),
             headers=headers,
         )

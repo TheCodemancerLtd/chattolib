@@ -2,32 +2,80 @@
 
 # source: chatto/api/v1/viewer.proto
 
-import chatto.api.v1.viewer_pb2 as _pb2
+import chatto.api.v1.viewer_pb2 as chatto_api_v1_viewer_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class ViewerServiceClient(ConnectClient):
-    async def get_viewer(self, request: _pb2.GetViewerRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetViewerResponse:
+    async def get_viewer(self, request: chatto_api_v1_viewer_pb2.GetViewerRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_viewer_pb2.GetViewerResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetViewer",
                 service_name="chatto.api.v1.ViewerService",
-                input=_pb2.GetViewerRequest,
-                output=_pb2.GetViewerResponse,
+                input=chatto_api_v1_viewer_pb2.GetViewerRequest,
+                output=chatto_api_v1_viewer_pb2.GetViewerResponse,
+            ),
+            headers=headers,
+        )
+
+    async def activate_privileged_mode(self, request: chatto_api_v1_viewer_pb2.ActivatePrivilegedModeRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_viewer_pb2.ActivatePrivilegedModeResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ActivatePrivilegedMode",
+                service_name="chatto.api.v1.ViewerService",
+                input=chatto_api_v1_viewer_pb2.ActivatePrivilegedModeRequest,
+                output=chatto_api_v1_viewer_pb2.ActivatePrivilegedModeResponse,
+            ),
+            headers=headers,
+        )
+
+    async def deactivate_privileged_mode(self, request: chatto_api_v1_viewer_pb2.DeactivatePrivilegedModeRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_viewer_pb2.DeactivatePrivilegedModeResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="DeactivatePrivilegedMode",
+                service_name="chatto.api.v1.ViewerService",
+                input=chatto_api_v1_viewer_pb2.DeactivatePrivilegedModeRequest,
+                output=chatto_api_v1_viewer_pb2.DeactivatePrivilegedModeResponse,
             ),
             headers=headers,
         )
 
 class ViewerServiceClientSync(ConnectClientSync):
 
-    def get_viewer(self, request: _pb2.GetViewerRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetViewerResponse:
+    def get_viewer(self, request: chatto_api_v1_viewer_pb2.GetViewerRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_viewer_pb2.GetViewerResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetViewer",
                 service_name="chatto.api.v1.ViewerService",
-                input=_pb2.GetViewerRequest,
-                output=_pb2.GetViewerResponse,
+                input=chatto_api_v1_viewer_pb2.GetViewerRequest,
+                output=chatto_api_v1_viewer_pb2.GetViewerResponse,
+            ),
+            headers=headers,
+        )
+
+    def activate_privileged_mode(self, request: chatto_api_v1_viewer_pb2.ActivatePrivilegedModeRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_viewer_pb2.ActivatePrivilegedModeResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ActivatePrivilegedMode",
+                service_name="chatto.api.v1.ViewerService",
+                input=chatto_api_v1_viewer_pb2.ActivatePrivilegedModeRequest,
+                output=chatto_api_v1_viewer_pb2.ActivatePrivilegedModeResponse,
+            ),
+            headers=headers,
+        )
+
+    def deactivate_privileged_mode(self, request: chatto_api_v1_viewer_pb2.DeactivatePrivilegedModeRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_viewer_pb2.DeactivatePrivilegedModeResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="DeactivatePrivilegedMode",
+                service_name="chatto.api.v1.ViewerService",
+                input=chatto_api_v1_viewer_pb2.DeactivatePrivilegedModeRequest,
+                output=chatto_api_v1_viewer_pb2.DeactivatePrivilegedModeResponse,
             ),
             headers=headers,
         )

@@ -2,200 +2,200 @@
 
 # source: chatto/admin/v1/permissions.proto
 
-import chatto.admin.v1.permissions_pb2 as _pb2
+import chatto.admin.v1.permissions_pb2 as chatto_admin_v1_permissions_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class AdminPermissionServiceClient(ConnectClient):
-    async def get_role_permission_tier_matrix(self, request: _pb2.GetRolePermissionTierMatrixRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRolePermissionTierMatrixResponse:
+    async def get_role_permission_tier_matrix(self, request: chatto_admin_v1_permissions_pb2.GetRolePermissionTierMatrixRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_permissions_pb2.GetRolePermissionTierMatrixResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRolePermissionTierMatrix",
                 service_name="chatto.admin.v1.AdminPermissionService",
-                input=_pb2.GetRolePermissionTierMatrixRequest,
-                output=_pb2.GetRolePermissionTierMatrixResponse,
+                input=chatto_admin_v1_permissions_pb2.GetRolePermissionTierMatrixRequest,
+                output=chatto_admin_v1_permissions_pb2.GetRolePermissionTierMatrixResponse,
             ),
             headers=headers,
         )
 
-    async def get_role_permission_matrix(self, request: _pb2.GetRolePermissionMatrixRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRolePermissionMatrixResponse:
+    async def get_role_permission_matrix(self, request: chatto_admin_v1_permissions_pb2.GetRolePermissionMatrixRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_permissions_pb2.GetRolePermissionMatrixResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRolePermissionMatrix",
                 service_name="chatto.admin.v1.AdminPermissionService",
-                input=_pb2.GetRolePermissionMatrixRequest,
-                output=_pb2.GetRolePermissionMatrixResponse,
+                input=chatto_admin_v1_permissions_pb2.GetRolePermissionMatrixRequest,
+                output=chatto_admin_v1_permissions_pb2.GetRolePermissionMatrixResponse,
             ),
             headers=headers,
         )
 
-    async def list_role_permission_decisions(self, request: _pb2.ListRolePermissionDecisionsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListRolePermissionDecisionsResponse:
+    async def list_role_permission_decisions(self, request: chatto_admin_v1_permissions_pb2.ListRolePermissionDecisionsRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_permissions_pb2.ListRolePermissionDecisionsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListRolePermissionDecisions",
                 service_name="chatto.admin.v1.AdminPermissionService",
-                input=_pb2.ListRolePermissionDecisionsRequest,
-                output=_pb2.ListRolePermissionDecisionsResponse,
+                input=chatto_admin_v1_permissions_pb2.ListRolePermissionDecisionsRequest,
+                output=chatto_admin_v1_permissions_pb2.ListRolePermissionDecisionsResponse,
             ),
             headers=headers,
         )
 
-    async def get_user_permission_matrix(self, request: _pb2.GetUserPermissionMatrixRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetUserPermissionMatrixResponse:
+    async def get_user_permission_matrix(self, request: chatto_admin_v1_permissions_pb2.GetUserPermissionMatrixRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_permissions_pb2.GetUserPermissionMatrixResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetUserPermissionMatrix",
                 service_name="chatto.admin.v1.AdminPermissionService",
-                input=_pb2.GetUserPermissionMatrixRequest,
-                output=_pb2.GetUserPermissionMatrixResponse,
+                input=chatto_admin_v1_permissions_pb2.GetUserPermissionMatrixRequest,
+                output=chatto_admin_v1_permissions_pb2.GetUserPermissionMatrixResponse,
             ),
             headers=headers,
         )
 
-    async def list_user_permission_decisions(self, request: _pb2.ListUserPermissionDecisionsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListUserPermissionDecisionsResponse:
+    async def list_user_permission_decisions(self, request: chatto_admin_v1_permissions_pb2.ListUserPermissionDecisionsRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_permissions_pb2.ListUserPermissionDecisionsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListUserPermissionDecisions",
                 service_name="chatto.admin.v1.AdminPermissionService",
-                input=_pb2.ListUserPermissionDecisionsRequest,
-                output=_pb2.ListUserPermissionDecisionsResponse,
+                input=chatto_admin_v1_permissions_pb2.ListUserPermissionDecisionsRequest,
+                output=chatto_admin_v1_permissions_pb2.ListUserPermissionDecisionsResponse,
             ),
             headers=headers,
         )
 
-    async def explain_permissions(self, request: _pb2.ExplainPermissionsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ExplainPermissionsResponse:
+    async def explain_permissions(self, request: chatto_admin_v1_permissions_pb2.ExplainPermissionsRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_permissions_pb2.ExplainPermissionsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ExplainPermissions",
                 service_name="chatto.admin.v1.AdminPermissionService",
-                input=_pb2.ExplainPermissionsRequest,
-                output=_pb2.ExplainPermissionsResponse,
+                input=chatto_admin_v1_permissions_pb2.ExplainPermissionsRequest,
+                output=chatto_admin_v1_permissions_pb2.ExplainPermissionsResponse,
             ),
             headers=headers,
         )
 
-    async def set_role_permission(self, request: _pb2.SetRolePermissionRequest, *, headers: dict[str, str] | None = None) -> _pb2.SetRolePermissionResponse:
+    async def set_role_permission(self, request: chatto_admin_v1_permissions_pb2.SetRolePermissionRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_permissions_pb2.SetRolePermissionResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="SetRolePermission",
                 service_name="chatto.admin.v1.AdminPermissionService",
-                input=_pb2.SetRolePermissionRequest,
-                output=_pb2.SetRolePermissionResponse,
+                input=chatto_admin_v1_permissions_pb2.SetRolePermissionRequest,
+                output=chatto_admin_v1_permissions_pb2.SetRolePermissionResponse,
             ),
             headers=headers,
         )
 
-    async def set_user_permission(self, request: _pb2.SetUserPermissionRequest, *, headers: dict[str, str] | None = None) -> _pb2.SetUserPermissionResponse:
+    async def set_user_permission(self, request: chatto_admin_v1_permissions_pb2.SetUserPermissionRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_permissions_pb2.SetUserPermissionResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="SetUserPermission",
                 service_name="chatto.admin.v1.AdminPermissionService",
-                input=_pb2.SetUserPermissionRequest,
-                output=_pb2.SetUserPermissionResponse,
+                input=chatto_admin_v1_permissions_pb2.SetUserPermissionRequest,
+                output=chatto_admin_v1_permissions_pb2.SetUserPermissionResponse,
             ),
             headers=headers,
         )
 
 class AdminPermissionServiceClientSync(ConnectClientSync):
 
-    def get_role_permission_tier_matrix(self, request: _pb2.GetRolePermissionTierMatrixRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRolePermissionTierMatrixResponse:
+    def get_role_permission_tier_matrix(self, request: chatto_admin_v1_permissions_pb2.GetRolePermissionTierMatrixRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_permissions_pb2.GetRolePermissionTierMatrixResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRolePermissionTierMatrix",
                 service_name="chatto.admin.v1.AdminPermissionService",
-                input=_pb2.GetRolePermissionTierMatrixRequest,
-                output=_pb2.GetRolePermissionTierMatrixResponse,
+                input=chatto_admin_v1_permissions_pb2.GetRolePermissionTierMatrixRequest,
+                output=chatto_admin_v1_permissions_pb2.GetRolePermissionTierMatrixResponse,
             ),
             headers=headers,
         )
 
-    def get_role_permission_matrix(self, request: _pb2.GetRolePermissionMatrixRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRolePermissionMatrixResponse:
+    def get_role_permission_matrix(self, request: chatto_admin_v1_permissions_pb2.GetRolePermissionMatrixRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_permissions_pb2.GetRolePermissionMatrixResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRolePermissionMatrix",
                 service_name="chatto.admin.v1.AdminPermissionService",
-                input=_pb2.GetRolePermissionMatrixRequest,
-                output=_pb2.GetRolePermissionMatrixResponse,
+                input=chatto_admin_v1_permissions_pb2.GetRolePermissionMatrixRequest,
+                output=chatto_admin_v1_permissions_pb2.GetRolePermissionMatrixResponse,
             ),
             headers=headers,
         )
 
-    def list_role_permission_decisions(self, request: _pb2.ListRolePermissionDecisionsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListRolePermissionDecisionsResponse:
+    def list_role_permission_decisions(self, request: chatto_admin_v1_permissions_pb2.ListRolePermissionDecisionsRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_permissions_pb2.ListRolePermissionDecisionsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListRolePermissionDecisions",
                 service_name="chatto.admin.v1.AdminPermissionService",
-                input=_pb2.ListRolePermissionDecisionsRequest,
-                output=_pb2.ListRolePermissionDecisionsResponse,
+                input=chatto_admin_v1_permissions_pb2.ListRolePermissionDecisionsRequest,
+                output=chatto_admin_v1_permissions_pb2.ListRolePermissionDecisionsResponse,
             ),
             headers=headers,
         )
 
-    def get_user_permission_matrix(self, request: _pb2.GetUserPermissionMatrixRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetUserPermissionMatrixResponse:
+    def get_user_permission_matrix(self, request: chatto_admin_v1_permissions_pb2.GetUserPermissionMatrixRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_permissions_pb2.GetUserPermissionMatrixResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetUserPermissionMatrix",
                 service_name="chatto.admin.v1.AdminPermissionService",
-                input=_pb2.GetUserPermissionMatrixRequest,
-                output=_pb2.GetUserPermissionMatrixResponse,
+                input=chatto_admin_v1_permissions_pb2.GetUserPermissionMatrixRequest,
+                output=chatto_admin_v1_permissions_pb2.GetUserPermissionMatrixResponse,
             ),
             headers=headers,
         )
 
-    def list_user_permission_decisions(self, request: _pb2.ListUserPermissionDecisionsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListUserPermissionDecisionsResponse:
+    def list_user_permission_decisions(self, request: chatto_admin_v1_permissions_pb2.ListUserPermissionDecisionsRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_permissions_pb2.ListUserPermissionDecisionsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListUserPermissionDecisions",
                 service_name="chatto.admin.v1.AdminPermissionService",
-                input=_pb2.ListUserPermissionDecisionsRequest,
-                output=_pb2.ListUserPermissionDecisionsResponse,
+                input=chatto_admin_v1_permissions_pb2.ListUserPermissionDecisionsRequest,
+                output=chatto_admin_v1_permissions_pb2.ListUserPermissionDecisionsResponse,
             ),
             headers=headers,
         )
 
-    def explain_permissions(self, request: _pb2.ExplainPermissionsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ExplainPermissionsResponse:
+    def explain_permissions(self, request: chatto_admin_v1_permissions_pb2.ExplainPermissionsRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_permissions_pb2.ExplainPermissionsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ExplainPermissions",
                 service_name="chatto.admin.v1.AdminPermissionService",
-                input=_pb2.ExplainPermissionsRequest,
-                output=_pb2.ExplainPermissionsResponse,
+                input=chatto_admin_v1_permissions_pb2.ExplainPermissionsRequest,
+                output=chatto_admin_v1_permissions_pb2.ExplainPermissionsResponse,
             ),
             headers=headers,
         )
 
-    def set_role_permission(self, request: _pb2.SetRolePermissionRequest, *, headers: dict[str, str] | None = None) -> _pb2.SetRolePermissionResponse:
+    def set_role_permission(self, request: chatto_admin_v1_permissions_pb2.SetRolePermissionRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_permissions_pb2.SetRolePermissionResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="SetRolePermission",
                 service_name="chatto.admin.v1.AdminPermissionService",
-                input=_pb2.SetRolePermissionRequest,
-                output=_pb2.SetRolePermissionResponse,
+                input=chatto_admin_v1_permissions_pb2.SetRolePermissionRequest,
+                output=chatto_admin_v1_permissions_pb2.SetRolePermissionResponse,
             ),
             headers=headers,
         )
 
-    def set_user_permission(self, request: _pb2.SetUserPermissionRequest, *, headers: dict[str, str] | None = None) -> _pb2.SetUserPermissionResponse:
+    def set_user_permission(self, request: chatto_admin_v1_permissions_pb2.SetUserPermissionRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_permissions_pb2.SetUserPermissionResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="SetUserPermission",
                 service_name="chatto.admin.v1.AdminPermissionService",
-                input=_pb2.SetUserPermissionRequest,
-                output=_pb2.SetUserPermissionResponse,
+                input=chatto_admin_v1_permissions_pb2.SetUserPermissionRequest,
+                output=chatto_admin_v1_permissions_pb2.SetUserPermissionResponse,
             ),
             headers=headers,
         )

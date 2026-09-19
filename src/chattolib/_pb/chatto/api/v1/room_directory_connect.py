@@ -2,152 +2,152 @@
 
 # source: chatto/api/v1/room_directory.proto
 
-import chatto.api.v1.room_directory_pb2 as _pb2
+import chatto.api.v1.room_directory_pb2 as chatto_api_v1_room_directory_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class RoomDirectoryServiceClient(ConnectClient):
-    async def list_rooms(self, request: _pb2.ListRoomsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListRoomsResponse:
+    async def list_rooms(self, request: chatto_api_v1_room_directory_pb2.ListRoomsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_room_directory_pb2.ListRoomsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListRooms",
                 service_name="chatto.api.v1.RoomDirectoryService",
-                input=_pb2.ListRoomsRequest,
-                output=_pb2.ListRoomsResponse,
+                input=chatto_api_v1_room_directory_pb2.ListRoomsRequest,
+                output=chatto_api_v1_room_directory_pb2.ListRoomsResponse,
             ),
             headers=headers,
         )
 
-    async def list_room_groups(self, request: _pb2.ListRoomGroupsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListRoomGroupsResponse:
+    async def list_room_groups(self, request: chatto_api_v1_room_directory_pb2.ListRoomGroupsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_room_directory_pb2.ListRoomGroupsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListRoomGroups",
                 service_name="chatto.api.v1.RoomDirectoryService",
-                input=_pb2.ListRoomGroupsRequest,
-                output=_pb2.ListRoomGroupsResponse,
+                input=chatto_api_v1_room_directory_pb2.ListRoomGroupsRequest,
+                output=chatto_api_v1_room_directory_pb2.ListRoomGroupsResponse,
             ),
             headers=headers,
         )
 
-    async def get_room_group(self, request: _pb2.GetRoomGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRoomGroupResponse:
+    async def get_room_group(self, request: chatto_api_v1_room_directory_pb2.GetRoomGroupRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_room_directory_pb2.GetRoomGroupResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRoomGroup",
                 service_name="chatto.api.v1.RoomDirectoryService",
-                input=_pb2.GetRoomGroupRequest,
-                output=_pb2.GetRoomGroupResponse,
+                input=chatto_api_v1_room_directory_pb2.GetRoomGroupRequest,
+                output=chatto_api_v1_room_directory_pb2.GetRoomGroupResponse,
             ),
             headers=headers,
         )
 
-    async def batch_get_room_groups(self, request: _pb2.BatchGetRoomGroupsRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetRoomGroupsResponse:
+    async def batch_get_room_groups(self, request: chatto_api_v1_room_directory_pb2.BatchGetRoomGroupsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_room_directory_pb2.BatchGetRoomGroupsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetRoomGroups",
                 service_name="chatto.api.v1.RoomDirectoryService",
-                input=_pb2.BatchGetRoomGroupsRequest,
-                output=_pb2.BatchGetRoomGroupsResponse,
+                input=chatto_api_v1_room_directory_pb2.BatchGetRoomGroupsRequest,
+                output=chatto_api_v1_room_directory_pb2.BatchGetRoomGroupsResponse,
             ),
             headers=headers,
         )
 
-    async def get_room(self, request: _pb2.GetRoomRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRoomResponse:
+    async def get_room(self, request: chatto_api_v1_room_directory_pb2.GetRoomRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_room_directory_pb2.GetRoomResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRoom",
                 service_name="chatto.api.v1.RoomDirectoryService",
-                input=_pb2.GetRoomRequest,
-                output=_pb2.GetRoomResponse,
+                input=chatto_api_v1_room_directory_pb2.GetRoomRequest,
+                output=chatto_api_v1_room_directory_pb2.GetRoomResponse,
             ),
             headers=headers,
         )
 
-    async def batch_get_rooms(self, request: _pb2.BatchGetRoomsRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetRoomsResponse:
+    async def batch_get_rooms(self, request: chatto_api_v1_room_directory_pb2.BatchGetRoomsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_room_directory_pb2.BatchGetRoomsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetRooms",
                 service_name="chatto.api.v1.RoomDirectoryService",
-                input=_pb2.BatchGetRoomsRequest,
-                output=_pb2.BatchGetRoomsResponse,
+                input=chatto_api_v1_room_directory_pb2.BatchGetRoomsRequest,
+                output=chatto_api_v1_room_directory_pb2.BatchGetRoomsResponse,
             ),
             headers=headers,
         )
 
 class RoomDirectoryServiceClientSync(ConnectClientSync):
 
-    def list_rooms(self, request: _pb2.ListRoomsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListRoomsResponse:
+    def list_rooms(self, request: chatto_api_v1_room_directory_pb2.ListRoomsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_room_directory_pb2.ListRoomsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListRooms",
                 service_name="chatto.api.v1.RoomDirectoryService",
-                input=_pb2.ListRoomsRequest,
-                output=_pb2.ListRoomsResponse,
+                input=chatto_api_v1_room_directory_pb2.ListRoomsRequest,
+                output=chatto_api_v1_room_directory_pb2.ListRoomsResponse,
             ),
             headers=headers,
         )
 
-    def list_room_groups(self, request: _pb2.ListRoomGroupsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListRoomGroupsResponse:
+    def list_room_groups(self, request: chatto_api_v1_room_directory_pb2.ListRoomGroupsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_room_directory_pb2.ListRoomGroupsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListRoomGroups",
                 service_name="chatto.api.v1.RoomDirectoryService",
-                input=_pb2.ListRoomGroupsRequest,
-                output=_pb2.ListRoomGroupsResponse,
+                input=chatto_api_v1_room_directory_pb2.ListRoomGroupsRequest,
+                output=chatto_api_v1_room_directory_pb2.ListRoomGroupsResponse,
             ),
             headers=headers,
         )
 
-    def get_room_group(self, request: _pb2.GetRoomGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRoomGroupResponse:
+    def get_room_group(self, request: chatto_api_v1_room_directory_pb2.GetRoomGroupRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_room_directory_pb2.GetRoomGroupResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRoomGroup",
                 service_name="chatto.api.v1.RoomDirectoryService",
-                input=_pb2.GetRoomGroupRequest,
-                output=_pb2.GetRoomGroupResponse,
+                input=chatto_api_v1_room_directory_pb2.GetRoomGroupRequest,
+                output=chatto_api_v1_room_directory_pb2.GetRoomGroupResponse,
             ),
             headers=headers,
         )
 
-    def batch_get_room_groups(self, request: _pb2.BatchGetRoomGroupsRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetRoomGroupsResponse:
+    def batch_get_room_groups(self, request: chatto_api_v1_room_directory_pb2.BatchGetRoomGroupsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_room_directory_pb2.BatchGetRoomGroupsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetRoomGroups",
                 service_name="chatto.api.v1.RoomDirectoryService",
-                input=_pb2.BatchGetRoomGroupsRequest,
-                output=_pb2.BatchGetRoomGroupsResponse,
+                input=chatto_api_v1_room_directory_pb2.BatchGetRoomGroupsRequest,
+                output=chatto_api_v1_room_directory_pb2.BatchGetRoomGroupsResponse,
             ),
             headers=headers,
         )
 
-    def get_room(self, request: _pb2.GetRoomRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRoomResponse:
+    def get_room(self, request: chatto_api_v1_room_directory_pb2.GetRoomRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_room_directory_pb2.GetRoomResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRoom",
                 service_name="chatto.api.v1.RoomDirectoryService",
-                input=_pb2.GetRoomRequest,
-                output=_pb2.GetRoomResponse,
+                input=chatto_api_v1_room_directory_pb2.GetRoomRequest,
+                output=chatto_api_v1_room_directory_pb2.GetRoomResponse,
             ),
             headers=headers,
         )
 
-    def batch_get_rooms(self, request: _pb2.BatchGetRoomsRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetRoomsResponse:
+    def batch_get_rooms(self, request: chatto_api_v1_room_directory_pb2.BatchGetRoomsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_room_directory_pb2.BatchGetRoomsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetRooms",
                 service_name="chatto.api.v1.RoomDirectoryService",
-                input=_pb2.BatchGetRoomsRequest,
-                output=_pb2.BatchGetRoomsResponse,
+                input=chatto_api_v1_room_directory_pb2.BatchGetRoomsRequest,
+                output=chatto_api_v1_room_directory_pb2.BatchGetRoomsResponse,
             ),
             headers=headers,
         )

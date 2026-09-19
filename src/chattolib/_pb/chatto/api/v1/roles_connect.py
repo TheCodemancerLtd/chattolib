@@ -2,80 +2,80 @@
 
 # source: chatto/api/v1/roles.proto
 
-import chatto.api.v1.roles_pb2 as _pb2
+import chatto.api.v1.roles_pb2 as chatto_api_v1_roles_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class RoleServiceClient(ConnectClient):
-    async def list_roles(self, request: _pb2.ListRolesRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListRolesResponse:
+    async def list_roles(self, request: chatto_api_v1_roles_pb2.ListRolesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_roles_pb2.ListRolesResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListRoles",
                 service_name="chatto.api.v1.RoleService",
-                input=_pb2.ListRolesRequest,
-                output=_pb2.ListRolesResponse,
+                input=chatto_api_v1_roles_pb2.ListRolesRequest,
+                output=chatto_api_v1_roles_pb2.ListRolesResponse,
             ),
             headers=headers,
         )
 
-    async def get_role(self, request: _pb2.GetRoleRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRoleResponse:
+    async def get_role(self, request: chatto_api_v1_roles_pb2.GetRoleRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_roles_pb2.GetRoleResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRole",
                 service_name="chatto.api.v1.RoleService",
-                input=_pb2.GetRoleRequest,
-                output=_pb2.GetRoleResponse,
+                input=chatto_api_v1_roles_pb2.GetRoleRequest,
+                output=chatto_api_v1_roles_pb2.GetRoleResponse,
             ),
             headers=headers,
         )
 
-    async def batch_get_roles(self, request: _pb2.BatchGetRolesRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetRolesResponse:
+    async def batch_get_roles(self, request: chatto_api_v1_roles_pb2.BatchGetRolesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_roles_pb2.BatchGetRolesResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetRoles",
                 service_name="chatto.api.v1.RoleService",
-                input=_pb2.BatchGetRolesRequest,
-                output=_pb2.BatchGetRolesResponse,
+                input=chatto_api_v1_roles_pb2.BatchGetRolesRequest,
+                output=chatto_api_v1_roles_pb2.BatchGetRolesResponse,
             ),
             headers=headers,
         )
 
 class RoleServiceClientSync(ConnectClientSync):
 
-    def list_roles(self, request: _pb2.ListRolesRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListRolesResponse:
+    def list_roles(self, request: chatto_api_v1_roles_pb2.ListRolesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_roles_pb2.ListRolesResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListRoles",
                 service_name="chatto.api.v1.RoleService",
-                input=_pb2.ListRolesRequest,
-                output=_pb2.ListRolesResponse,
+                input=chatto_api_v1_roles_pb2.ListRolesRequest,
+                output=chatto_api_v1_roles_pb2.ListRolesResponse,
             ),
             headers=headers,
         )
 
-    def get_role(self, request: _pb2.GetRoleRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRoleResponse:
+    def get_role(self, request: chatto_api_v1_roles_pb2.GetRoleRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_roles_pb2.GetRoleResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRole",
                 service_name="chatto.api.v1.RoleService",
-                input=_pb2.GetRoleRequest,
-                output=_pb2.GetRoleResponse,
+                input=chatto_api_v1_roles_pb2.GetRoleRequest,
+                output=chatto_api_v1_roles_pb2.GetRoleResponse,
             ),
             headers=headers,
         )
 
-    def batch_get_roles(self, request: _pb2.BatchGetRolesRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetRolesResponse:
+    def batch_get_roles(self, request: chatto_api_v1_roles_pb2.BatchGetRolesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_roles_pb2.BatchGetRolesResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetRoles",
                 service_name="chatto.api.v1.RoleService",
-                input=_pb2.BatchGetRolesRequest,
-                output=_pb2.BatchGetRolesResponse,
+                input=chatto_api_v1_roles_pb2.BatchGetRolesRequest,
+                output=chatto_api_v1_roles_pb2.BatchGetRolesResponse,
             ),
             headers=headers,
         )

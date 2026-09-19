@@ -2,152 +2,176 @@
 
 # source: chatto/admin/v1/roles.proto
 
-import chatto.admin.v1.roles_pb2 as _pb2
+import chatto.admin.v1.roles_pb2 as chatto_admin_v1_roles_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class AdminRoleServiceClient(ConnectClient):
-    async def list_roles(self, request: _pb2.ListRolesRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListRolesResponse:
+    async def list_roles(self, request: chatto_admin_v1_roles_pb2.ListRolesRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_roles_pb2.ListRolesResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListRoles",
                 service_name="chatto.admin.v1.AdminRoleService",
-                input=_pb2.ListRolesRequest,
-                output=_pb2.ListRolesResponse,
+                input=chatto_admin_v1_roles_pb2.ListRolesRequest,
+                output=chatto_admin_v1_roles_pb2.ListRolesResponse,
             ),
             headers=headers,
         )
 
-    async def get_role(self, request: _pb2.GetRoleRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRoleResponse:
+    async def get_role(self, request: chatto_admin_v1_roles_pb2.GetRoleRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_roles_pb2.GetRoleResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRole",
                 service_name="chatto.admin.v1.AdminRoleService",
-                input=_pb2.GetRoleRequest,
-                output=_pb2.GetRoleResponse,
+                input=chatto_admin_v1_roles_pb2.GetRoleRequest,
+                output=chatto_admin_v1_roles_pb2.GetRoleResponse,
             ),
             headers=headers,
         )
 
-    async def create_role(self, request: _pb2.CreateRoleRequest, *, headers: dict[str, str] | None = None) -> _pb2.CreateRoleResponse:
+    async def list_members(self, request: chatto_admin_v1_roles_pb2.AdminRoleServiceListMembersRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_roles_pb2.AdminRoleServiceListMembersResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListMembers",
+                service_name="chatto.admin.v1.AdminRoleService",
+                input=chatto_admin_v1_roles_pb2.AdminRoleServiceListMembersRequest,
+                output=chatto_admin_v1_roles_pb2.AdminRoleServiceListMembersResponse,
+            ),
+            headers=headers,
+        )
+
+    async def create_role(self, request: chatto_admin_v1_roles_pb2.CreateRoleRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_roles_pb2.CreateRoleResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CreateRole",
                 service_name="chatto.admin.v1.AdminRoleService",
-                input=_pb2.CreateRoleRequest,
-                output=_pb2.CreateRoleResponse,
+                input=chatto_admin_v1_roles_pb2.CreateRoleRequest,
+                output=chatto_admin_v1_roles_pb2.CreateRoleResponse,
             ),
             headers=headers,
         )
 
-    async def update_role(self, request: _pb2.UpdateRoleRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateRoleResponse:
+    async def update_role(self, request: chatto_admin_v1_roles_pb2.UpdateRoleRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_roles_pb2.UpdateRoleResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateRole",
                 service_name="chatto.admin.v1.AdminRoleService",
-                input=_pb2.UpdateRoleRequest,
-                output=_pb2.UpdateRoleResponse,
+                input=chatto_admin_v1_roles_pb2.UpdateRoleRequest,
+                output=chatto_admin_v1_roles_pb2.UpdateRoleResponse,
             ),
             headers=headers,
         )
 
-    async def delete_role(self, request: _pb2.DeleteRoleRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteRoleResponse:
+    async def delete_role(self, request: chatto_admin_v1_roles_pb2.DeleteRoleRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_roles_pb2.DeleteRoleResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteRole",
                 service_name="chatto.admin.v1.AdminRoleService",
-                input=_pb2.DeleteRoleRequest,
-                output=_pb2.DeleteRoleResponse,
+                input=chatto_admin_v1_roles_pb2.DeleteRoleRequest,
+                output=chatto_admin_v1_roles_pb2.DeleteRoleResponse,
             ),
             headers=headers,
         )
 
-    async def reorder_roles(self, request: _pb2.ReorderRolesRequest, *, headers: dict[str, str] | None = None) -> _pb2.ReorderRolesResponse:
+    async def reorder_roles(self, request: chatto_admin_v1_roles_pb2.ReorderRolesRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_roles_pb2.ReorderRolesResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ReorderRoles",
                 service_name="chatto.admin.v1.AdminRoleService",
-                input=_pb2.ReorderRolesRequest,
-                output=_pb2.ReorderRolesResponse,
+                input=chatto_admin_v1_roles_pb2.ReorderRolesRequest,
+                output=chatto_admin_v1_roles_pb2.ReorderRolesResponse,
             ),
             headers=headers,
         )
 
 class AdminRoleServiceClientSync(ConnectClientSync):
 
-    def list_roles(self, request: _pb2.ListRolesRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListRolesResponse:
+    def list_roles(self, request: chatto_admin_v1_roles_pb2.ListRolesRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_roles_pb2.ListRolesResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListRoles",
                 service_name="chatto.admin.v1.AdminRoleService",
-                input=_pb2.ListRolesRequest,
-                output=_pb2.ListRolesResponse,
+                input=chatto_admin_v1_roles_pb2.ListRolesRequest,
+                output=chatto_admin_v1_roles_pb2.ListRolesResponse,
             ),
             headers=headers,
         )
 
-    def get_role(self, request: _pb2.GetRoleRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRoleResponse:
+    def get_role(self, request: chatto_admin_v1_roles_pb2.GetRoleRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_roles_pb2.GetRoleResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRole",
                 service_name="chatto.admin.v1.AdminRoleService",
-                input=_pb2.GetRoleRequest,
-                output=_pb2.GetRoleResponse,
+                input=chatto_admin_v1_roles_pb2.GetRoleRequest,
+                output=chatto_admin_v1_roles_pb2.GetRoleResponse,
             ),
             headers=headers,
         )
 
-    def create_role(self, request: _pb2.CreateRoleRequest, *, headers: dict[str, str] | None = None) -> _pb2.CreateRoleResponse:
+    def list_members(self, request: chatto_admin_v1_roles_pb2.AdminRoleServiceListMembersRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_roles_pb2.AdminRoleServiceListMembersResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListMembers",
+                service_name="chatto.admin.v1.AdminRoleService",
+                input=chatto_admin_v1_roles_pb2.AdminRoleServiceListMembersRequest,
+                output=chatto_admin_v1_roles_pb2.AdminRoleServiceListMembersResponse,
+            ),
+            headers=headers,
+        )
+
+    def create_role(self, request: chatto_admin_v1_roles_pb2.CreateRoleRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_roles_pb2.CreateRoleResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CreateRole",
                 service_name="chatto.admin.v1.AdminRoleService",
-                input=_pb2.CreateRoleRequest,
-                output=_pb2.CreateRoleResponse,
+                input=chatto_admin_v1_roles_pb2.CreateRoleRequest,
+                output=chatto_admin_v1_roles_pb2.CreateRoleResponse,
             ),
             headers=headers,
         )
 
-    def update_role(self, request: _pb2.UpdateRoleRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateRoleResponse:
+    def update_role(self, request: chatto_admin_v1_roles_pb2.UpdateRoleRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_roles_pb2.UpdateRoleResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateRole",
                 service_name="chatto.admin.v1.AdminRoleService",
-                input=_pb2.UpdateRoleRequest,
-                output=_pb2.UpdateRoleResponse,
+                input=chatto_admin_v1_roles_pb2.UpdateRoleRequest,
+                output=chatto_admin_v1_roles_pb2.UpdateRoleResponse,
             ),
             headers=headers,
         )
 
-    def delete_role(self, request: _pb2.DeleteRoleRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteRoleResponse:
+    def delete_role(self, request: chatto_admin_v1_roles_pb2.DeleteRoleRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_roles_pb2.DeleteRoleResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteRole",
                 service_name="chatto.admin.v1.AdminRoleService",
-                input=_pb2.DeleteRoleRequest,
-                output=_pb2.DeleteRoleResponse,
+                input=chatto_admin_v1_roles_pb2.DeleteRoleRequest,
+                output=chatto_admin_v1_roles_pb2.DeleteRoleResponse,
             ),
             headers=headers,
         )
 
-    def reorder_roles(self, request: _pb2.ReorderRolesRequest, *, headers: dict[str, str] | None = None) -> _pb2.ReorderRolesResponse:
+    def reorder_roles(self, request: chatto_admin_v1_roles_pb2.ReorderRolesRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_roles_pb2.ReorderRolesResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ReorderRoles",
                 service_name="chatto.admin.v1.AdminRoleService",
-                input=_pb2.ReorderRolesRequest,
-                output=_pb2.ReorderRolesResponse,
+                input=chatto_admin_v1_roles_pb2.ReorderRolesRequest,
+                output=chatto_admin_v1_roles_pb2.ReorderRolesResponse,
             ),
             headers=headers,
         )

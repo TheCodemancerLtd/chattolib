@@ -2,320 +2,320 @@
 
 # source: chatto/admin/v1/server.proto
 
-import chatto.admin.v1.server_pb2 as _pb2
+import chatto.admin.v1.server_pb2 as chatto_admin_v1_server_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class AdminServerServiceClient(ConnectClient):
-    async def get_server_config(self, request: _pb2.GetServerConfigRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetServerConfigResponse:
+    async def get_server_config(self, request: chatto_admin_v1_server_pb2.GetServerConfigRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.GetServerConfigResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetServerConfig",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.GetServerConfigRequest,
-                output=_pb2.GetServerConfigResponse,
+                input=chatto_admin_v1_server_pb2.GetServerConfigRequest,
+                output=chatto_admin_v1_server_pb2.GetServerConfigResponse,
             ),
             headers=headers,
         )
 
-    async def update_server_config(self, request: _pb2.UpdateServerConfigRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateServerConfigResponse:
+    async def update_server_config(self, request: chatto_admin_v1_server_pb2.UpdateServerConfigRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.UpdateServerConfigResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateServerConfig",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.UpdateServerConfigRequest,
-                output=_pb2.UpdateServerConfigResponse,
+                input=chatto_admin_v1_server_pb2.UpdateServerConfigRequest,
+                output=chatto_admin_v1_server_pb2.UpdateServerConfigResponse,
             ),
             headers=headers,
         )
 
-    async def upload_server_logo(self, request: _pb2.UploadServerLogoRequest, *, headers: dict[str, str] | None = None) -> _pb2.UploadServerLogoResponse:
+    async def upload_server_logo(self, request: chatto_admin_v1_server_pb2.UploadServerLogoRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.UploadServerLogoResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UploadServerLogo",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.UploadServerLogoRequest,
-                output=_pb2.UploadServerLogoResponse,
+                input=chatto_admin_v1_server_pb2.UploadServerLogoRequest,
+                output=chatto_admin_v1_server_pb2.UploadServerLogoResponse,
             ),
             headers=headers,
         )
 
-    async def delete_server_logo(self, request: _pb2.DeleteServerLogoRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteServerLogoResponse:
+    async def delete_server_logo(self, request: chatto_admin_v1_server_pb2.DeleteServerLogoRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.DeleteServerLogoResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteServerLogo",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.DeleteServerLogoRequest,
-                output=_pb2.DeleteServerLogoResponse,
+                input=chatto_admin_v1_server_pb2.DeleteServerLogoRequest,
+                output=chatto_admin_v1_server_pb2.DeleteServerLogoResponse,
             ),
             headers=headers,
         )
 
-    async def upload_server_banner(self, request: _pb2.UploadServerBannerRequest, *, headers: dict[str, str] | None = None) -> _pb2.UploadServerBannerResponse:
+    async def upload_server_banner(self, request: chatto_admin_v1_server_pb2.UploadServerBannerRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.UploadServerBannerResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UploadServerBanner",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.UploadServerBannerRequest,
-                output=_pb2.UploadServerBannerResponse,
+                input=chatto_admin_v1_server_pb2.UploadServerBannerRequest,
+                output=chatto_admin_v1_server_pb2.UploadServerBannerResponse,
             ),
             headers=headers,
         )
 
-    async def delete_server_banner(self, request: _pb2.DeleteServerBannerRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteServerBannerResponse:
+    async def delete_server_banner(self, request: chatto_admin_v1_server_pb2.DeleteServerBannerRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.DeleteServerBannerResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteServerBanner",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.DeleteServerBannerRequest,
-                output=_pb2.DeleteServerBannerResponse,
+                input=chatto_admin_v1_server_pb2.DeleteServerBannerRequest,
+                output=chatto_admin_v1_server_pb2.DeleteServerBannerResponse,
             ),
             headers=headers,
         )
 
-    async def get_server_security_config(self, request: _pb2.GetServerSecurityConfigRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetServerSecurityConfigResponse:
+    async def get_server_security_config(self, request: chatto_admin_v1_server_pb2.GetServerSecurityConfigRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.GetServerSecurityConfigResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetServerSecurityConfig",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.GetServerSecurityConfigRequest,
-                output=_pb2.GetServerSecurityConfigResponse,
+                input=chatto_admin_v1_server_pb2.GetServerSecurityConfigRequest,
+                output=chatto_admin_v1_server_pb2.GetServerSecurityConfigResponse,
             ),
             headers=headers,
         )
 
-    async def update_blocked_usernames(self, request: _pb2.UpdateBlockedUsernamesRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateBlockedUsernamesResponse:
+    async def update_blocked_usernames(self, request: chatto_admin_v1_server_pb2.UpdateBlockedUsernamesRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.UpdateBlockedUsernamesResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateBlockedUsernames",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.UpdateBlockedUsernamesRequest,
-                output=_pb2.UpdateBlockedUsernamesResponse,
+                input=chatto_admin_v1_server_pb2.UpdateBlockedUsernamesRequest,
+                output=chatto_admin_v1_server_pb2.UpdateBlockedUsernamesResponse,
             ),
             headers=headers,
         )
 
-    async def list_neighbors(self, request: _pb2.ListNeighborsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListNeighborsResponse:
+    async def list_neighbors(self, request: chatto_admin_v1_server_pb2.ListNeighborsRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.ListNeighborsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListNeighbors",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.ListNeighborsRequest,
-                output=_pb2.ListNeighborsResponse,
+                input=chatto_admin_v1_server_pb2.ListNeighborsRequest,
+                output=chatto_admin_v1_server_pb2.ListNeighborsResponse,
             ),
             headers=headers,
         )
 
-    async def get_neighbor(self, request: _pb2.GetNeighborRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetNeighborResponse:
+    async def get_neighbor(self, request: chatto_admin_v1_server_pb2.GetNeighborRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.GetNeighborResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetNeighbor",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.GetNeighborRequest,
-                output=_pb2.GetNeighborResponse,
+                input=chatto_admin_v1_server_pb2.GetNeighborRequest,
+                output=chatto_admin_v1_server_pb2.GetNeighborResponse,
             ),
             headers=headers,
         )
 
-    async def create_neighbor(self, request: _pb2.CreateNeighborRequest, *, headers: dict[str, str] | None = None) -> _pb2.CreateNeighborResponse:
+    async def create_neighbor(self, request: chatto_admin_v1_server_pb2.CreateNeighborRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.CreateNeighborResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CreateNeighbor",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.CreateNeighborRequest,
-                output=_pb2.CreateNeighborResponse,
+                input=chatto_admin_v1_server_pb2.CreateNeighborRequest,
+                output=chatto_admin_v1_server_pb2.CreateNeighborResponse,
             ),
             headers=headers,
         )
 
-    async def update_neighbor(self, request: _pb2.UpdateNeighborRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateNeighborResponse:
+    async def update_neighbor(self, request: chatto_admin_v1_server_pb2.UpdateNeighborRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.UpdateNeighborResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateNeighbor",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.UpdateNeighborRequest,
-                output=_pb2.UpdateNeighborResponse,
+                input=chatto_admin_v1_server_pb2.UpdateNeighborRequest,
+                output=chatto_admin_v1_server_pb2.UpdateNeighborResponse,
             ),
             headers=headers,
         )
 
-    async def delete_neighbor(self, request: _pb2.DeleteNeighborRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteNeighborResponse:
+    async def delete_neighbor(self, request: chatto_admin_v1_server_pb2.DeleteNeighborRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.DeleteNeighborResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteNeighbor",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.DeleteNeighborRequest,
-                output=_pb2.DeleteNeighborResponse,
+                input=chatto_admin_v1_server_pb2.DeleteNeighborRequest,
+                output=chatto_admin_v1_server_pb2.DeleteNeighborResponse,
             ),
             headers=headers,
         )
 
 class AdminServerServiceClientSync(ConnectClientSync):
 
-    def get_server_config(self, request: _pb2.GetServerConfigRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetServerConfigResponse:
+    def get_server_config(self, request: chatto_admin_v1_server_pb2.GetServerConfigRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.GetServerConfigResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetServerConfig",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.GetServerConfigRequest,
-                output=_pb2.GetServerConfigResponse,
+                input=chatto_admin_v1_server_pb2.GetServerConfigRequest,
+                output=chatto_admin_v1_server_pb2.GetServerConfigResponse,
             ),
             headers=headers,
         )
 
-    def update_server_config(self, request: _pb2.UpdateServerConfigRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateServerConfigResponse:
+    def update_server_config(self, request: chatto_admin_v1_server_pb2.UpdateServerConfigRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.UpdateServerConfigResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateServerConfig",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.UpdateServerConfigRequest,
-                output=_pb2.UpdateServerConfigResponse,
+                input=chatto_admin_v1_server_pb2.UpdateServerConfigRequest,
+                output=chatto_admin_v1_server_pb2.UpdateServerConfigResponse,
             ),
             headers=headers,
         )
 
-    def upload_server_logo(self, request: _pb2.UploadServerLogoRequest, *, headers: dict[str, str] | None = None) -> _pb2.UploadServerLogoResponse:
+    def upload_server_logo(self, request: chatto_admin_v1_server_pb2.UploadServerLogoRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.UploadServerLogoResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UploadServerLogo",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.UploadServerLogoRequest,
-                output=_pb2.UploadServerLogoResponse,
+                input=chatto_admin_v1_server_pb2.UploadServerLogoRequest,
+                output=chatto_admin_v1_server_pb2.UploadServerLogoResponse,
             ),
             headers=headers,
         )
 
-    def delete_server_logo(self, request: _pb2.DeleteServerLogoRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteServerLogoResponse:
+    def delete_server_logo(self, request: chatto_admin_v1_server_pb2.DeleteServerLogoRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.DeleteServerLogoResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteServerLogo",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.DeleteServerLogoRequest,
-                output=_pb2.DeleteServerLogoResponse,
+                input=chatto_admin_v1_server_pb2.DeleteServerLogoRequest,
+                output=chatto_admin_v1_server_pb2.DeleteServerLogoResponse,
             ),
             headers=headers,
         )
 
-    def upload_server_banner(self, request: _pb2.UploadServerBannerRequest, *, headers: dict[str, str] | None = None) -> _pb2.UploadServerBannerResponse:
+    def upload_server_banner(self, request: chatto_admin_v1_server_pb2.UploadServerBannerRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.UploadServerBannerResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UploadServerBanner",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.UploadServerBannerRequest,
-                output=_pb2.UploadServerBannerResponse,
+                input=chatto_admin_v1_server_pb2.UploadServerBannerRequest,
+                output=chatto_admin_v1_server_pb2.UploadServerBannerResponse,
             ),
             headers=headers,
         )
 
-    def delete_server_banner(self, request: _pb2.DeleteServerBannerRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteServerBannerResponse:
+    def delete_server_banner(self, request: chatto_admin_v1_server_pb2.DeleteServerBannerRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.DeleteServerBannerResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteServerBanner",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.DeleteServerBannerRequest,
-                output=_pb2.DeleteServerBannerResponse,
+                input=chatto_admin_v1_server_pb2.DeleteServerBannerRequest,
+                output=chatto_admin_v1_server_pb2.DeleteServerBannerResponse,
             ),
             headers=headers,
         )
 
-    def get_server_security_config(self, request: _pb2.GetServerSecurityConfigRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetServerSecurityConfigResponse:
+    def get_server_security_config(self, request: chatto_admin_v1_server_pb2.GetServerSecurityConfigRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.GetServerSecurityConfigResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetServerSecurityConfig",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.GetServerSecurityConfigRequest,
-                output=_pb2.GetServerSecurityConfigResponse,
+                input=chatto_admin_v1_server_pb2.GetServerSecurityConfigRequest,
+                output=chatto_admin_v1_server_pb2.GetServerSecurityConfigResponse,
             ),
             headers=headers,
         )
 
-    def update_blocked_usernames(self, request: _pb2.UpdateBlockedUsernamesRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateBlockedUsernamesResponse:
+    def update_blocked_usernames(self, request: chatto_admin_v1_server_pb2.UpdateBlockedUsernamesRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.UpdateBlockedUsernamesResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateBlockedUsernames",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.UpdateBlockedUsernamesRequest,
-                output=_pb2.UpdateBlockedUsernamesResponse,
+                input=chatto_admin_v1_server_pb2.UpdateBlockedUsernamesRequest,
+                output=chatto_admin_v1_server_pb2.UpdateBlockedUsernamesResponse,
             ),
             headers=headers,
         )
 
-    def list_neighbors(self, request: _pb2.ListNeighborsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListNeighborsResponse:
+    def list_neighbors(self, request: chatto_admin_v1_server_pb2.ListNeighborsRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.ListNeighborsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListNeighbors",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.ListNeighborsRequest,
-                output=_pb2.ListNeighborsResponse,
+                input=chatto_admin_v1_server_pb2.ListNeighborsRequest,
+                output=chatto_admin_v1_server_pb2.ListNeighborsResponse,
             ),
             headers=headers,
         )
 
-    def get_neighbor(self, request: _pb2.GetNeighborRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetNeighborResponse:
+    def get_neighbor(self, request: chatto_admin_v1_server_pb2.GetNeighborRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.GetNeighborResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetNeighbor",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.GetNeighborRequest,
-                output=_pb2.GetNeighborResponse,
+                input=chatto_admin_v1_server_pb2.GetNeighborRequest,
+                output=chatto_admin_v1_server_pb2.GetNeighborResponse,
             ),
             headers=headers,
         )
 
-    def create_neighbor(self, request: _pb2.CreateNeighborRequest, *, headers: dict[str, str] | None = None) -> _pb2.CreateNeighborResponse:
+    def create_neighbor(self, request: chatto_admin_v1_server_pb2.CreateNeighborRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.CreateNeighborResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CreateNeighbor",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.CreateNeighborRequest,
-                output=_pb2.CreateNeighborResponse,
+                input=chatto_admin_v1_server_pb2.CreateNeighborRequest,
+                output=chatto_admin_v1_server_pb2.CreateNeighborResponse,
             ),
             headers=headers,
         )
 
-    def update_neighbor(self, request: _pb2.UpdateNeighborRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateNeighborResponse:
+    def update_neighbor(self, request: chatto_admin_v1_server_pb2.UpdateNeighborRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.UpdateNeighborResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateNeighbor",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.UpdateNeighborRequest,
-                output=_pb2.UpdateNeighborResponse,
+                input=chatto_admin_v1_server_pb2.UpdateNeighborRequest,
+                output=chatto_admin_v1_server_pb2.UpdateNeighborResponse,
             ),
             headers=headers,
         )
 
-    def delete_neighbor(self, request: _pb2.DeleteNeighborRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteNeighborResponse:
+    def delete_neighbor(self, request: chatto_admin_v1_server_pb2.DeleteNeighborRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_server_pb2.DeleteNeighborResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteNeighbor",
                 service_name="chatto.admin.v1.AdminServerService",
-                input=_pb2.DeleteNeighborRequest,
-                output=_pb2.DeleteNeighborResponse,
+                input=chatto_admin_v1_server_pb2.DeleteNeighborRequest,
+                output=chatto_admin_v1_server_pb2.DeleteNeighborResponse,
             ),
             headers=headers,
         )

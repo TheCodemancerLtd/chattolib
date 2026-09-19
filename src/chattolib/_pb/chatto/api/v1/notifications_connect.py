@@ -2,299 +2,251 @@
 
 # source: chatto/api/v1/notifications.proto
 
-import chatto.api.v1.notifications_pb2 as _pb2
+import chatto.api.v1.notifications_pb2 as chatto_api_v1_notifications_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class NotificationServiceClient(ConnectClient):
-    async def get_notification_occurrence(self, request: _pb2.GetNotificationOccurrenceRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetNotificationOccurrenceResponse:
+    async def get_notification_occurrence(self, request: chatto_api_v1_notifications_pb2.GetNotificationOccurrenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.GetNotificationOccurrenceResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetNotificationOccurrence",
                 service_name="chatto.api.v1.NotificationService",
-                input=_pb2.GetNotificationOccurrenceRequest,
-                output=_pb2.GetNotificationOccurrenceResponse,
+                input=chatto_api_v1_notifications_pb2.GetNotificationOccurrenceRequest,
+                output=chatto_api_v1_notifications_pb2.GetNotificationOccurrenceResponse,
             ),
             headers=headers,
         )
 
-    async def batch_get_notification_occurrences(self, request: _pb2.BatchGetNotificationOccurrencesRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetNotificationOccurrencesResponse:
+    async def batch_get_notification_occurrences(self, request: chatto_api_v1_notifications_pb2.BatchGetNotificationOccurrencesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.BatchGetNotificationOccurrencesResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetNotificationOccurrences",
                 service_name="chatto.api.v1.NotificationService",
-                input=_pb2.BatchGetNotificationOccurrencesRequest,
-                output=_pb2.BatchGetNotificationOccurrencesResponse,
+                input=chatto_api_v1_notifications_pb2.BatchGetNotificationOccurrencesRequest,
+                output=chatto_api_v1_notifications_pb2.BatchGetNotificationOccurrencesResponse,
             ),
             headers=headers,
         )
 
-    async def list_notification_occurrences(self, request: _pb2.ListNotificationOccurrencesRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListNotificationOccurrencesResponse:
+    async def list_notification_occurrences(self, request: chatto_api_v1_notifications_pb2.ListNotificationOccurrencesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.ListNotificationOccurrencesResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListNotificationOccurrences",
                 service_name="chatto.api.v1.NotificationService",
-                input=_pb2.ListNotificationOccurrencesRequest,
-                output=_pb2.ListNotificationOccurrencesResponse,
+                input=chatto_api_v1_notifications_pb2.ListNotificationOccurrencesRequest,
+                output=chatto_api_v1_notifications_pb2.ListNotificationOccurrencesResponse,
             ),
             headers=headers,
         )
 
-    async def mark_notification_read(self, request: _pb2.MarkNotificationReadRequest, *, headers: dict[str, str] | None = None) -> _pb2.MarkNotificationReadResponse:
+    async def mark_notification_read(self, request: chatto_api_v1_notifications_pb2.MarkNotificationReadRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.MarkNotificationReadResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="MarkNotificationRead",
                 service_name="chatto.api.v1.NotificationService",
-                input=_pb2.MarkNotificationReadRequest,
-                output=_pb2.MarkNotificationReadResponse,
+                input=chatto_api_v1_notifications_pb2.MarkNotificationReadRequest,
+                output=chatto_api_v1_notifications_pb2.MarkNotificationReadResponse,
             ),
             headers=headers,
         )
 
-    async def delete_notification_occurrence(self, request: _pb2.DeleteNotificationOccurrenceRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteNotificationOccurrenceResponse:
+    async def delete_notification_occurrence(self, request: chatto_api_v1_notifications_pb2.DeleteNotificationOccurrenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.DeleteNotificationOccurrenceResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteNotificationOccurrence",
                 service_name="chatto.api.v1.NotificationService",
-                input=_pb2.DeleteNotificationOccurrenceRequest,
-                output=_pb2.DeleteNotificationOccurrenceResponse,
+                input=chatto_api_v1_notifications_pb2.DeleteNotificationOccurrenceRequest,
+                output=chatto_api_v1_notifications_pb2.DeleteNotificationOccurrenceResponse,
             ),
             headers=headers,
         )
 
-    async def batch_delete_notification_occurrences(self, request: _pb2.BatchDeleteNotificationOccurrencesRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchDeleteNotificationOccurrencesResponse:
+    async def batch_delete_notification_occurrences(self, request: chatto_api_v1_notifications_pb2.BatchDeleteNotificationOccurrencesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.BatchDeleteNotificationOccurrencesResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchDeleteNotificationOccurrences",
                 service_name="chatto.api.v1.NotificationService",
-                input=_pb2.BatchDeleteNotificationOccurrencesRequest,
-                output=_pb2.BatchDeleteNotificationOccurrencesResponse,
+                input=chatto_api_v1_notifications_pb2.BatchDeleteNotificationOccurrencesRequest,
+                output=chatto_api_v1_notifications_pb2.BatchDeleteNotificationOccurrencesResponse,
             ),
             headers=headers,
         )
 
-    async def delete_all_notification_occurrences(self, request: _pb2.DeleteAllNotificationOccurrencesRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteAllNotificationOccurrencesResponse:
+    async def delete_all_notification_occurrences(self, request: chatto_api_v1_notifications_pb2.DeleteAllNotificationOccurrencesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.DeleteAllNotificationOccurrencesResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteAllNotificationOccurrences",
                 service_name="chatto.api.v1.NotificationService",
-                input=_pb2.DeleteAllNotificationOccurrencesRequest,
-                output=_pb2.DeleteAllNotificationOccurrencesResponse,
-            ),
-            headers=headers,
-        )
-
-    async def get_notification_policy(self, request: _pb2.GetNotificationPolicyRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetNotificationPolicyResponse:
-        return await self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="GetNotificationPolicy",
-                service_name="chatto.api.v1.NotificationService",
-                input=_pb2.GetNotificationPolicyRequest,
-                output=_pb2.GetNotificationPolicyResponse,
-            ),
-            headers=headers,
-        )
-
-    async def update_notification_policy(self, request: _pb2.UpdateNotificationPolicyRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateNotificationPolicyResponse:
-        return await self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="UpdateNotificationPolicy",
-                service_name="chatto.api.v1.NotificationService",
-                input=_pb2.UpdateNotificationPolicyRequest,
-                output=_pb2.UpdateNotificationPolicyResponse,
+                input=chatto_api_v1_notifications_pb2.DeleteAllNotificationOccurrencesRequest,
+                output=chatto_api_v1_notifications_pb2.DeleteAllNotificationOccurrencesResponse,
             ),
             headers=headers,
         )
 
 class NotificationServiceClientSync(ConnectClientSync):
 
-    def get_notification_occurrence(self, request: _pb2.GetNotificationOccurrenceRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetNotificationOccurrenceResponse:
+    def get_notification_occurrence(self, request: chatto_api_v1_notifications_pb2.GetNotificationOccurrenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.GetNotificationOccurrenceResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetNotificationOccurrence",
                 service_name="chatto.api.v1.NotificationService",
-                input=_pb2.GetNotificationOccurrenceRequest,
-                output=_pb2.GetNotificationOccurrenceResponse,
+                input=chatto_api_v1_notifications_pb2.GetNotificationOccurrenceRequest,
+                output=chatto_api_v1_notifications_pb2.GetNotificationOccurrenceResponse,
             ),
             headers=headers,
         )
 
-    def batch_get_notification_occurrences(self, request: _pb2.BatchGetNotificationOccurrencesRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetNotificationOccurrencesResponse:
+    def batch_get_notification_occurrences(self, request: chatto_api_v1_notifications_pb2.BatchGetNotificationOccurrencesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.BatchGetNotificationOccurrencesResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetNotificationOccurrences",
                 service_name="chatto.api.v1.NotificationService",
-                input=_pb2.BatchGetNotificationOccurrencesRequest,
-                output=_pb2.BatchGetNotificationOccurrencesResponse,
+                input=chatto_api_v1_notifications_pb2.BatchGetNotificationOccurrencesRequest,
+                output=chatto_api_v1_notifications_pb2.BatchGetNotificationOccurrencesResponse,
             ),
             headers=headers,
         )
 
-    def list_notification_occurrences(self, request: _pb2.ListNotificationOccurrencesRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListNotificationOccurrencesResponse:
+    def list_notification_occurrences(self, request: chatto_api_v1_notifications_pb2.ListNotificationOccurrencesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.ListNotificationOccurrencesResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListNotificationOccurrences",
                 service_name="chatto.api.v1.NotificationService",
-                input=_pb2.ListNotificationOccurrencesRequest,
-                output=_pb2.ListNotificationOccurrencesResponse,
+                input=chatto_api_v1_notifications_pb2.ListNotificationOccurrencesRequest,
+                output=chatto_api_v1_notifications_pb2.ListNotificationOccurrencesResponse,
             ),
             headers=headers,
         )
 
-    def mark_notification_read(self, request: _pb2.MarkNotificationReadRequest, *, headers: dict[str, str] | None = None) -> _pb2.MarkNotificationReadResponse:
+    def mark_notification_read(self, request: chatto_api_v1_notifications_pb2.MarkNotificationReadRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.MarkNotificationReadResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="MarkNotificationRead",
                 service_name="chatto.api.v1.NotificationService",
-                input=_pb2.MarkNotificationReadRequest,
-                output=_pb2.MarkNotificationReadResponse,
+                input=chatto_api_v1_notifications_pb2.MarkNotificationReadRequest,
+                output=chatto_api_v1_notifications_pb2.MarkNotificationReadResponse,
             ),
             headers=headers,
         )
 
-    def delete_notification_occurrence(self, request: _pb2.DeleteNotificationOccurrenceRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteNotificationOccurrenceResponse:
+    def delete_notification_occurrence(self, request: chatto_api_v1_notifications_pb2.DeleteNotificationOccurrenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.DeleteNotificationOccurrenceResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteNotificationOccurrence",
                 service_name="chatto.api.v1.NotificationService",
-                input=_pb2.DeleteNotificationOccurrenceRequest,
-                output=_pb2.DeleteNotificationOccurrenceResponse,
+                input=chatto_api_v1_notifications_pb2.DeleteNotificationOccurrenceRequest,
+                output=chatto_api_v1_notifications_pb2.DeleteNotificationOccurrenceResponse,
             ),
             headers=headers,
         )
 
-    def batch_delete_notification_occurrences(self, request: _pb2.BatchDeleteNotificationOccurrencesRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchDeleteNotificationOccurrencesResponse:
+    def batch_delete_notification_occurrences(self, request: chatto_api_v1_notifications_pb2.BatchDeleteNotificationOccurrencesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.BatchDeleteNotificationOccurrencesResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchDeleteNotificationOccurrences",
                 service_name="chatto.api.v1.NotificationService",
-                input=_pb2.BatchDeleteNotificationOccurrencesRequest,
-                output=_pb2.BatchDeleteNotificationOccurrencesResponse,
+                input=chatto_api_v1_notifications_pb2.BatchDeleteNotificationOccurrencesRequest,
+                output=chatto_api_v1_notifications_pb2.BatchDeleteNotificationOccurrencesResponse,
             ),
             headers=headers,
         )
 
-    def delete_all_notification_occurrences(self, request: _pb2.DeleteAllNotificationOccurrencesRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteAllNotificationOccurrencesResponse:
+    def delete_all_notification_occurrences(self, request: chatto_api_v1_notifications_pb2.DeleteAllNotificationOccurrencesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.DeleteAllNotificationOccurrencesResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteAllNotificationOccurrences",
                 service_name="chatto.api.v1.NotificationService",
-                input=_pb2.DeleteAllNotificationOccurrencesRequest,
-                output=_pb2.DeleteAllNotificationOccurrencesResponse,
-            ),
-            headers=headers,
-        )
-
-    def get_notification_policy(self, request: _pb2.GetNotificationPolicyRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetNotificationPolicyResponse:
-        return self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="GetNotificationPolicy",
-                service_name="chatto.api.v1.NotificationService",
-                input=_pb2.GetNotificationPolicyRequest,
-                output=_pb2.GetNotificationPolicyResponse,
-            ),
-            headers=headers,
-        )
-
-    def update_notification_policy(self, request: _pb2.UpdateNotificationPolicyRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateNotificationPolicyResponse:
-        return self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="UpdateNotificationPolicy",
-                service_name="chatto.api.v1.NotificationService",
-                input=_pb2.UpdateNotificationPolicyRequest,
-                output=_pb2.UpdateNotificationPolicyResponse,
+                input=chatto_api_v1_notifications_pb2.DeleteAllNotificationOccurrencesRequest,
+                output=chatto_api_v1_notifications_pb2.DeleteAllNotificationOccurrencesResponse,
             ),
             headers=headers,
         )
 
 class NotificationPolicyServiceClient(ConnectClient):
-    async def get_notification_policy(self, request: _pb2.NotificationPolicyServiceGetNotificationPolicyRequest, *, headers: dict[str, str] | None = None) -> _pb2.NotificationPolicyServiceGetNotificationPolicyResponse:
+    async def get_notification_policy(self, request: chatto_api_v1_notifications_pb2.NotificationPolicyServiceGetNotificationPolicyRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.NotificationPolicyServiceGetNotificationPolicyResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetNotificationPolicy",
                 service_name="chatto.api.v1.NotificationPolicyService",
-                input=_pb2.NotificationPolicyServiceGetNotificationPolicyRequest,
-                output=_pb2.NotificationPolicyServiceGetNotificationPolicyResponse,
+                input=chatto_api_v1_notifications_pb2.NotificationPolicyServiceGetNotificationPolicyRequest,
+                output=chatto_api_v1_notifications_pb2.NotificationPolicyServiceGetNotificationPolicyResponse,
             ),
             headers=headers,
         )
 
-    async def batch_get_notification_policies(self, request: _pb2.BatchGetNotificationPoliciesRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetNotificationPoliciesResponse:
+    async def batch_get_notification_policies(self, request: chatto_api_v1_notifications_pb2.BatchGetNotificationPoliciesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.BatchGetNotificationPoliciesResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetNotificationPolicies",
                 service_name="chatto.api.v1.NotificationPolicyService",
-                input=_pb2.BatchGetNotificationPoliciesRequest,
-                output=_pb2.BatchGetNotificationPoliciesResponse,
+                input=chatto_api_v1_notifications_pb2.BatchGetNotificationPoliciesRequest,
+                output=chatto_api_v1_notifications_pb2.BatchGetNotificationPoliciesResponse,
             ),
             headers=headers,
         )
 
-    async def update_notification_policy(self, request: _pb2.NotificationPolicyServiceUpdateNotificationPolicyRequest, *, headers: dict[str, str] | None = None) -> _pb2.NotificationPolicyServiceUpdateNotificationPolicyResponse:
+    async def update_notification_policy(self, request: chatto_api_v1_notifications_pb2.NotificationPolicyServiceUpdateNotificationPolicyRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.NotificationPolicyServiceUpdateNotificationPolicyResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateNotificationPolicy",
                 service_name="chatto.api.v1.NotificationPolicyService",
-                input=_pb2.NotificationPolicyServiceUpdateNotificationPolicyRequest,
-                output=_pb2.NotificationPolicyServiceUpdateNotificationPolicyResponse,
+                input=chatto_api_v1_notifications_pb2.NotificationPolicyServiceUpdateNotificationPolicyRequest,
+                output=chatto_api_v1_notifications_pb2.NotificationPolicyServiceUpdateNotificationPolicyResponse,
             ),
             headers=headers,
         )
 
 class NotificationPolicyServiceClientSync(ConnectClientSync):
 
-    def get_notification_policy(self, request: _pb2.NotificationPolicyServiceGetNotificationPolicyRequest, *, headers: dict[str, str] | None = None) -> _pb2.NotificationPolicyServiceGetNotificationPolicyResponse:
+    def get_notification_policy(self, request: chatto_api_v1_notifications_pb2.NotificationPolicyServiceGetNotificationPolicyRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.NotificationPolicyServiceGetNotificationPolicyResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetNotificationPolicy",
                 service_name="chatto.api.v1.NotificationPolicyService",
-                input=_pb2.NotificationPolicyServiceGetNotificationPolicyRequest,
-                output=_pb2.NotificationPolicyServiceGetNotificationPolicyResponse,
+                input=chatto_api_v1_notifications_pb2.NotificationPolicyServiceGetNotificationPolicyRequest,
+                output=chatto_api_v1_notifications_pb2.NotificationPolicyServiceGetNotificationPolicyResponse,
             ),
             headers=headers,
         )
 
-    def batch_get_notification_policies(self, request: _pb2.BatchGetNotificationPoliciesRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetNotificationPoliciesResponse:
+    def batch_get_notification_policies(self, request: chatto_api_v1_notifications_pb2.BatchGetNotificationPoliciesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.BatchGetNotificationPoliciesResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetNotificationPolicies",
                 service_name="chatto.api.v1.NotificationPolicyService",
-                input=_pb2.BatchGetNotificationPoliciesRequest,
-                output=_pb2.BatchGetNotificationPoliciesResponse,
+                input=chatto_api_v1_notifications_pb2.BatchGetNotificationPoliciesRequest,
+                output=chatto_api_v1_notifications_pb2.BatchGetNotificationPoliciesResponse,
             ),
             headers=headers,
         )
 
-    def update_notification_policy(self, request: _pb2.NotificationPolicyServiceUpdateNotificationPolicyRequest, *, headers: dict[str, str] | None = None) -> _pb2.NotificationPolicyServiceUpdateNotificationPolicyResponse:
+    def update_notification_policy(self, request: chatto_api_v1_notifications_pb2.NotificationPolicyServiceUpdateNotificationPolicyRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notifications_pb2.NotificationPolicyServiceUpdateNotificationPolicyResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateNotificationPolicy",
                 service_name="chatto.api.v1.NotificationPolicyService",
-                input=_pb2.NotificationPolicyServiceUpdateNotificationPolicyRequest,
-                output=_pb2.NotificationPolicyServiceUpdateNotificationPolicyResponse,
+                input=chatto_api_v1_notifications_pb2.NotificationPolicyServiceUpdateNotificationPolicyRequest,
+                output=chatto_api_v1_notifications_pb2.NotificationPolicyServiceUpdateNotificationPolicyResponse,
             ),
             headers=headers,
         )

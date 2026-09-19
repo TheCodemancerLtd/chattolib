@@ -2,248 +2,298 @@
 
 # source: chatto/api/v1/messages.proto
 
-import chatto.api.v1.messages_pb2 as _pb2
+import chatto.api.v1.reactions_pb2 as chatto_api_v1_reactions_pb2
+import chatto.api.v1.link_previews_pb2 as chatto_api_v1_link_previews_pb2
+import chatto.api.v1.messages_pb2 as chatto_api_v1_messages_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class MessageServiceClient(ConnectClient):
-    async def fetch_link_preview(self, request: _pb2.FetchLinkPreviewRequest, *, headers: dict[str, str] | None = None) -> _pb2.FetchLinkPreviewResponse:
+    async def list_reaction_users(self, request: chatto_api_v1_reactions_pb2.ListReactionUsersRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_reactions_pb2.ListReactionUsersResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListReactionUsers",
+                service_name="chatto.api.v1.MessageService",
+                input=chatto_api_v1_reactions_pb2.ListReactionUsersRequest,
+                output=chatto_api_v1_reactions_pb2.ListReactionUsersResponse,
+            ),
+            headers=headers,
+        )
+
+    async def fetch_link_preview(self, request: chatto_api_v1_link_previews_pb2.FetchLinkPreviewRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_link_previews_pb2.FetchLinkPreviewResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="FetchLinkPreview",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.FetchLinkPreviewRequest,
-                output=_pb2.FetchLinkPreviewResponse,
+                input=chatto_api_v1_link_previews_pb2.FetchLinkPreviewRequest,
+                output=chatto_api_v1_link_previews_pb2.FetchLinkPreviewResponse,
             ),
             headers=headers,
         )
 
-    async def create_message(self, request: _pb2.CreateMessageRequest, *, headers: dict[str, str] | None = None) -> _pb2.CreateMessageResponse:
+    async def create_message(self, request: chatto_api_v1_messages_pb2.CreateMessageRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_messages_pb2.CreateMessageResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CreateMessage",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.CreateMessageRequest,
-                output=_pb2.CreateMessageResponse,
+                input=chatto_api_v1_messages_pb2.CreateMessageRequest,
+                output=chatto_api_v1_messages_pb2.CreateMessageResponse,
             ),
             headers=headers,
         )
 
-    async def update_message(self, request: _pb2.UpdateMessageRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateMessageResponse:
+    async def update_message(self, request: chatto_api_v1_messages_pb2.UpdateMessageRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_messages_pb2.UpdateMessageResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateMessage",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.UpdateMessageRequest,
-                output=_pb2.UpdateMessageResponse,
+                input=chatto_api_v1_messages_pb2.UpdateMessageRequest,
+                output=chatto_api_v1_messages_pb2.UpdateMessageResponse,
             ),
             headers=headers,
         )
 
-    async def delete_message(self, request: _pb2.DeleteMessageRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteMessageResponse:
+    async def delete_message(self, request: chatto_api_v1_messages_pb2.DeleteMessageRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_messages_pb2.DeleteMessageResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteMessage",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.DeleteMessageRequest,
-                output=_pb2.DeleteMessageResponse,
+                input=chatto_api_v1_messages_pb2.DeleteMessageRequest,
+                output=chatto_api_v1_messages_pb2.DeleteMessageResponse,
             ),
             headers=headers,
         )
 
-    async def delete_attachment(self, request: _pb2.DeleteAttachmentRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteAttachmentResponse:
+    async def delete_attachment(self, request: chatto_api_v1_messages_pb2.DeleteAttachmentRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_messages_pb2.DeleteAttachmentResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteAttachment",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.DeleteAttachmentRequest,
-                output=_pb2.DeleteAttachmentResponse,
+                input=chatto_api_v1_messages_pb2.DeleteAttachmentRequest,
+                output=chatto_api_v1_messages_pb2.DeleteAttachmentResponse,
             ),
             headers=headers,
         )
 
-    async def delete_link_preview(self, request: _pb2.DeleteLinkPreviewRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteLinkPreviewResponse:
+    async def set_attachment_description(self, request: chatto_api_v1_messages_pb2.SetAttachmentDescriptionRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_messages_pb2.SetAttachmentDescriptionResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="SetAttachmentDescription",
+                service_name="chatto.api.v1.MessageService",
+                input=chatto_api_v1_messages_pb2.SetAttachmentDescriptionRequest,
+                output=chatto_api_v1_messages_pb2.SetAttachmentDescriptionResponse,
+            ),
+            headers=headers,
+        )
+
+    async def delete_link_preview(self, request: chatto_api_v1_messages_pb2.DeleteLinkPreviewRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_messages_pb2.DeleteLinkPreviewResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteLinkPreview",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.DeleteLinkPreviewRequest,
-                output=_pb2.DeleteLinkPreviewResponse,
+                input=chatto_api_v1_messages_pb2.DeleteLinkPreviewRequest,
+                output=chatto_api_v1_messages_pb2.DeleteLinkPreviewResponse,
             ),
             headers=headers,
         )
 
-    async def get_message(self, request: _pb2.GetMessageRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetMessageResponse:
+    async def get_message(self, request: chatto_api_v1_messages_pb2.GetMessageRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_messages_pb2.GetMessageResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetMessage",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.GetMessageRequest,
-                output=_pb2.GetMessageResponse,
+                input=chatto_api_v1_messages_pb2.GetMessageRequest,
+                output=chatto_api_v1_messages_pb2.GetMessageResponse,
             ),
             headers=headers,
         )
 
-    async def batch_get_messages(self, request: _pb2.BatchGetMessagesRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetMessagesResponse:
+    async def batch_get_messages(self, request: chatto_api_v1_messages_pb2.BatchGetMessagesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_messages_pb2.BatchGetMessagesResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetMessages",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.BatchGetMessagesRequest,
-                output=_pb2.BatchGetMessagesResponse,
+                input=chatto_api_v1_messages_pb2.BatchGetMessagesRequest,
+                output=chatto_api_v1_messages_pb2.BatchGetMessagesResponse,
             ),
             headers=headers,
         )
 
-    async def add_reaction(self, request: _pb2.AddReactionRequest, *, headers: dict[str, str] | None = None) -> _pb2.AddReactionResponse:
+    async def add_reaction(self, request: chatto_api_v1_reactions_pb2.AddReactionRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_reactions_pb2.AddReactionResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="AddReaction",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.AddReactionRequest,
-                output=_pb2.AddReactionResponse,
+                input=chatto_api_v1_reactions_pb2.AddReactionRequest,
+                output=chatto_api_v1_reactions_pb2.AddReactionResponse,
             ),
             headers=headers,
         )
 
-    async def remove_reaction(self, request: _pb2.RemoveReactionRequest, *, headers: dict[str, str] | None = None) -> _pb2.RemoveReactionResponse:
+    async def remove_reaction(self, request: chatto_api_v1_reactions_pb2.RemoveReactionRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_reactions_pb2.RemoveReactionResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="RemoveReaction",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.RemoveReactionRequest,
-                output=_pb2.RemoveReactionResponse,
+                input=chatto_api_v1_reactions_pb2.RemoveReactionRequest,
+                output=chatto_api_v1_reactions_pb2.RemoveReactionResponse,
             ),
             headers=headers,
         )
 
 class MessageServiceClientSync(ConnectClientSync):
 
-    def fetch_link_preview(self, request: _pb2.FetchLinkPreviewRequest, *, headers: dict[str, str] | None = None) -> _pb2.FetchLinkPreviewResponse:
+    def list_reaction_users(self, request: chatto_api_v1_reactions_pb2.ListReactionUsersRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_reactions_pb2.ListReactionUsersResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListReactionUsers",
+                service_name="chatto.api.v1.MessageService",
+                input=chatto_api_v1_reactions_pb2.ListReactionUsersRequest,
+                output=chatto_api_v1_reactions_pb2.ListReactionUsersResponse,
+            ),
+            headers=headers,
+        )
+
+    def fetch_link_preview(self, request: chatto_api_v1_link_previews_pb2.FetchLinkPreviewRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_link_previews_pb2.FetchLinkPreviewResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="FetchLinkPreview",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.FetchLinkPreviewRequest,
-                output=_pb2.FetchLinkPreviewResponse,
+                input=chatto_api_v1_link_previews_pb2.FetchLinkPreviewRequest,
+                output=chatto_api_v1_link_previews_pb2.FetchLinkPreviewResponse,
             ),
             headers=headers,
         )
 
-    def create_message(self, request: _pb2.CreateMessageRequest, *, headers: dict[str, str] | None = None) -> _pb2.CreateMessageResponse:
+    def create_message(self, request: chatto_api_v1_messages_pb2.CreateMessageRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_messages_pb2.CreateMessageResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CreateMessage",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.CreateMessageRequest,
-                output=_pb2.CreateMessageResponse,
+                input=chatto_api_v1_messages_pb2.CreateMessageRequest,
+                output=chatto_api_v1_messages_pb2.CreateMessageResponse,
             ),
             headers=headers,
         )
 
-    def update_message(self, request: _pb2.UpdateMessageRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateMessageResponse:
+    def update_message(self, request: chatto_api_v1_messages_pb2.UpdateMessageRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_messages_pb2.UpdateMessageResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateMessage",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.UpdateMessageRequest,
-                output=_pb2.UpdateMessageResponse,
+                input=chatto_api_v1_messages_pb2.UpdateMessageRequest,
+                output=chatto_api_v1_messages_pb2.UpdateMessageResponse,
             ),
             headers=headers,
         )
 
-    def delete_message(self, request: _pb2.DeleteMessageRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteMessageResponse:
+    def delete_message(self, request: chatto_api_v1_messages_pb2.DeleteMessageRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_messages_pb2.DeleteMessageResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteMessage",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.DeleteMessageRequest,
-                output=_pb2.DeleteMessageResponse,
+                input=chatto_api_v1_messages_pb2.DeleteMessageRequest,
+                output=chatto_api_v1_messages_pb2.DeleteMessageResponse,
             ),
             headers=headers,
         )
 
-    def delete_attachment(self, request: _pb2.DeleteAttachmentRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteAttachmentResponse:
+    def delete_attachment(self, request: chatto_api_v1_messages_pb2.DeleteAttachmentRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_messages_pb2.DeleteAttachmentResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteAttachment",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.DeleteAttachmentRequest,
-                output=_pb2.DeleteAttachmentResponse,
+                input=chatto_api_v1_messages_pb2.DeleteAttachmentRequest,
+                output=chatto_api_v1_messages_pb2.DeleteAttachmentResponse,
             ),
             headers=headers,
         )
 
-    def delete_link_preview(self, request: _pb2.DeleteLinkPreviewRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteLinkPreviewResponse:
+    def set_attachment_description(self, request: chatto_api_v1_messages_pb2.SetAttachmentDescriptionRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_messages_pb2.SetAttachmentDescriptionResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="SetAttachmentDescription",
+                service_name="chatto.api.v1.MessageService",
+                input=chatto_api_v1_messages_pb2.SetAttachmentDescriptionRequest,
+                output=chatto_api_v1_messages_pb2.SetAttachmentDescriptionResponse,
+            ),
+            headers=headers,
+        )
+
+    def delete_link_preview(self, request: chatto_api_v1_messages_pb2.DeleteLinkPreviewRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_messages_pb2.DeleteLinkPreviewResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteLinkPreview",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.DeleteLinkPreviewRequest,
-                output=_pb2.DeleteLinkPreviewResponse,
+                input=chatto_api_v1_messages_pb2.DeleteLinkPreviewRequest,
+                output=chatto_api_v1_messages_pb2.DeleteLinkPreviewResponse,
             ),
             headers=headers,
         )
 
-    def get_message(self, request: _pb2.GetMessageRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetMessageResponse:
+    def get_message(self, request: chatto_api_v1_messages_pb2.GetMessageRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_messages_pb2.GetMessageResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetMessage",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.GetMessageRequest,
-                output=_pb2.GetMessageResponse,
+                input=chatto_api_v1_messages_pb2.GetMessageRequest,
+                output=chatto_api_v1_messages_pb2.GetMessageResponse,
             ),
             headers=headers,
         )
 
-    def batch_get_messages(self, request: _pb2.BatchGetMessagesRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetMessagesResponse:
+    def batch_get_messages(self, request: chatto_api_v1_messages_pb2.BatchGetMessagesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_messages_pb2.BatchGetMessagesResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetMessages",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.BatchGetMessagesRequest,
-                output=_pb2.BatchGetMessagesResponse,
+                input=chatto_api_v1_messages_pb2.BatchGetMessagesRequest,
+                output=chatto_api_v1_messages_pb2.BatchGetMessagesResponse,
             ),
             headers=headers,
         )
 
-    def add_reaction(self, request: _pb2.AddReactionRequest, *, headers: dict[str, str] | None = None) -> _pb2.AddReactionResponse:
+    def add_reaction(self, request: chatto_api_v1_reactions_pb2.AddReactionRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_reactions_pb2.AddReactionResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="AddReaction",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.AddReactionRequest,
-                output=_pb2.AddReactionResponse,
+                input=chatto_api_v1_reactions_pb2.AddReactionRequest,
+                output=chatto_api_v1_reactions_pb2.AddReactionResponse,
             ),
             headers=headers,
         )
 
-    def remove_reaction(self, request: _pb2.RemoveReactionRequest, *, headers: dict[str, str] | None = None) -> _pb2.RemoveReactionResponse:
+    def remove_reaction(self, request: chatto_api_v1_reactions_pb2.RemoveReactionRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_reactions_pb2.RemoveReactionResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="RemoveReaction",
                 service_name="chatto.api.v1.MessageService",
-                input=_pb2.RemoveReactionRequest,
-                output=_pb2.RemoveReactionResponse,
+                input=chatto_api_v1_reactions_pb2.RemoveReactionRequest,
+                output=chatto_api_v1_reactions_pb2.RemoveReactionResponse,
             ),
             headers=headers,
         )

@@ -2,200 +2,200 @@
 
 # source: chatto/api/v1/voice_calls.proto
 
-import chatto.api.v1.voice_calls_pb2 as _pb2
+import chatto.api.v1.voice_calls_pb2 as chatto_api_v1_voice_calls_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class VoiceCallServiceClient(ConnectClient):
-    async def list_active_calls(self, request: _pb2.ListActiveCallsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListActiveCallsResponse:
+    async def list_active_calls(self, request: chatto_api_v1_voice_calls_pb2.ListActiveCallsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_voice_calls_pb2.ListActiveCallsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListActiveCalls",
                 service_name="chatto.api.v1.VoiceCallService",
-                input=_pb2.ListActiveCallsRequest,
-                output=_pb2.ListActiveCallsResponse,
+                input=chatto_api_v1_voice_calls_pb2.ListActiveCallsRequest,
+                output=chatto_api_v1_voice_calls_pb2.ListActiveCallsResponse,
             ),
             headers=headers,
         )
 
-    async def get_active_call(self, request: _pb2.GetActiveCallRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetActiveCallResponse:
+    async def get_active_call(self, request: chatto_api_v1_voice_calls_pb2.GetActiveCallRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_voice_calls_pb2.GetActiveCallResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetActiveCall",
                 service_name="chatto.api.v1.VoiceCallService",
-                input=_pb2.GetActiveCallRequest,
-                output=_pb2.GetActiveCallResponse,
+                input=chatto_api_v1_voice_calls_pb2.GetActiveCallRequest,
+                output=chatto_api_v1_voice_calls_pb2.GetActiveCallResponse,
             ),
             headers=headers,
         )
 
-    async def batch_get_active_calls(self, request: _pb2.BatchGetActiveCallsRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetActiveCallsResponse:
+    async def batch_get_active_calls(self, request: chatto_api_v1_voice_calls_pb2.BatchGetActiveCallsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_voice_calls_pb2.BatchGetActiveCallsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetActiveCalls",
                 service_name="chatto.api.v1.VoiceCallService",
-                input=_pb2.BatchGetActiveCallsRequest,
-                output=_pb2.BatchGetActiveCallsResponse,
+                input=chatto_api_v1_voice_calls_pb2.BatchGetActiveCallsRequest,
+                output=chatto_api_v1_voice_calls_pb2.BatchGetActiveCallsResponse,
             ),
             headers=headers,
         )
 
-    async def list_call_participants(self, request: _pb2.ListCallParticipantsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListCallParticipantsResponse:
+    async def list_call_participants(self, request: chatto_api_v1_voice_calls_pb2.ListCallParticipantsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_voice_calls_pb2.ListCallParticipantsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListCallParticipants",
                 service_name="chatto.api.v1.VoiceCallService",
-                input=_pb2.ListCallParticipantsRequest,
-                output=_pb2.ListCallParticipantsResponse,
+                input=chatto_api_v1_voice_calls_pb2.ListCallParticipantsRequest,
+                output=chatto_api_v1_voice_calls_pb2.ListCallParticipantsResponse,
             ),
             headers=headers,
         )
 
-    async def join_call(self, request: _pb2.JoinCallRequest, *, headers: dict[str, str] | None = None) -> _pb2.JoinCallResponse:
+    async def join_call(self, request: chatto_api_v1_voice_calls_pb2.JoinCallRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_voice_calls_pb2.JoinCallResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="JoinCall",
                 service_name="chatto.api.v1.VoiceCallService",
-                input=_pb2.JoinCallRequest,
-                output=_pb2.JoinCallResponse,
+                input=chatto_api_v1_voice_calls_pb2.JoinCallRequest,
+                output=chatto_api_v1_voice_calls_pb2.JoinCallResponse,
             ),
             headers=headers,
         )
 
-    async def get_call_token(self, request: _pb2.GetCallTokenRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetCallTokenResponse:
+    async def create_call_token(self, request: chatto_api_v1_voice_calls_pb2.CreateCallTokenRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_voice_calls_pb2.CreateCallTokenResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="GetCallToken",
+                name="CreateCallToken",
                 service_name="chatto.api.v1.VoiceCallService",
-                input=_pb2.GetCallTokenRequest,
-                output=_pb2.GetCallTokenResponse,
+                input=chatto_api_v1_voice_calls_pb2.CreateCallTokenRequest,
+                output=chatto_api_v1_voice_calls_pb2.CreateCallTokenResponse,
             ),
             headers=headers,
         )
 
-    async def create_call_media_publisher_token(self, request: _pb2.CreateCallMediaPublisherTokenRequest, *, headers: dict[str, str] | None = None) -> _pb2.CreateCallMediaPublisherTokenResponse:
+    async def create_call_media_publisher_token(self, request: chatto_api_v1_voice_calls_pb2.CreateCallMediaPublisherTokenRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_voice_calls_pb2.CreateCallMediaPublisherTokenResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CreateCallMediaPublisherToken",
                 service_name="chatto.api.v1.VoiceCallService",
-                input=_pb2.CreateCallMediaPublisherTokenRequest,
-                output=_pb2.CreateCallMediaPublisherTokenResponse,
+                input=chatto_api_v1_voice_calls_pb2.CreateCallMediaPublisherTokenRequest,
+                output=chatto_api_v1_voice_calls_pb2.CreateCallMediaPublisherTokenResponse,
             ),
             headers=headers,
         )
 
-    async def leave_call(self, request: _pb2.LeaveCallRequest, *, headers: dict[str, str] | None = None) -> _pb2.LeaveCallResponse:
+    async def leave_call(self, request: chatto_api_v1_voice_calls_pb2.LeaveCallRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_voice_calls_pb2.LeaveCallResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="LeaveCall",
                 service_name="chatto.api.v1.VoiceCallService",
-                input=_pb2.LeaveCallRequest,
-                output=_pb2.LeaveCallResponse,
+                input=chatto_api_v1_voice_calls_pb2.LeaveCallRequest,
+                output=chatto_api_v1_voice_calls_pb2.LeaveCallResponse,
             ),
             headers=headers,
         )
 
 class VoiceCallServiceClientSync(ConnectClientSync):
 
-    def list_active_calls(self, request: _pb2.ListActiveCallsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListActiveCallsResponse:
+    def list_active_calls(self, request: chatto_api_v1_voice_calls_pb2.ListActiveCallsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_voice_calls_pb2.ListActiveCallsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListActiveCalls",
                 service_name="chatto.api.v1.VoiceCallService",
-                input=_pb2.ListActiveCallsRequest,
-                output=_pb2.ListActiveCallsResponse,
+                input=chatto_api_v1_voice_calls_pb2.ListActiveCallsRequest,
+                output=chatto_api_v1_voice_calls_pb2.ListActiveCallsResponse,
             ),
             headers=headers,
         )
 
-    def get_active_call(self, request: _pb2.GetActiveCallRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetActiveCallResponse:
+    def get_active_call(self, request: chatto_api_v1_voice_calls_pb2.GetActiveCallRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_voice_calls_pb2.GetActiveCallResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetActiveCall",
                 service_name="chatto.api.v1.VoiceCallService",
-                input=_pb2.GetActiveCallRequest,
-                output=_pb2.GetActiveCallResponse,
+                input=chatto_api_v1_voice_calls_pb2.GetActiveCallRequest,
+                output=chatto_api_v1_voice_calls_pb2.GetActiveCallResponse,
             ),
             headers=headers,
         )
 
-    def batch_get_active_calls(self, request: _pb2.BatchGetActiveCallsRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetActiveCallsResponse:
+    def batch_get_active_calls(self, request: chatto_api_v1_voice_calls_pb2.BatchGetActiveCallsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_voice_calls_pb2.BatchGetActiveCallsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetActiveCalls",
                 service_name="chatto.api.v1.VoiceCallService",
-                input=_pb2.BatchGetActiveCallsRequest,
-                output=_pb2.BatchGetActiveCallsResponse,
+                input=chatto_api_v1_voice_calls_pb2.BatchGetActiveCallsRequest,
+                output=chatto_api_v1_voice_calls_pb2.BatchGetActiveCallsResponse,
             ),
             headers=headers,
         )
 
-    def list_call_participants(self, request: _pb2.ListCallParticipantsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListCallParticipantsResponse:
+    def list_call_participants(self, request: chatto_api_v1_voice_calls_pb2.ListCallParticipantsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_voice_calls_pb2.ListCallParticipantsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListCallParticipants",
                 service_name="chatto.api.v1.VoiceCallService",
-                input=_pb2.ListCallParticipantsRequest,
-                output=_pb2.ListCallParticipantsResponse,
+                input=chatto_api_v1_voice_calls_pb2.ListCallParticipantsRequest,
+                output=chatto_api_v1_voice_calls_pb2.ListCallParticipantsResponse,
             ),
             headers=headers,
         )
 
-    def join_call(self, request: _pb2.JoinCallRequest, *, headers: dict[str, str] | None = None) -> _pb2.JoinCallResponse:
+    def join_call(self, request: chatto_api_v1_voice_calls_pb2.JoinCallRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_voice_calls_pb2.JoinCallResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="JoinCall",
                 service_name="chatto.api.v1.VoiceCallService",
-                input=_pb2.JoinCallRequest,
-                output=_pb2.JoinCallResponse,
+                input=chatto_api_v1_voice_calls_pb2.JoinCallRequest,
+                output=chatto_api_v1_voice_calls_pb2.JoinCallResponse,
             ),
             headers=headers,
         )
 
-    def get_call_token(self, request: _pb2.GetCallTokenRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetCallTokenResponse:
+    def create_call_token(self, request: chatto_api_v1_voice_calls_pb2.CreateCallTokenRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_voice_calls_pb2.CreateCallTokenResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="GetCallToken",
+                name="CreateCallToken",
                 service_name="chatto.api.v1.VoiceCallService",
-                input=_pb2.GetCallTokenRequest,
-                output=_pb2.GetCallTokenResponse,
+                input=chatto_api_v1_voice_calls_pb2.CreateCallTokenRequest,
+                output=chatto_api_v1_voice_calls_pb2.CreateCallTokenResponse,
             ),
             headers=headers,
         )
 
-    def create_call_media_publisher_token(self, request: _pb2.CreateCallMediaPublisherTokenRequest, *, headers: dict[str, str] | None = None) -> _pb2.CreateCallMediaPublisherTokenResponse:
+    def create_call_media_publisher_token(self, request: chatto_api_v1_voice_calls_pb2.CreateCallMediaPublisherTokenRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_voice_calls_pb2.CreateCallMediaPublisherTokenResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CreateCallMediaPublisherToken",
                 service_name="chatto.api.v1.VoiceCallService",
-                input=_pb2.CreateCallMediaPublisherTokenRequest,
-                output=_pb2.CreateCallMediaPublisherTokenResponse,
+                input=chatto_api_v1_voice_calls_pb2.CreateCallMediaPublisherTokenRequest,
+                output=chatto_api_v1_voice_calls_pb2.CreateCallMediaPublisherTokenResponse,
             ),
             headers=headers,
         )
 
-    def leave_call(self, request: _pb2.LeaveCallRequest, *, headers: dict[str, str] | None = None) -> _pb2.LeaveCallResponse:
+    def leave_call(self, request: chatto_api_v1_voice_calls_pb2.LeaveCallRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_voice_calls_pb2.LeaveCallResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="LeaveCall",
                 service_name="chatto.api.v1.VoiceCallService",
-                input=_pb2.LeaveCallRequest,
-                output=_pb2.LeaveCallResponse,
+                input=chatto_api_v1_voice_calls_pb2.LeaveCallRequest,
+                output=chatto_api_v1_voice_calls_pb2.LeaveCallResponse,
             ),
             headers=headers,
         )

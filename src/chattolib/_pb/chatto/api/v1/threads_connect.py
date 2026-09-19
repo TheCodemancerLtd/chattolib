@@ -2,152 +2,226 @@
 
 # source: chatto/api/v1/threads.proto
 
-import chatto.api.v1.threads_pb2 as _pb2
+import chatto.api.v1.read_state_pb2 as chatto_api_v1_read_state_pb2
+import chatto.api.v1.threads_pb2 as chatto_api_v1_threads_pb2
+import chatto.api.v1.room_timeline_pb2 as chatto_api_v1_room_timeline_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class ThreadServiceClient(ConnectClient):
-    async def list_followed_threads(self, request: _pb2.ListFollowedThreadsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListFollowedThreadsResponse:
+    async def get_thread_read_state(self, request: chatto_api_v1_read_state_pb2.GetThreadReadStateRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_read_state_pb2.GetThreadReadStateResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetThreadReadState",
+                service_name="chatto.api.v1.ThreadService",
+                input=chatto_api_v1_read_state_pb2.GetThreadReadStateRequest,
+                output=chatto_api_v1_read_state_pb2.GetThreadReadStateResponse,
+            ),
+            headers=headers,
+        )
+
+    async def batch_get_thread_read_states(self, request: chatto_api_v1_read_state_pb2.BatchGetThreadReadStatesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_read_state_pb2.BatchGetThreadReadStatesResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="BatchGetThreadReadStates",
+                service_name="chatto.api.v1.ThreadService",
+                input=chatto_api_v1_read_state_pb2.BatchGetThreadReadStatesRequest,
+                output=chatto_api_v1_read_state_pb2.BatchGetThreadReadStatesResponse,
+            ),
+            headers=headers,
+        )
+
+    async def list_thread_participants(self, request: chatto_api_v1_threads_pb2.ListThreadParticipantsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_threads_pb2.ListThreadParticipantsResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListThreadParticipants",
+                service_name="chatto.api.v1.ThreadService",
+                input=chatto_api_v1_threads_pb2.ListThreadParticipantsRequest,
+                output=chatto_api_v1_threads_pb2.ListThreadParticipantsResponse,
+            ),
+            headers=headers,
+        )
+
+    async def list_followed_threads(self, request: chatto_api_v1_threads_pb2.ListFollowedThreadsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_threads_pb2.ListFollowedThreadsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListFollowedThreads",
                 service_name="chatto.api.v1.ThreadService",
-                input=_pb2.ListFollowedThreadsRequest,
-                output=_pb2.ListFollowedThreadsResponse,
+                input=chatto_api_v1_threads_pb2.ListFollowedThreadsRequest,
+                output=chatto_api_v1_threads_pb2.ListFollowedThreadsResponse,
             ),
             headers=headers,
         )
 
-    async def follow_thread(self, request: _pb2.FollowThreadRequest, *, headers: dict[str, str] | None = None) -> _pb2.FollowThreadResponse:
+    async def follow_thread(self, request: chatto_api_v1_threads_pb2.FollowThreadRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_threads_pb2.FollowThreadResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="FollowThread",
                 service_name="chatto.api.v1.ThreadService",
-                input=_pb2.FollowThreadRequest,
-                output=_pb2.FollowThreadResponse,
+                input=chatto_api_v1_threads_pb2.FollowThreadRequest,
+                output=chatto_api_v1_threads_pb2.FollowThreadResponse,
             ),
             headers=headers,
         )
 
-    async def unfollow_thread(self, request: _pb2.UnfollowThreadRequest, *, headers: dict[str, str] | None = None) -> _pb2.UnfollowThreadResponse:
+    async def unfollow_thread(self, request: chatto_api_v1_threads_pb2.UnfollowThreadRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_threads_pb2.UnfollowThreadResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UnfollowThread",
                 service_name="chatto.api.v1.ThreadService",
-                input=_pb2.UnfollowThreadRequest,
-                output=_pb2.UnfollowThreadResponse,
+                input=chatto_api_v1_threads_pb2.UnfollowThreadRequest,
+                output=chatto_api_v1_threads_pb2.UnfollowThreadResponse,
             ),
             headers=headers,
         )
 
-    async def get_thread_events(self, request: _pb2.GetThreadEventsRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetThreadEventsResponse:
+    async def get_thread_events(self, request: chatto_api_v1_room_timeline_pb2.GetThreadEventsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_room_timeline_pb2.GetThreadEventsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetThreadEvents",
                 service_name="chatto.api.v1.ThreadService",
-                input=_pb2.GetThreadEventsRequest,
-                output=_pb2.GetThreadEventsResponse,
+                input=chatto_api_v1_room_timeline_pb2.GetThreadEventsRequest,
+                output=chatto_api_v1_room_timeline_pb2.GetThreadEventsResponse,
             ),
             headers=headers,
         )
 
-    async def get_thread_events_around(self, request: _pb2.GetThreadEventsAroundRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetThreadEventsAroundResponse:
+    async def get_thread_events_around(self, request: chatto_api_v1_room_timeline_pb2.GetThreadEventsAroundRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_room_timeline_pb2.GetThreadEventsAroundResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetThreadEventsAround",
                 service_name="chatto.api.v1.ThreadService",
-                input=_pb2.GetThreadEventsAroundRequest,
-                output=_pb2.GetThreadEventsAroundResponse,
+                input=chatto_api_v1_room_timeline_pb2.GetThreadEventsAroundRequest,
+                output=chatto_api_v1_room_timeline_pb2.GetThreadEventsAroundResponse,
             ),
             headers=headers,
         )
 
-    async def mark_thread_as_read(self, request: _pb2.MarkThreadAsReadRequest, *, headers: dict[str, str] | None = None) -> _pb2.MarkThreadAsReadResponse:
+    async def mark_thread_as_read(self, request: chatto_api_v1_read_state_pb2.MarkThreadAsReadRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_read_state_pb2.MarkThreadAsReadResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="MarkThreadAsRead",
                 service_name="chatto.api.v1.ThreadService",
-                input=_pb2.MarkThreadAsReadRequest,
-                output=_pb2.MarkThreadAsReadResponse,
+                input=chatto_api_v1_read_state_pb2.MarkThreadAsReadRequest,
+                output=chatto_api_v1_read_state_pb2.MarkThreadAsReadResponse,
             ),
             headers=headers,
         )
 
 class ThreadServiceClientSync(ConnectClientSync):
 
-    def list_followed_threads(self, request: _pb2.ListFollowedThreadsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListFollowedThreadsResponse:
+    def get_thread_read_state(self, request: chatto_api_v1_read_state_pb2.GetThreadReadStateRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_read_state_pb2.GetThreadReadStateResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetThreadReadState",
+                service_name="chatto.api.v1.ThreadService",
+                input=chatto_api_v1_read_state_pb2.GetThreadReadStateRequest,
+                output=chatto_api_v1_read_state_pb2.GetThreadReadStateResponse,
+            ),
+            headers=headers,
+        )
+
+    def batch_get_thread_read_states(self, request: chatto_api_v1_read_state_pb2.BatchGetThreadReadStatesRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_read_state_pb2.BatchGetThreadReadStatesResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="BatchGetThreadReadStates",
+                service_name="chatto.api.v1.ThreadService",
+                input=chatto_api_v1_read_state_pb2.BatchGetThreadReadStatesRequest,
+                output=chatto_api_v1_read_state_pb2.BatchGetThreadReadStatesResponse,
+            ),
+            headers=headers,
+        )
+
+    def list_thread_participants(self, request: chatto_api_v1_threads_pb2.ListThreadParticipantsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_threads_pb2.ListThreadParticipantsResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListThreadParticipants",
+                service_name="chatto.api.v1.ThreadService",
+                input=chatto_api_v1_threads_pb2.ListThreadParticipantsRequest,
+                output=chatto_api_v1_threads_pb2.ListThreadParticipantsResponse,
+            ),
+            headers=headers,
+        )
+
+    def list_followed_threads(self, request: chatto_api_v1_threads_pb2.ListFollowedThreadsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_threads_pb2.ListFollowedThreadsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListFollowedThreads",
                 service_name="chatto.api.v1.ThreadService",
-                input=_pb2.ListFollowedThreadsRequest,
-                output=_pb2.ListFollowedThreadsResponse,
+                input=chatto_api_v1_threads_pb2.ListFollowedThreadsRequest,
+                output=chatto_api_v1_threads_pb2.ListFollowedThreadsResponse,
             ),
             headers=headers,
         )
 
-    def follow_thread(self, request: _pb2.FollowThreadRequest, *, headers: dict[str, str] | None = None) -> _pb2.FollowThreadResponse:
+    def follow_thread(self, request: chatto_api_v1_threads_pb2.FollowThreadRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_threads_pb2.FollowThreadResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="FollowThread",
                 service_name="chatto.api.v1.ThreadService",
-                input=_pb2.FollowThreadRequest,
-                output=_pb2.FollowThreadResponse,
+                input=chatto_api_v1_threads_pb2.FollowThreadRequest,
+                output=chatto_api_v1_threads_pb2.FollowThreadResponse,
             ),
             headers=headers,
         )
 
-    def unfollow_thread(self, request: _pb2.UnfollowThreadRequest, *, headers: dict[str, str] | None = None) -> _pb2.UnfollowThreadResponse:
+    def unfollow_thread(self, request: chatto_api_v1_threads_pb2.UnfollowThreadRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_threads_pb2.UnfollowThreadResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UnfollowThread",
                 service_name="chatto.api.v1.ThreadService",
-                input=_pb2.UnfollowThreadRequest,
-                output=_pb2.UnfollowThreadResponse,
+                input=chatto_api_v1_threads_pb2.UnfollowThreadRequest,
+                output=chatto_api_v1_threads_pb2.UnfollowThreadResponse,
             ),
             headers=headers,
         )
 
-    def get_thread_events(self, request: _pb2.GetThreadEventsRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetThreadEventsResponse:
+    def get_thread_events(self, request: chatto_api_v1_room_timeline_pb2.GetThreadEventsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_room_timeline_pb2.GetThreadEventsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetThreadEvents",
                 service_name="chatto.api.v1.ThreadService",
-                input=_pb2.GetThreadEventsRequest,
-                output=_pb2.GetThreadEventsResponse,
+                input=chatto_api_v1_room_timeline_pb2.GetThreadEventsRequest,
+                output=chatto_api_v1_room_timeline_pb2.GetThreadEventsResponse,
             ),
             headers=headers,
         )
 
-    def get_thread_events_around(self, request: _pb2.GetThreadEventsAroundRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetThreadEventsAroundResponse:
+    def get_thread_events_around(self, request: chatto_api_v1_room_timeline_pb2.GetThreadEventsAroundRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_room_timeline_pb2.GetThreadEventsAroundResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetThreadEventsAround",
                 service_name="chatto.api.v1.ThreadService",
-                input=_pb2.GetThreadEventsAroundRequest,
-                output=_pb2.GetThreadEventsAroundResponse,
+                input=chatto_api_v1_room_timeline_pb2.GetThreadEventsAroundRequest,
+                output=chatto_api_v1_room_timeline_pb2.GetThreadEventsAroundResponse,
             ),
             headers=headers,
         )
 
-    def mark_thread_as_read(self, request: _pb2.MarkThreadAsReadRequest, *, headers: dict[str, str] | None = None) -> _pb2.MarkThreadAsReadResponse:
+    def mark_thread_as_read(self, request: chatto_api_v1_read_state_pb2.MarkThreadAsReadRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_read_state_pb2.MarkThreadAsReadResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="MarkThreadAsRead",
                 service_name="chatto.api.v1.ThreadService",
-                input=_pb2.MarkThreadAsReadRequest,
-                output=_pb2.MarkThreadAsReadResponse,
+                input=chatto_api_v1_read_state_pb2.MarkThreadAsReadRequest,
+                output=chatto_api_v1_read_state_pb2.MarkThreadAsReadResponse,
             ),
             headers=headers,
         )

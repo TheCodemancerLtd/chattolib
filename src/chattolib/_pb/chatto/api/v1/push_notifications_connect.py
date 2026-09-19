@@ -2,80 +2,80 @@
 
 # source: chatto/api/v1/push_notifications.proto
 
-import chatto.api.v1.push_notifications_pb2 as _pb2
+import chatto.api.v1.push_notifications_pb2 as chatto_api_v1_push_notifications_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class PushNotificationServiceClient(ConnectClient):
-    async def subscribe(self, request: _pb2.SubscribePushRequest, *, headers: dict[str, str] | None = None) -> _pb2.SubscribePushResponse:
+    async def subscribe(self, request: chatto_api_v1_push_notifications_pb2.SubscribeRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_push_notifications_pb2.SubscribeResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="Subscribe",
                 service_name="chatto.api.v1.PushNotificationService",
-                input=_pb2.SubscribePushRequest,
-                output=_pb2.SubscribePushResponse,
+                input=chatto_api_v1_push_notifications_pb2.SubscribeRequest,
+                output=chatto_api_v1_push_notifications_pb2.SubscribeResponse,
             ),
             headers=headers,
         )
 
-    async def unsubscribe(self, request: _pb2.UnsubscribePushRequest, *, headers: dict[str, str] | None = None) -> _pb2.UnsubscribePushResponse:
+    async def unsubscribe(self, request: chatto_api_v1_push_notifications_pb2.UnsubscribeRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_push_notifications_pb2.UnsubscribeResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="Unsubscribe",
                 service_name="chatto.api.v1.PushNotificationService",
-                input=_pb2.UnsubscribePushRequest,
-                output=_pb2.UnsubscribePushResponse,
+                input=chatto_api_v1_push_notifications_pb2.UnsubscribeRequest,
+                output=chatto_api_v1_push_notifications_pb2.UnsubscribeResponse,
             ),
             headers=headers,
         )
 
-    async def send_test_notification(self, request: _pb2.SendTestPushNotificationRequest, *, headers: dict[str, str] | None = None) -> _pb2.SendTestPushNotificationResponse:
+    async def send_test_notification(self, request: chatto_api_v1_push_notifications_pb2.SendTestNotificationRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_push_notifications_pb2.SendTestNotificationResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="SendTestNotification",
                 service_name="chatto.api.v1.PushNotificationService",
-                input=_pb2.SendTestPushNotificationRequest,
-                output=_pb2.SendTestPushNotificationResponse,
+                input=chatto_api_v1_push_notifications_pb2.SendTestNotificationRequest,
+                output=chatto_api_v1_push_notifications_pb2.SendTestNotificationResponse,
             ),
             headers=headers,
         )
 
 class PushNotificationServiceClientSync(ConnectClientSync):
 
-    def subscribe(self, request: _pb2.SubscribePushRequest, *, headers: dict[str, str] | None = None) -> _pb2.SubscribePushResponse:
+    def subscribe(self, request: chatto_api_v1_push_notifications_pb2.SubscribeRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_push_notifications_pb2.SubscribeResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="Subscribe",
                 service_name="chatto.api.v1.PushNotificationService",
-                input=_pb2.SubscribePushRequest,
-                output=_pb2.SubscribePushResponse,
+                input=chatto_api_v1_push_notifications_pb2.SubscribeRequest,
+                output=chatto_api_v1_push_notifications_pb2.SubscribeResponse,
             ),
             headers=headers,
         )
 
-    def unsubscribe(self, request: _pb2.UnsubscribePushRequest, *, headers: dict[str, str] | None = None) -> _pb2.UnsubscribePushResponse:
+    def unsubscribe(self, request: chatto_api_v1_push_notifications_pb2.UnsubscribeRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_push_notifications_pb2.UnsubscribeResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="Unsubscribe",
                 service_name="chatto.api.v1.PushNotificationService",
-                input=_pb2.UnsubscribePushRequest,
-                output=_pb2.UnsubscribePushResponse,
+                input=chatto_api_v1_push_notifications_pb2.UnsubscribeRequest,
+                output=chatto_api_v1_push_notifications_pb2.UnsubscribeResponse,
             ),
             headers=headers,
         )
 
-    def send_test_notification(self, request: _pb2.SendTestPushNotificationRequest, *, headers: dict[str, str] | None = None) -> _pb2.SendTestPushNotificationResponse:
+    def send_test_notification(self, request: chatto_api_v1_push_notifications_pb2.SendTestNotificationRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_push_notifications_pb2.SendTestNotificationResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="SendTestNotification",
                 service_name="chatto.api.v1.PushNotificationService",
-                input=_pb2.SendTestPushNotificationRequest,
-                output=_pb2.SendTestPushNotificationResponse,
+                input=chatto_api_v1_push_notifications_pb2.SendTestNotificationRequest,
+                output=chatto_api_v1_push_notifications_pb2.SendTestNotificationResponse,
             ),
             headers=headers,
         )
