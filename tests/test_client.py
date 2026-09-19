@@ -22,7 +22,6 @@ from chattolib._pb.chatto.api.v1 import (
     account_pb2,
     asset_uploads_pb2,
     attachments_pb2,
-    member_directory_pb2,
     messages_pb2,
     notification_preferences_pb2,
     notifications_pb2,
@@ -41,7 +40,6 @@ from chattolib._pb.chatto.api.v1 import (
 from chattolib._pb.chatto.discovery.v1 import server_pb2 as discovery_server_pb2
 from chattolib.client import ChattoClient
 from chattolib.types import (
-    AdminRoomLayoutItemKind,
     ImageFitMode,
     ImageTransformOptions,
     NotificationLevel,
@@ -175,11 +173,10 @@ async def test_update_message(client):
 
 
 async def test_delete_message(client):
-    resp = messages_pb2.DeleteMessageResponse(deleted=True)
-    _mock_method(client, "messages", "delete_message", resp)
+    _mock_method(client, "messages", "delete_message", messages_pb2.DeleteMessageResponse())
 
     async with client:
-        assert await client.delete_message("r1", "e1") is True
+        assert await client.delete_message("r1", "e1") is None
 
 
 async def test_add_reaction(client):
@@ -231,11 +228,10 @@ async def test_archive_room(client):
 
 
 async def test_ban_member(client):
-    resp = rooms_pb2.BanMemberResponse(banned=True)
-    _mock_method(client, "rooms", "ban_member", resp)
+    _mock_method(client, "rooms", "ban_member", rooms_pb2.BanMemberResponse())
 
     async with client:
-        assert await client.ban_member("r1", "u2", "spam") is True
+        assert await client.ban_member("r1", "u2", "spam") is None
 
 
 async def test_start_dm(client):
@@ -313,41 +309,21 @@ async def test_update_profile(client):
     assert user.display_name == "New Name"
 
 
-async def test_upload_avatar(client, tmp_path):
-    resp = account_pb2.UploadAvatarResponse()
-    resp.user.id = "u1"
-    resp.user.login = "alice"
-    resp.user.display_name = "Alice"
-    resp.user.avatar_url = "https://example.com/avatar.jpg"
-    mock = _mock_method(client, "account", "upload_avatar", resp)
-
-    avatar = tmp_path / "avatar.png"
-    avatar.write_bytes(b"\x89PNGfake")
-    async with client:
-        user = await client.upload_avatar(str(avatar), content_type="image/png")
-
-    assert user.avatar_url == "https://example.com/avatar.jpg"
-    req = mock.call_args.args[0]
-    assert req.image.image == b"\x89PNGfake"
-    assert req.image.filename == "avatar.png"
-    assert req.image.content_type == "image/png"
-
-
-async def test_update_presence(client):
-    resp = presence_pb2.UpdatePresenceResponse()
+async def test_set_presence(client):
+    resp = presence_pb2.SetPresenceResponse()
     resp.status = "PRESENCE_STATUS_ONLINE"
-    _mock_method(client, "account", "update_presence", resp)
+    _mock_method(client, "account", "set_presence", resp)
 
     async with client:
-        result = await client.update_presence(PresenceStatus.ONLINE)
+        result = await client.set_presence(PresenceStatus.ONLINE)
 
     assert result is PresenceStatus.ONLINE
 
 
-async def test_update_presence_offline_rejected(client):
+async def test_set_presence_offline_rejected(client):
     async with client:
         with pytest.raises(ValueError):
-            await client.update_presence(PresenceStatus.OFFLINE)
+            await client.set_presence(PresenceStatus.OFFLINE)
 
 
 async def test_update_settings(client):
@@ -363,34 +339,6 @@ async def test_update_settings(client):
 
     assert settings.timezone == "Europe/Rome"
     assert settings.time_format is TimeFormat.HOUR_24
-
-
-# --- Users -------------------------------------------------------------
-
-
-async def test_get_user_by_id(client):
-    resp = member_directory_pb2.GetUserResponse()
-    resp.user.user.id = "u1"
-    resp.user.user.login = "alice"
-    resp.user.user.display_name = "Alice"
-    resp.user.user.presence_status = "PRESENCE_STATUS_ONLINE"
-    resp.user.roles.append("everyone")
-    _mock_method(client, "users", "get_user", resp)
-
-    async with client:
-        member = await client.get_user(user_id="u1")
-
-    assert member is not None
-    assert member.user is not None
-    assert member.user.login == "alice"
-    assert "everyone" in member.roles
-
-
-async def test_get_user_requires_one_target(client):
-    with pytest.raises(ValueError):
-        await client.get_user()
-    with pytest.raises(ValueError):
-        await client.get_user(user_id="u1", login="alice")
 
 
 # --- Threads ----------------------------------------------------------
@@ -410,7 +358,7 @@ async def test_list_followed_threads(client):
     ft.thread.reply_count = 3
     ft.thread.last_reply_at.FromJsonString("2026-01-02T00:00:00Z")
     ft.thread.viewer_state.is_following = True
-    ft.thread.viewer_state.has_unread = False
+    ft.thread.viewer_state.has_unread_replies = False
     resp.page.total_count = 1
     resp.page.has_more = False
     _mock_method(client, "threads", "list_followed_threads", resp)
@@ -425,14 +373,12 @@ async def test_list_followed_threads(client):
 
 
 async def test_follow_and_unfollow_thread(client):
-    follow_resp = threads_pb2.FollowThreadResponse(following=True)
-    unfollow_resp = threads_pb2.UnfollowThreadResponse(following=False)
-    _mock_method(client, "threads", "follow_thread", follow_resp)
-    _mock_method(client, "threads", "unfollow_thread", unfollow_resp)
+    _mock_method(client, "threads", "follow_thread", threads_pb2.FollowThreadResponse())
+    _mock_method(client, "threads", "unfollow_thread", threads_pb2.UnfollowThreadResponse())
 
     async with client:
-        assert await client.follow_thread("r1", "e1") is True
-        assert await client.unfollow_thread("r1", "e1") is False
+        assert await client.follow_thread("r1", "e1") is None
+        assert await client.unfollow_thread("r1", "e1") is None
 
 
 # --- Notifications ----------------------------------------------------
@@ -509,8 +455,7 @@ async def test_notification_preference(client):
 
 
 async def test_subscribe_push(client):
-    resp = push_notifications_pb2.SubscribePushResponse(subscribed=True)
-    _mock_method(client, "push", "subscribe", resp)
+    _mock_method(client, "push", "subscribe", push_notifications_pb2.SubscribeResponse())
 
     async with client:
         assert await client.subscribe_push("https://push", "k", "a") is True
@@ -729,18 +674,15 @@ async def test_admin_move_sidebar_item(client):
 
     async with client:
         group = await client.admin_move_sidebar_item(
-            (AdminRoomLayoutItemKind.SIDEBAR_LINK, "sl1"),
+            ("sidebar_link", "sl1"),
             "g1",
-            before=(AdminRoomLayoutItemKind.ROOM, "r1"),
+            before=("room", "r1"),
         )
 
     assert group.id == "g1"
     sent = mock.call_args.args[0]
-    item_kind = room_layout_pb2.AdminRoomLayoutItemKind
-    assert sent.item.id == "sl1"
-    assert sent.item.kind == item_kind.ADMIN_ROOM_LAYOUT_ITEM_KIND_SIDEBAR_LINK
-    assert sent.before.id == "r1"
-    assert sent.before.kind == item_kind.ADMIN_ROOM_LAYOUT_ITEM_KIND_ROOM
+    assert sent.item.sidebar_link_id == "sl1"
+    assert sent.before.room_id == "r1"
     assert sent.group_id == "g1"
 
 

@@ -88,7 +88,7 @@ async def _wait_for_event(
 
     bot.on("message", on_event)
     stop = asyncio.Event()
-    run_task = asyncio.create_task(bot.run(retained_room_ids=[room_id], until=stop))
+    run_task = asyncio.create_task(bot.run(until=stop))
     await asyncio.sleep(2)  # let the stream connect + subscribe
 
     try:

@@ -63,41 +63,79 @@ def _method_name(m: Any) -> str:
     return "".join(out)
 
 
-def _service_preamble(fd: Any) -> str:
-    """The shared header + imports for a generated module (emitted once)."""
-    pb2_module = fd.name[: -len(".proto")].replace("/", ".") + "_pb2"
-    return "\n".join(
-        [
-            _HEADER,
-            f"# source: {fd.name}",
-            "",
-            f"import {pb2_module} as _pb2",
-            "from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo",
-            "",
-            "",
-        ]
-    )
+def _pb2_module(fd: Any) -> str:
+    """The import path of the pb2 module protoc emits for ``fd``."""
+    name: str = fd.name
+    return name[: -len(".proto")].replace("/", ".") + "_pb2"
 
 
-def _service_body(fd: Any, svc: Any) -> str:
+def _alias_for(module: str) -> str:
+    """A valid, unique import alias for a pb2 module (dots -> underscores)."""
+    return module.replace(".", "_")
+
+
+def _build_module_map(request: Any) -> dict[str, str]:
+    """Map a fully-qualified message name (leading dot) to the pb2 module of
+    the file that defines it.
+
+    A service method's input/output may be a message declared in a *different*
+    proto file than the service itself (e.g. ``MyAccountService`` in
+    ``account.proto`` using ``ListExternalIdentitiesRequest`` from
+    ``external_identities.proto``). The generated stub must import the module
+    that actually defines the referenced message, not the service's own module.
+    """
+    mapping: dict[str, str] = {}
+    for fd in request.proto_file:
+        module = _pb2_module(fd)
+
+        def walk(msgs: list[Any], prefix: list[str]) -> None:
+            for mt in msgs:
+                full = "." + ".".join([p for p in (fd.package, *prefix, mt.name) if p])
+                mapping[full] = module
+                walk(list(mt.nested_type), prefix + [mt.name])
+
+        walk(list(fd.message_type), [])
+    return mapping
+
+
+def _service_preamble(fd: Any, modules: list[str]) -> str:
+    """The shared header + imports for a generated module (emitted once).
+
+    ``modules`` is the (deduplicated) set of pb2 modules the file's services
+    reference; each is imported under a unique alias so cross-file messages
+    resolve to the module that defines them.
+    """
+    lines = [_HEADER, f"# source: {fd.name}", ""]
+    for module in modules:
+        lines.append(f"import {module} as {_alias_for(module)}")
+    lines.append("from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo")
+    lines += ["", ""]
+    return "\n".join(lines)
+
+
+def _service_body(fd: Any, svc: Any, mod_by_fullname: dict[str, str]) -> str:
     """Render one service's async + sync client classes (no preamble)."""
     pkg = fd.package
     base = f"{pkg}.{svc.name}" if pkg else svc.name
     lines: list[str] = [f"class {svc.name}Client(ConnectClient):"]
     for m in svc.method:
         mn = _method_name(m)
+        in_module = mod_by_fullname[m.input_type]
+        out_module = mod_by_fullname[m.output_type]
         in_name = m.input_type.lstrip(".").split(".")[-1]
         out_name = m.output_type.lstrip(".").split(".")[-1]
+        in_alias = _alias_for(in_module)
+        out_alias = _alias_for(out_module)
         lines += [
-            f"    async def {mn}(self, request: _pb2.{in_name}, *,"
-            f" headers: dict[str, str] | None = None) -> _pb2.{out_name}:",
+            f"    async def {mn}(self, request: {in_alias}.{in_name}, *,"
+            f" headers: dict[str, str] | None = None) -> {out_alias}.{out_name}:",
             "        return await self.execute_unary(",
             "            request=request,",
             "            method=MethodInfo(",
             f'                name="{m.name}",',
             f'                service_name="{base}",',
-            f"                input=_pb2.{in_name},",
-            f"                output=_pb2.{out_name},",
+            f"                input={in_alias}.{in_name},",
+            f"                output={out_alias}.{out_name},",
             "            ),",
             "            headers=headers,",
             "        )",
@@ -106,18 +144,22 @@ def _service_body(fd: Any, svc: Any) -> str:
     lines += [f"class {svc.name}ClientSync(ConnectClientSync):", ""]
     for m in svc.method:
         mn = _method_name(m)
+        in_module = mod_by_fullname[m.input_type]
+        out_module = mod_by_fullname[m.output_type]
         in_name = m.input_type.lstrip(".").split(".")[-1]
         out_name = m.output_type.lstrip(".").split(".")[-1]
+        in_alias = _alias_for(in_module)
+        out_alias = _alias_for(out_module)
         lines += [
-            f"    def {mn}(self, request: _pb2.{in_name}, *,"
-            f" headers: dict[str, str] | None = None) -> _pb2.{out_name}:",
+            f"    def {mn}(self, request: {in_alias}.{in_name}, *,"
+            f" headers: dict[str, str] | None = None) -> {out_alias}.{out_name}:",
             "        return self.execute_unary(",
             "            request=request,",
             "            method=MethodInfo(",
             f'                name="{m.name}",',
             f'                service_name="{base}",',
-            f"                input=_pb2.{in_name},",
-            f"                output=_pb2.{out_name},",
+            f"                input={in_alias}.{in_name},",
+            f"                output={out_alias}.{out_name},",
             "            ),",
             "            headers=headers,",
             "        )",
@@ -135,6 +177,7 @@ def generate(request: g.CodeGeneratorRequest) -> r.CodeGeneratorResponse:
     # file_to_generate is a repeated *string* (proto file names), not a list of
     # message objects — match by string membership.
     to_generate = set(request.file_to_generate)
+    mod_by_fullname = _build_module_map(request)
     for fd in request.proto_file:
         if fd.name not in to_generate:
             continue
@@ -145,10 +188,19 @@ def generate(request: g.CodeGeneratorRequest) -> r.CodeGeneratorResponse:
         # notifications.proto -> NotificationServiceClient and
         # NotificationPolicyServiceClient in the same module), matching the
         # historical connectrpc layout.
+        required: list[str] = []
+        seen: set[str] = set()
+        for svc in services:
+            for m in svc.method:
+                for ref in (m.input_type, m.output_type):
+                    module = mod_by_fullname[ref]
+                    if module not in seen:
+                        seen.add(module)
+                        required.append(module)
         out = resp.file.add()
         out.name = fd.name.replace(".proto", "_connect.py")
-        out.content = _service_preamble(fd) + "\n".join(
-            _service_body(fd, svc) for svc in services
+        out.content = _service_preamble(fd, required) + "\n".join(
+            _service_body(fd, svc, mod_by_fullname) for svc in services
         )
     return resp
 

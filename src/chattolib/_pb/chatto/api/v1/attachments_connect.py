@@ -2,56 +2,56 @@
 
 # source: chatto/api/v1/attachments.proto
 
-import chatto.api.v1.attachments_pb2 as _pb2
+import chatto.api.v1.attachments_pb2 as chatto_api_v1_attachments_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class AssetServiceClient(ConnectClient):
-    async def get_asset(self, request: _pb2.GetAssetRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetAssetResponse:
+    async def get_asset(self, request: chatto_api_v1_attachments_pb2.GetAssetRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_attachments_pb2.GetAssetResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetAsset",
                 service_name="chatto.api.v1.AssetService",
-                input=_pb2.GetAssetRequest,
-                output=_pb2.GetAssetResponse,
+                input=chatto_api_v1_attachments_pb2.GetAssetRequest,
+                output=chatto_api_v1_attachments_pb2.GetAssetResponse,
             ),
             headers=headers,
         )
 
-    async def batch_get_assets(self, request: _pb2.BatchGetAssetsRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetAssetsResponse:
+    async def batch_get_assets(self, request: chatto_api_v1_attachments_pb2.BatchGetAssetsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_attachments_pb2.BatchGetAssetsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetAssets",
                 service_name="chatto.api.v1.AssetService",
-                input=_pb2.BatchGetAssetsRequest,
-                output=_pb2.BatchGetAssetsResponse,
+                input=chatto_api_v1_attachments_pb2.BatchGetAssetsRequest,
+                output=chatto_api_v1_attachments_pb2.BatchGetAssetsResponse,
             ),
             headers=headers,
         )
 
 class AssetServiceClientSync(ConnectClientSync):
 
-    def get_asset(self, request: _pb2.GetAssetRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetAssetResponse:
+    def get_asset(self, request: chatto_api_v1_attachments_pb2.GetAssetRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_attachments_pb2.GetAssetResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetAsset",
                 service_name="chatto.api.v1.AssetService",
-                input=_pb2.GetAssetRequest,
-                output=_pb2.GetAssetResponse,
+                input=chatto_api_v1_attachments_pb2.GetAssetRequest,
+                output=chatto_api_v1_attachments_pb2.GetAssetResponse,
             ),
             headers=headers,
         )
 
-    def batch_get_assets(self, request: _pb2.BatchGetAssetsRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetAssetsResponse:
+    def batch_get_assets(self, request: chatto_api_v1_attachments_pb2.BatchGetAssetsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_attachments_pb2.BatchGetAssetsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetAssets",
                 service_name="chatto.api.v1.AssetService",
-                input=_pb2.BatchGetAssetsRequest,
-                output=_pb2.BatchGetAssetsResponse,
+                input=chatto_api_v1_attachments_pb2.BatchGetAssetsRequest,
+                output=chatto_api_v1_attachments_pb2.BatchGetAssetsResponse,
             ),
             headers=headers,
         )

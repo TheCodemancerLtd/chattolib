@@ -2,128 +2,128 @@
 
 # source: chatto/api/v1/asset_uploads.proto
 
-import chatto.api.v1.asset_uploads_pb2 as _pb2
+import chatto.api.v1.asset_uploads_pb2 as chatto_api_v1_asset_uploads_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class AssetUploadServiceClient(ConnectClient):
-    async def create_upload(self, request: _pb2.CreateUploadRequest, *, headers: dict[str, str] | None = None) -> _pb2.CreateUploadResponse:
+    async def create_upload(self, request: chatto_api_v1_asset_uploads_pb2.CreateUploadRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_asset_uploads_pb2.CreateUploadResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CreateUpload",
                 service_name="chatto.api.v1.AssetUploadService",
-                input=_pb2.CreateUploadRequest,
-                output=_pb2.CreateUploadResponse,
+                input=chatto_api_v1_asset_uploads_pb2.CreateUploadRequest,
+                output=chatto_api_v1_asset_uploads_pb2.CreateUploadResponse,
             ),
             headers=headers,
         )
 
-    async def upload_chunk(self, request: _pb2.UploadChunkRequest, *, headers: dict[str, str] | None = None) -> _pb2.UploadChunkResponse:
+    async def upload_chunk(self, request: chatto_api_v1_asset_uploads_pb2.UploadChunkRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_asset_uploads_pb2.UploadChunkResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UploadChunk",
                 service_name="chatto.api.v1.AssetUploadService",
-                input=_pb2.UploadChunkRequest,
-                output=_pb2.UploadChunkResponse,
+                input=chatto_api_v1_asset_uploads_pb2.UploadChunkRequest,
+                output=chatto_api_v1_asset_uploads_pb2.UploadChunkResponse,
             ),
             headers=headers,
         )
 
-    async def get_upload(self, request: _pb2.GetUploadRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetUploadResponse:
+    async def get_upload(self, request: chatto_api_v1_asset_uploads_pb2.GetUploadRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_asset_uploads_pb2.GetUploadResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetUpload",
                 service_name="chatto.api.v1.AssetUploadService",
-                input=_pb2.GetUploadRequest,
-                output=_pb2.GetUploadResponse,
+                input=chatto_api_v1_asset_uploads_pb2.GetUploadRequest,
+                output=chatto_api_v1_asset_uploads_pb2.GetUploadResponse,
             ),
             headers=headers,
         )
 
-    async def complete_upload(self, request: _pb2.CompleteUploadRequest, *, headers: dict[str, str] | None = None) -> _pb2.CompleteUploadResponse:
+    async def complete_upload(self, request: chatto_api_v1_asset_uploads_pb2.CompleteUploadRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_asset_uploads_pb2.CompleteUploadResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CompleteUpload",
                 service_name="chatto.api.v1.AssetUploadService",
-                input=_pb2.CompleteUploadRequest,
-                output=_pb2.CompleteUploadResponse,
+                input=chatto_api_v1_asset_uploads_pb2.CompleteUploadRequest,
+                output=chatto_api_v1_asset_uploads_pb2.CompleteUploadResponse,
             ),
             headers=headers,
         )
 
-    async def cancel_upload(self, request: _pb2.CancelUploadRequest, *, headers: dict[str, str] | None = None) -> _pb2.CancelUploadResponse:
+    async def cancel_upload(self, request: chatto_api_v1_asset_uploads_pb2.CancelUploadRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_asset_uploads_pb2.CancelUploadResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CancelUpload",
                 service_name="chatto.api.v1.AssetUploadService",
-                input=_pb2.CancelUploadRequest,
-                output=_pb2.CancelUploadResponse,
+                input=chatto_api_v1_asset_uploads_pb2.CancelUploadRequest,
+                output=chatto_api_v1_asset_uploads_pb2.CancelUploadResponse,
             ),
             headers=headers,
         )
 
 class AssetUploadServiceClientSync(ConnectClientSync):
 
-    def create_upload(self, request: _pb2.CreateUploadRequest, *, headers: dict[str, str] | None = None) -> _pb2.CreateUploadResponse:
+    def create_upload(self, request: chatto_api_v1_asset_uploads_pb2.CreateUploadRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_asset_uploads_pb2.CreateUploadResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CreateUpload",
                 service_name="chatto.api.v1.AssetUploadService",
-                input=_pb2.CreateUploadRequest,
-                output=_pb2.CreateUploadResponse,
+                input=chatto_api_v1_asset_uploads_pb2.CreateUploadRequest,
+                output=chatto_api_v1_asset_uploads_pb2.CreateUploadResponse,
             ),
             headers=headers,
         )
 
-    def upload_chunk(self, request: _pb2.UploadChunkRequest, *, headers: dict[str, str] | None = None) -> _pb2.UploadChunkResponse:
+    def upload_chunk(self, request: chatto_api_v1_asset_uploads_pb2.UploadChunkRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_asset_uploads_pb2.UploadChunkResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UploadChunk",
                 service_name="chatto.api.v1.AssetUploadService",
-                input=_pb2.UploadChunkRequest,
-                output=_pb2.UploadChunkResponse,
+                input=chatto_api_v1_asset_uploads_pb2.UploadChunkRequest,
+                output=chatto_api_v1_asset_uploads_pb2.UploadChunkResponse,
             ),
             headers=headers,
         )
 
-    def get_upload(self, request: _pb2.GetUploadRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetUploadResponse:
+    def get_upload(self, request: chatto_api_v1_asset_uploads_pb2.GetUploadRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_asset_uploads_pb2.GetUploadResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetUpload",
                 service_name="chatto.api.v1.AssetUploadService",
-                input=_pb2.GetUploadRequest,
-                output=_pb2.GetUploadResponse,
+                input=chatto_api_v1_asset_uploads_pb2.GetUploadRequest,
+                output=chatto_api_v1_asset_uploads_pb2.GetUploadResponse,
             ),
             headers=headers,
         )
 
-    def complete_upload(self, request: _pb2.CompleteUploadRequest, *, headers: dict[str, str] | None = None) -> _pb2.CompleteUploadResponse:
+    def complete_upload(self, request: chatto_api_v1_asset_uploads_pb2.CompleteUploadRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_asset_uploads_pb2.CompleteUploadResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CompleteUpload",
                 service_name="chatto.api.v1.AssetUploadService",
-                input=_pb2.CompleteUploadRequest,
-                output=_pb2.CompleteUploadResponse,
+                input=chatto_api_v1_asset_uploads_pb2.CompleteUploadRequest,
+                output=chatto_api_v1_asset_uploads_pb2.CompleteUploadResponse,
             ),
             headers=headers,
         )
 
-    def cancel_upload(self, request: _pb2.CancelUploadRequest, *, headers: dict[str, str] | None = None) -> _pb2.CancelUploadResponse:
+    def cancel_upload(self, request: chatto_api_v1_asset_uploads_pb2.CancelUploadRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_asset_uploads_pb2.CancelUploadResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CancelUpload",
                 service_name="chatto.api.v1.AssetUploadService",
-                input=_pb2.CancelUploadRequest,
-                output=_pb2.CancelUploadResponse,
+                input=chatto_api_v1_asset_uploads_pb2.CancelUploadRequest,
+                output=chatto_api_v1_asset_uploads_pb2.CancelUploadResponse,
             ),
             headers=headers,
         )

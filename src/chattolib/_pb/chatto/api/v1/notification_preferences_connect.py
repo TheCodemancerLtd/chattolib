@@ -2,104 +2,104 @@
 
 # source: chatto/api/v1/notification_preferences.proto
 
-import chatto.api.v1.notification_preferences_pb2 as _pb2
+import chatto.api.v1.notification_preferences_pb2 as chatto_api_v1_notification_preferences_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class NotificationPreferencesServiceClient(ConnectClient):
-    async def get_server_notification_preference(self, request: _pb2.GetServerNotificationPreferenceRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetNotificationPreferenceResponse:
+    async def get_server_notification_preference(self, request: chatto_api_v1_notification_preferences_pb2.GetServerNotificationPreferenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notification_preferences_pb2.GetNotificationPreferenceResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetServerNotificationPreference",
                 service_name="chatto.api.v1.NotificationPreferencesService",
-                input=_pb2.GetServerNotificationPreferenceRequest,
-                output=_pb2.GetNotificationPreferenceResponse,
+                input=chatto_api_v1_notification_preferences_pb2.GetServerNotificationPreferenceRequest,
+                output=chatto_api_v1_notification_preferences_pb2.GetNotificationPreferenceResponse,
             ),
             headers=headers,
         )
 
-    async def update_server_notification_preference(self, request: _pb2.UpdateServerNotificationPreferenceRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateNotificationPreferenceResponse:
+    async def update_server_notification_preference(self, request: chatto_api_v1_notification_preferences_pb2.UpdateServerNotificationPreferenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notification_preferences_pb2.UpdateNotificationPreferenceResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateServerNotificationPreference",
                 service_name="chatto.api.v1.NotificationPreferencesService",
-                input=_pb2.UpdateServerNotificationPreferenceRequest,
-                output=_pb2.UpdateNotificationPreferenceResponse,
+                input=chatto_api_v1_notification_preferences_pb2.UpdateServerNotificationPreferenceRequest,
+                output=chatto_api_v1_notification_preferences_pb2.UpdateNotificationPreferenceResponse,
             ),
             headers=headers,
         )
 
-    async def get_room_notification_preference(self, request: _pb2.GetRoomNotificationPreferenceRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetNotificationPreferenceResponse:
+    async def get_room_notification_preference(self, request: chatto_api_v1_notification_preferences_pb2.GetRoomNotificationPreferenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notification_preferences_pb2.GetNotificationPreferenceResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRoomNotificationPreference",
                 service_name="chatto.api.v1.NotificationPreferencesService",
-                input=_pb2.GetRoomNotificationPreferenceRequest,
-                output=_pb2.GetNotificationPreferenceResponse,
+                input=chatto_api_v1_notification_preferences_pb2.GetRoomNotificationPreferenceRequest,
+                output=chatto_api_v1_notification_preferences_pb2.GetNotificationPreferenceResponse,
             ),
             headers=headers,
         )
 
-    async def update_room_notification_preference(self, request: _pb2.UpdateRoomNotificationPreferenceRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateNotificationPreferenceResponse:
+    async def update_room_notification_preference(self, request: chatto_api_v1_notification_preferences_pb2.UpdateRoomNotificationPreferenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notification_preferences_pb2.UpdateNotificationPreferenceResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateRoomNotificationPreference",
                 service_name="chatto.api.v1.NotificationPreferencesService",
-                input=_pb2.UpdateRoomNotificationPreferenceRequest,
-                output=_pb2.UpdateNotificationPreferenceResponse,
+                input=chatto_api_v1_notification_preferences_pb2.UpdateRoomNotificationPreferenceRequest,
+                output=chatto_api_v1_notification_preferences_pb2.UpdateNotificationPreferenceResponse,
             ),
             headers=headers,
         )
 
 class NotificationPreferencesServiceClientSync(ConnectClientSync):
 
-    def get_server_notification_preference(self, request: _pb2.GetServerNotificationPreferenceRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetNotificationPreferenceResponse:
+    def get_server_notification_preference(self, request: chatto_api_v1_notification_preferences_pb2.GetServerNotificationPreferenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notification_preferences_pb2.GetNotificationPreferenceResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetServerNotificationPreference",
                 service_name="chatto.api.v1.NotificationPreferencesService",
-                input=_pb2.GetServerNotificationPreferenceRequest,
-                output=_pb2.GetNotificationPreferenceResponse,
+                input=chatto_api_v1_notification_preferences_pb2.GetServerNotificationPreferenceRequest,
+                output=chatto_api_v1_notification_preferences_pb2.GetNotificationPreferenceResponse,
             ),
             headers=headers,
         )
 
-    def update_server_notification_preference(self, request: _pb2.UpdateServerNotificationPreferenceRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateNotificationPreferenceResponse:
+    def update_server_notification_preference(self, request: chatto_api_v1_notification_preferences_pb2.UpdateServerNotificationPreferenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notification_preferences_pb2.UpdateNotificationPreferenceResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateServerNotificationPreference",
                 service_name="chatto.api.v1.NotificationPreferencesService",
-                input=_pb2.UpdateServerNotificationPreferenceRequest,
-                output=_pb2.UpdateNotificationPreferenceResponse,
+                input=chatto_api_v1_notification_preferences_pb2.UpdateServerNotificationPreferenceRequest,
+                output=chatto_api_v1_notification_preferences_pb2.UpdateNotificationPreferenceResponse,
             ),
             headers=headers,
         )
 
-    def get_room_notification_preference(self, request: _pb2.GetRoomNotificationPreferenceRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetNotificationPreferenceResponse:
+    def get_room_notification_preference(self, request: chatto_api_v1_notification_preferences_pb2.GetRoomNotificationPreferenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notification_preferences_pb2.GetNotificationPreferenceResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRoomNotificationPreference",
                 service_name="chatto.api.v1.NotificationPreferencesService",
-                input=_pb2.GetRoomNotificationPreferenceRequest,
-                output=_pb2.GetNotificationPreferenceResponse,
+                input=chatto_api_v1_notification_preferences_pb2.GetRoomNotificationPreferenceRequest,
+                output=chatto_api_v1_notification_preferences_pb2.GetNotificationPreferenceResponse,
             ),
             headers=headers,
         )
 
-    def update_room_notification_preference(self, request: _pb2.UpdateRoomNotificationPreferenceRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateNotificationPreferenceResponse:
+    def update_room_notification_preference(self, request: chatto_api_v1_notification_preferences_pb2.UpdateRoomNotificationPreferenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_notification_preferences_pb2.UpdateNotificationPreferenceResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateRoomNotificationPreference",
                 service_name="chatto.api.v1.NotificationPreferencesService",
-                input=_pb2.UpdateRoomNotificationPreferenceRequest,
-                output=_pb2.UpdateNotificationPreferenceResponse,
+                input=chatto_api_v1_notification_preferences_pb2.UpdateRoomNotificationPreferenceRequest,
+                output=chatto_api_v1_notification_preferences_pb2.UpdateNotificationPreferenceResponse,
             ),
             headers=headers,
         )

@@ -103,12 +103,6 @@ class AssetUploadStatus(StrEnum):
     CANCELLED = "ASSET_UPLOAD_STATUS_CANCELLED"
 
 
-class AdminRoomLayoutItemKind(StrEnum):
-    UNSPECIFIED = "ADMIN_ROOM_LAYOUT_ITEM_KIND_UNSPECIFIED"
-    ROOM = "ADMIN_ROOM_LAYOUT_ITEM_KIND_ROOM"
-    SIDEBAR_LINK = "ADMIN_ROOM_LAYOUT_ITEM_KIND_SIDEBAR_LINK"
-
-
 # --- Time helpers --------------------------------------------------------
 
 
@@ -155,6 +149,23 @@ class CustomUserStatus:
 
 
 @dataclass
+class BotInfo:
+    """Metadata identifying a bot account and the human that owns it.
+
+    Present on a :class:`User` only when the identity is a bot; its presence
+    (rather than a boolean flag) is what marks a bot in Chatto 0.5.0.
+    """
+
+    owner_user_id: str = ""
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> BotInfo | None:
+        if not data:
+            return None
+        return cls(owner_user_id=data.get("ownerUserId", ""))
+
+
+@dataclass
 class User:
     id: str
     login: str
@@ -163,9 +174,14 @@ class User:
     avatar_url: str | None = None
     deleted: bool = False
     custom_status: CustomUserStatus | None = None
-    is_bot: bool = False
+    bot: BotInfo | None = None
     bio: str | None = None
     timezone: str | None = None
+
+    @property
+    def is_bot(self) -> bool:
+        """True when this identity is a bot (i.e. ``bot`` is present)."""
+        return self.bot is not None
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> User | None:
@@ -181,7 +197,7 @@ class User:
             avatar_url=data.get("avatarUrl"),
             deleted=bool(data.get("deleted", False)),
             custom_status=CustomUserStatus.parse(data.get("customStatus")),
-            is_bot=bool(data.get("isBot", False)),
+            bot=BotInfo.parse(data.get("bot")),
             bio=data.get("bio"),
             timezone=data.get("timezone"),
         )
@@ -427,6 +443,8 @@ class RoomViewerState:
 class RoomWithViewerState:
     room: Room | None
     viewer_state: RoomViewerState
+    member_user_ids: list[str] = field(default_factory=list)
+    has_message_history: bool | None = None
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> RoomWithViewerState | None:
@@ -435,6 +453,10 @@ class RoomWithViewerState:
         return cls(
             room=Room.parse(data.get("room")),
             viewer_state=RoomViewerState.parse(data.get("viewerState")),
+            member_user_ids=list(data.get("memberUserIds") or []),
+            has_message_history=(
+                data.get("hasMessageHistory") if "hasMessageHistory" in data else None
+            ),
         )
 
 
@@ -587,6 +609,7 @@ class MessageAttachment:
     asset_url: AssetUrl | None = None
     thumbnail_asset_url: AssetUrl | None = None
     video_processing: VideoProcessing | None = None
+    description: str | None = None
 
     @classmethod
     def parse(cls, data: dict[str, Any]) -> MessageAttachment:
@@ -599,6 +622,7 @@ class MessageAttachment:
             asset_url=AssetUrl.parse(data.get("assetUrl")),
             thumbnail_asset_url=AssetUrl.parse(data.get("thumbnailAssetUrl")),
             video_processing=VideoProcessing.parse(data.get("videoProcessing")),
+            description=data.get("description"),
         )
 
 
@@ -782,7 +806,7 @@ class ThreadSummary:
     participant_preview_user_ids: list[str] = field(default_factory=list)
     participant_count: int = 0
     is_following: bool | None = None
-    has_unread: bool | None = None
+    has_unread_replies: bool | None = None
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> ThreadSummary | None:
@@ -796,7 +820,9 @@ class ThreadSummary:
             participant_preview_user_ids=list(data.get("participantPreviewUserIds") or []),
             participant_count=int(data.get("participantCount", 0)),
             is_following=viewer.get("isFollowing") if "isFollowing" in viewer else None,
-            has_unread=viewer.get("hasUnread") if "hasUnread" in viewer else None,
+            has_unread_replies=(
+                viewer.get("hasUnreadReplies") if "hasUnreadReplies" in viewer else None
+            ),
         )
 
 
@@ -931,6 +957,8 @@ class FollowedThread:
     room: RoomSummary | None
     root_message: Message | None
     thread: ThreadSummary | None
+    latest_reply: Message | None = None
+    direct_message_participant_user_ids: list[str] = field(default_factory=list)
 
     @classmethod
     def parse(cls, data: dict[str, Any]) -> FollowedThread:
@@ -938,6 +966,10 @@ class FollowedThread:
             room=RoomSummary.parse(data.get("room")),
             root_message=Message.parse(data.get("rootMessage")),
             thread=ThreadSummary.parse(data.get("thread")),
+            latest_reply=Message.parse(data.get("latestReply")),
+            direct_message_participant_user_ids=list(
+                data.get("directMessageParticipantUserIds") or []
+            ),
         )
 
 
@@ -1351,6 +1383,7 @@ class AdminMember:
     created_at: datetime | None = None
     has_verified_email: bool = False
     verified_emails: list[str] = field(default_factory=list)
+    primary_verified_email: str | None = None
     viewer_can_delete_account: bool = False
     last_login_change: datetime | None = None
 
@@ -1364,6 +1397,7 @@ class AdminMember:
             created_at=parse_datetime(data.get("createdAt")),
             has_verified_email=bool(data.get("hasVerifiedEmail", False)),
             verified_emails=list(data.get("verifiedEmails") or []),
+            primary_verified_email=data.get("primaryVerifiedEmail"),
             viewer_can_delete_account=bool(data.get("viewerCanDeleteAccount", False)),
             last_login_change=parse_datetime(data.get("lastLoginChange")),
         )

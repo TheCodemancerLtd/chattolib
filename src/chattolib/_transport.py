@@ -46,14 +46,15 @@ from chattolib._pb.chatto.admin.v1.server_connect import AdminServerServiceClien
 from chattolib._pb.chatto.api.v1.account_connect import MyAccountServiceClient
 from chattolib._pb.chatto.api.v1.asset_uploads_connect import AssetUploadServiceClient
 from chattolib._pb.chatto.api.v1.attachments_connect import AssetServiceClient
-from chattolib._pb.chatto.api.v1.member_directory_connect import UserServiceClient
 from chattolib._pb.chatto.api.v1.messages_connect import MessageServiceClient
 from chattolib._pb.chatto.api.v1.notification_preferences_connect import (
     NotificationPreferencesServiceClient,
 )
 from chattolib._pb.chatto.api.v1.notifications_connect import (
+    NotificationPolicyServiceClient,
     NotificationServiceClient,
 )
+from chattolib._pb.chatto.api.v1.permissions_connect import PermissionServiceClient
 from chattolib._pb.chatto.api.v1.push_notifications_connect import (
     PushNotificationServiceClient,
 )
@@ -82,14 +83,15 @@ class ServiceClients:
     server: ServerServiceClient
     viewer: ViewerServiceClient
     account: MyAccountServiceClient
-    users: UserServiceClient
     roles: RoleServiceClient
     room_directory: RoomDirectoryServiceClient
     rooms: RoomServiceClient
     messages: MessageServiceClient
     threads: ThreadServiceClient
     notifications: NotificationServiceClient
+    notification_policy: NotificationPolicyServiceClient
     notification_prefs: NotificationPreferencesServiceClient
+    permissions: PermissionServiceClient
     push: PushNotificationServiceClient
     assets: AssetServiceClient
     asset_uploads: AssetUploadServiceClient
@@ -125,14 +127,15 @@ def build_service_clients(base_url: str) -> ServiceClients:
         server=make(ServerServiceClient),
         viewer=make(ViewerServiceClient),
         account=make(MyAccountServiceClient),
-        users=make(UserServiceClient),
         roles=make(RoleServiceClient),
         room_directory=make(RoomDirectoryServiceClient),
         rooms=make(RoomServiceClient),
         messages=make(MessageServiceClient),
         threads=make(ThreadServiceClient),
         notifications=make(NotificationServiceClient),
+        notification_policy=make(NotificationPolicyServiceClient),
         notification_prefs=make(NotificationPreferencesServiceClient),
+        permissions=make(PermissionServiceClient),
         push=make(PushNotificationServiceClient),
         assets=make(AssetServiceClient),
         asset_uploads=make(AssetUploadServiceClient),

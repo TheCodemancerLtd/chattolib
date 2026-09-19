@@ -12,9 +12,10 @@ from chattolib.realtime import (
     ChattoRealtimeCloseError,
     ChattoRealtimeError,
     RealtimeEvent,
-    RealtimeProjectionEvent,
+    RealtimeSnapshot,
+    _close_code_name,
     _wrap_event,
-    _wrap_projection_event,
+    _wrap_snapshot,
     realtime_url,
 )
 
@@ -34,9 +35,10 @@ def test_realtime_url_strips_trailing_slash():
 def test_wrap_event_user_typing():
     from chattolib._pb.chatto.realtime.v1 import realtime_pb2
 
-    envelope = realtime_pb2.RealtimeEventEnvelope()
+    envelope = realtime_pb2.RealtimeEvent()
     envelope.id = "evt_1"
     envelope.actor_id = "u1"
+    envelope.cursor = "cur_1"
     envelope.user_typing.room_id = "r1"
 
     wrapped = _wrap_event(envelope)
@@ -44,55 +46,65 @@ def test_wrap_event_user_typing():
     assert wrapped.id == "evt_1"
     assert wrapped.kind == "user_typing"
     assert wrapped.actor_id == "u1"
+    assert wrapped.cursor == "cur_1"
     assert wrapped.payload.room_id == "r1"
-
-
-def test_wrap_projection_event():
-    from chattolib._pb.chatto.realtime.v1 import realtime_pb2
-
-    envelope = realtime_pb2.RealtimeProjectionEvent()
-    envelope.id = "proj_1"
-    envelope.resume_cursor = "cur_1"
-    op = envelope.operations.add()
-    op.room_remove.room_id = "r1"
-    op2 = envelope.operations.add()
-    op2.reset.SetInParent()
-
-    wrapped = _wrap_projection_event(envelope)
-    assert isinstance(wrapped, RealtimeProjectionEvent)
-    assert wrapped.id == "proj_1"
-    assert wrapped.resume_cursor == "cur_1"
-    assert [o.operation for o in wrapped.operations] == ["room_remove", "reset"]
-    assert wrapped.operations[0].payload.room_id == "r1"
 
 
 def test_wrap_event_presence_changed():
     from chattolib._pb.chatto.api.v1 import presence_pb2
     from chattolib._pb.chatto.realtime.v1 import realtime_pb2
 
-    envelope = realtime_pb2.RealtimeEventEnvelope()
+    envelope = realtime_pb2.RealtimeEvent()
     envelope.id = "evt_2"
-    envelope.presence_changed.user_id = "u1"
     envelope.presence_changed.status = presence_pb2.PresenceStatus.PRESENCE_STATUS_ONLINE
 
     wrapped = _wrap_event(envelope)
     assert wrapped.kind == "presence_changed"
-    assert wrapped.payload.user_id == "u1"
-    assert wrapped.payload.status == presence_pb2.PresenceStatus.PRESENCE_STATUS_ONLINE
-    # No actor_id set on this envelope, so it should be None.
+    # In protocol 4 the actor lives on the envelope, not the payload.
     assert wrapped.actor_id is None
+    assert wrapped.payload.status == presence_pb2.PresenceStatus.PRESENCE_STATUS_ONLINE
 
 
 def test_wrap_event_without_variant():
     """Envelope with no oneof set (server bug or truncation) should still wrap."""
     from chattolib._pb.chatto.realtime.v1 import realtime_pb2
 
-    envelope = realtime_pb2.RealtimeEventEnvelope()
+    envelope = realtime_pb2.RealtimeEvent()
     envelope.id = "evt_3"
 
     wrapped = _wrap_event(envelope)
     assert wrapped.kind == ""
     assert wrapped.payload is None
+    assert wrapped.cursor is None
+
+
+def test_wrap_snapshot_copies_families():
+    from chattolib._pb.chatto.realtime.v1 import realtime_pb2
+
+    snap = realtime_pb2.RealtimeSnapshot()
+    snap.server.name = "Acme"
+    snap.rooms.add().room.id = "r1"
+    snap.rooms.add().room.id = "r2"
+    snap.users.add().user.id = "u1"
+
+    wrapped = _wrap_snapshot(snap)
+    assert isinstance(wrapped, RealtimeSnapshot)
+    assert wrapped.server is not None
+    assert wrapped.server.name == "Acme"
+    assert [r.room.id for r in wrapped.rooms] == ["r1", "r2"]
+    assert [u.user.id for u in wrapped.users] == ["u1"]
+    assert wrapped.room_groups == []
+    assert wrapped.active_calls == []
+
+
+def test_close_code_name_strips_prefix():
+    from chattolib._pb.chatto.realtime.v1 import realtime_pb2
+
+    assert (
+        _close_code_name(realtime_pb2.REALTIME_CLOSE_CODE_SESSION_TERMINATED)
+        == "SESSION_TERMINATED"
+    )
+    assert _close_code_name(12345) == "UNKNOWN_12345"
 
 
 def test_close_exception_carries_reconnect_hint():
@@ -112,32 +124,36 @@ def test_error_exception_marks_fatal():
     assert recoverable.fatal is False
 
 
-def test_frame_roundtrip_hello():
-    """Client hello serializes and parses back with the fields we set."""
+def test_subscribe_roundtrip():
+    """The v4 handshake message serializes and parses back with the fields set."""
     from chattolib._pb.chatto.realtime.v1 import realtime_pb2
 
-    frame = realtime_pb2.RealtimeClientFrame()
-    frame.hello.protocol_version = 1
-    frame.hello.bearer_token = "cht_abc"
+    frame = realtime_pb2.RealtimeSubscribe()
+    frame.protocol_version = 4
+    frame.bearer_token = "cht_abc"
+    frame.initial_state = realtime_pb2.REALTIME_INITIAL_STATE_LIVE_ONLY
     wire = frame.SerializeToString()
 
-    parsed = realtime_pb2.RealtimeClientFrame()
+    parsed = realtime_pb2.RealtimeSubscribe()
     parsed.ParseFromString(wire)
-    assert parsed.WhichOneof("frame") == "hello"
-    assert parsed.hello.protocol_version == 1
-    assert parsed.hello.bearer_token == "cht_abc"
+    assert parsed.protocol_version == 4
+    assert parsed.bearer_token == "cht_abc"
+    assert parsed.initial_state == realtime_pb2.REALTIME_INITIAL_STATE_LIVE_ONLY
 
 
 @pytest.mark.parametrize(
-    "case,attr",
+    "case,set_",
     [
-        ("subscribe_events", "subscribe_events"),
-        ("ping", "ping"),
+        ("event", lambda s: s.__setattr__("id", "e")),
+        ("heartbeat", lambda s: s.__setattr__("cursor", "c")),
+        ("close", lambda s: s.__setattr__("message", "x")),
+        ("caught_up", lambda s: s.__setattr__("cursor", "c")),
+        ("snapshot", lambda s: s.server.__setattr__("name", "x")),
     ],
 )
-def test_client_frame_oneof_cases(case: str, attr: str):
+def test_server_frame_oneof_cases(case: str, set_):
     from chattolib._pb.chatto.realtime.v1 import realtime_pb2
 
-    frame = realtime_pb2.RealtimeClientFrame()
-    getattr(frame, attr).SetInParent()
+    frame = realtime_pb2.RealtimeServerFrame()
+    set_(getattr(frame, case))  # touching a (nested) field marks the oneof case as set
     assert frame.WhichOneof("frame") == case

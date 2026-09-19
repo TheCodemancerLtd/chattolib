@@ -2,224 +2,224 @@
 
 # source: chatto/admin/v1/members.proto
 
-import chatto.admin.v1.members_pb2 as _pb2
+import chatto.admin.v1.members_pb2 as chatto_admin_v1_members_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class AdminUserServiceClient(ConnectClient):
-    async def list_members(self, request: _pb2.ListMembersRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListMembersResponse:
+    async def list_members(self, request: chatto_admin_v1_members_pb2.ListMembersRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.ListMembersResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListMembers",
                 service_name="chatto.admin.v1.AdminUserService",
-                input=_pb2.ListMembersRequest,
-                output=_pb2.ListMembersResponse,
+                input=chatto_admin_v1_members_pb2.ListMembersRequest,
+                output=chatto_admin_v1_members_pb2.ListMembersResponse,
             ),
             headers=headers,
         )
 
-    async def get_member(self, request: _pb2.GetMemberRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetMemberResponse:
+    async def get_member(self, request: chatto_admin_v1_members_pb2.GetMemberRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.GetMemberResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetMember",
                 service_name="chatto.admin.v1.AdminUserService",
-                input=_pb2.GetMemberRequest,
-                output=_pb2.GetMemberResponse,
+                input=chatto_admin_v1_members_pb2.GetMemberRequest,
+                output=chatto_admin_v1_members_pb2.GetMemberResponse,
             ),
             headers=headers,
         )
 
-    async def batch_get_members(self, request: _pb2.BatchGetMembersRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetMembersResponse:
+    async def batch_get_members(self, request: chatto_admin_v1_members_pb2.BatchGetMembersRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.BatchGetMembersResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetMembers",
                 service_name="chatto.admin.v1.AdminUserService",
-                input=_pb2.BatchGetMembersRequest,
-                output=_pb2.BatchGetMembersResponse,
+                input=chatto_admin_v1_members_pb2.BatchGetMembersRequest,
+                output=chatto_admin_v1_members_pb2.BatchGetMembersResponse,
             ),
             headers=headers,
         )
 
-    async def assign_role(self, request: _pb2.AssignRoleRequest, *, headers: dict[str, str] | None = None) -> _pb2.AssignRoleResponse:
+    async def assign_role(self, request: chatto_admin_v1_members_pb2.AssignRoleRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.AssignRoleResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="AssignRole",
                 service_name="chatto.admin.v1.AdminUserService",
-                input=_pb2.AssignRoleRequest,
-                output=_pb2.AssignRoleResponse,
+                input=chatto_admin_v1_members_pb2.AssignRoleRequest,
+                output=chatto_admin_v1_members_pb2.AssignRoleResponse,
             ),
             headers=headers,
         )
 
-    async def revoke_role(self, request: _pb2.RevokeRoleRequest, *, headers: dict[str, str] | None = None) -> _pb2.RevokeRoleResponse:
+    async def revoke_role(self, request: chatto_admin_v1_members_pb2.RevokeRoleRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.RevokeRoleResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="RevokeRole",
                 service_name="chatto.admin.v1.AdminUserService",
-                input=_pb2.RevokeRoleRequest,
-                output=_pb2.RevokeRoleResponse,
+                input=chatto_admin_v1_members_pb2.RevokeRoleRequest,
+                output=chatto_admin_v1_members_pb2.RevokeRoleResponse,
             ),
             headers=headers,
         )
 
-    async def update_user(self, request: _pb2.UpdateUserRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateUserResponse:
+    async def update_user(self, request: chatto_admin_v1_members_pb2.UpdateUserRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.UpdateUserResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateUser",
                 service_name="chatto.admin.v1.AdminUserService",
-                input=_pb2.UpdateUserRequest,
-                output=_pb2.UpdateUserResponse,
+                input=chatto_admin_v1_members_pb2.UpdateUserRequest,
+                output=chatto_admin_v1_members_pb2.UpdateUserResponse,
             ),
             headers=headers,
         )
 
-    async def update_user_password(self, request: _pb2.UpdateUserPasswordRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateUserPasswordResponse:
+    async def change_user_password(self, request: chatto_admin_v1_members_pb2.ChangeUserPasswordRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.ChangeUserPasswordResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="UpdateUserPassword",
+                name="ChangeUserPassword",
                 service_name="chatto.admin.v1.AdminUserService",
-                input=_pb2.UpdateUserPasswordRequest,
-                output=_pb2.UpdateUserPasswordResponse,
+                input=chatto_admin_v1_members_pb2.ChangeUserPasswordRequest,
+                output=chatto_admin_v1_members_pb2.ChangeUserPasswordResponse,
             ),
             headers=headers,
         )
 
-    async def clear_username_cooldown(self, request: _pb2.ClearUsernameCooldownRequest, *, headers: dict[str, str] | None = None) -> _pb2.ClearUsernameCooldownResponse:
+    async def clear_username_cooldown(self, request: chatto_admin_v1_members_pb2.ClearUsernameCooldownRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.ClearUsernameCooldownResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ClearUsernameCooldown",
                 service_name="chatto.admin.v1.AdminUserService",
-                input=_pb2.ClearUsernameCooldownRequest,
-                output=_pb2.ClearUsernameCooldownResponse,
+                input=chatto_admin_v1_members_pb2.ClearUsernameCooldownRequest,
+                output=chatto_admin_v1_members_pb2.ClearUsernameCooldownResponse,
             ),
             headers=headers,
         )
 
-    async def delete_user(self, request: _pb2.DeleteUserRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteUserResponse:
+    async def delete_user(self, request: chatto_admin_v1_members_pb2.DeleteUserRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.DeleteUserResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteUser",
                 service_name="chatto.admin.v1.AdminUserService",
-                input=_pb2.DeleteUserRequest,
-                output=_pb2.DeleteUserResponse,
+                input=chatto_admin_v1_members_pb2.DeleteUserRequest,
+                output=chatto_admin_v1_members_pb2.DeleteUserResponse,
             ),
             headers=headers,
         )
 
 class AdminUserServiceClientSync(ConnectClientSync):
 
-    def list_members(self, request: _pb2.ListMembersRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListMembersResponse:
+    def list_members(self, request: chatto_admin_v1_members_pb2.ListMembersRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.ListMembersResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListMembers",
                 service_name="chatto.admin.v1.AdminUserService",
-                input=_pb2.ListMembersRequest,
-                output=_pb2.ListMembersResponse,
+                input=chatto_admin_v1_members_pb2.ListMembersRequest,
+                output=chatto_admin_v1_members_pb2.ListMembersResponse,
             ),
             headers=headers,
         )
 
-    def get_member(self, request: _pb2.GetMemberRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetMemberResponse:
+    def get_member(self, request: chatto_admin_v1_members_pb2.GetMemberRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.GetMemberResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetMember",
                 service_name="chatto.admin.v1.AdminUserService",
-                input=_pb2.GetMemberRequest,
-                output=_pb2.GetMemberResponse,
+                input=chatto_admin_v1_members_pb2.GetMemberRequest,
+                output=chatto_admin_v1_members_pb2.GetMemberResponse,
             ),
             headers=headers,
         )
 
-    def batch_get_members(self, request: _pb2.BatchGetMembersRequest, *, headers: dict[str, str] | None = None) -> _pb2.BatchGetMembersResponse:
+    def batch_get_members(self, request: chatto_admin_v1_members_pb2.BatchGetMembersRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.BatchGetMembersResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="BatchGetMembers",
                 service_name="chatto.admin.v1.AdminUserService",
-                input=_pb2.BatchGetMembersRequest,
-                output=_pb2.BatchGetMembersResponse,
+                input=chatto_admin_v1_members_pb2.BatchGetMembersRequest,
+                output=chatto_admin_v1_members_pb2.BatchGetMembersResponse,
             ),
             headers=headers,
         )
 
-    def assign_role(self, request: _pb2.AssignRoleRequest, *, headers: dict[str, str] | None = None) -> _pb2.AssignRoleResponse:
+    def assign_role(self, request: chatto_admin_v1_members_pb2.AssignRoleRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.AssignRoleResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="AssignRole",
                 service_name="chatto.admin.v1.AdminUserService",
-                input=_pb2.AssignRoleRequest,
-                output=_pb2.AssignRoleResponse,
+                input=chatto_admin_v1_members_pb2.AssignRoleRequest,
+                output=chatto_admin_v1_members_pb2.AssignRoleResponse,
             ),
             headers=headers,
         )
 
-    def revoke_role(self, request: _pb2.RevokeRoleRequest, *, headers: dict[str, str] | None = None) -> _pb2.RevokeRoleResponse:
+    def revoke_role(self, request: chatto_admin_v1_members_pb2.RevokeRoleRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.RevokeRoleResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="RevokeRole",
                 service_name="chatto.admin.v1.AdminUserService",
-                input=_pb2.RevokeRoleRequest,
-                output=_pb2.RevokeRoleResponse,
+                input=chatto_admin_v1_members_pb2.RevokeRoleRequest,
+                output=chatto_admin_v1_members_pb2.RevokeRoleResponse,
             ),
             headers=headers,
         )
 
-    def update_user(self, request: _pb2.UpdateUserRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateUserResponse:
+    def update_user(self, request: chatto_admin_v1_members_pb2.UpdateUserRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.UpdateUserResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateUser",
                 service_name="chatto.admin.v1.AdminUserService",
-                input=_pb2.UpdateUserRequest,
-                output=_pb2.UpdateUserResponse,
+                input=chatto_admin_v1_members_pb2.UpdateUserRequest,
+                output=chatto_admin_v1_members_pb2.UpdateUserResponse,
             ),
             headers=headers,
         )
 
-    def update_user_password(self, request: _pb2.UpdateUserPasswordRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateUserPasswordResponse:
+    def change_user_password(self, request: chatto_admin_v1_members_pb2.ChangeUserPasswordRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.ChangeUserPasswordResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="UpdateUserPassword",
+                name="ChangeUserPassword",
                 service_name="chatto.admin.v1.AdminUserService",
-                input=_pb2.UpdateUserPasswordRequest,
-                output=_pb2.UpdateUserPasswordResponse,
+                input=chatto_admin_v1_members_pb2.ChangeUserPasswordRequest,
+                output=chatto_admin_v1_members_pb2.ChangeUserPasswordResponse,
             ),
             headers=headers,
         )
 
-    def clear_username_cooldown(self, request: _pb2.ClearUsernameCooldownRequest, *, headers: dict[str, str] | None = None) -> _pb2.ClearUsernameCooldownResponse:
+    def clear_username_cooldown(self, request: chatto_admin_v1_members_pb2.ClearUsernameCooldownRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.ClearUsernameCooldownResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ClearUsernameCooldown",
                 service_name="chatto.admin.v1.AdminUserService",
-                input=_pb2.ClearUsernameCooldownRequest,
-                output=_pb2.ClearUsernameCooldownResponse,
+                input=chatto_admin_v1_members_pb2.ClearUsernameCooldownRequest,
+                output=chatto_admin_v1_members_pb2.ClearUsernameCooldownResponse,
             ),
             headers=headers,
         )
 
-    def delete_user(self, request: _pb2.DeleteUserRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteUserResponse:
+    def delete_user(self, request: chatto_admin_v1_members_pb2.DeleteUserRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.DeleteUserResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteUser",
                 service_name="chatto.admin.v1.AdminUserService",
-                input=_pb2.DeleteUserRequest,
-                output=_pb2.DeleteUserResponse,
+                input=chatto_admin_v1_members_pb2.DeleteUserRequest,
+                output=chatto_admin_v1_members_pb2.DeleteUserResponse,
             ),
             headers=headers,
         )

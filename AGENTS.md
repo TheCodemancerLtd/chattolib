@@ -91,15 +91,16 @@ to its grants.
 | Discovery | `chatto.discovery.v1.ServerDiscoveryService` | `GetServer` (public) |
 | Server | `ServerService` | `GetMotd`, `GetRuntimeConfig` |
 | Viewer | `ViewerService` | `GetViewer` |
-| My account | `MyAccountService` | `UpdateProfile`, `UploadAvatar`, `DeleteAvatar`, `UpdateSettings`, `UpdatePresence`, `UpdateCustomStatus`, `DeleteCustomStatus` |
-| Users | `UserService` | `ListUsers`, `GetUser`, `BatchGetUsers` |
+| My account | `MyAccountService` | `UpdateProfile`, `UpdateSettings`, `SetPresence`, `SetCustomStatus`, `DeleteCustomStatus`, `ChangePassword`, `DeleteMyAccount` (avatar upload was removed in 0.5.0b4) |
 | Roles | `RoleService` | `ListRoles`, `GetRole`, `BatchGetRoles` |
 | Room directory | `RoomDirectoryService` | `ListRooms`, `ListRoomGroups`, `GetRoomGroup`, `BatchGetRoomGroups`, `GetRoom`, `BatchGetRooms` |
-| Rooms | `RoomService` | `CreateRoom`, `UpdateRoom`, `ArchiveRoom`, `UnarchiveRoom`, `JoinRoom`, `JoinRoomGroup`, `StartDM`, `LeaveRoom`, `AddMember`, `RemoveMember`, `ListMembers`, `GetMember`, `BatchGetMembers`, `BanMember`, `UnbanMember`, `ListBans`, `UpdateTypingIndicator`, `GetRoomEvents`, `GetRoomEventsAround`, `MarkRoomAsRead`, `ListRoomAttachments` |
+| Rooms | `RoomService` | `CreateRoom`, `UpdateRoom`, `ArchiveRoom`, `UnarchiveRoom`, `JoinRoom`, `JoinRoomGroup`, `StartDM`, `LeaveRoom`, `AddMember`, `RemoveMember`, `ListMembers`, `GetMember`, `BatchGetMembers`, `BanMember`, `UnbanMember`, `ListBans`, `RefreshTypingIndicator`, `GetRoomEvents`, `GetRoomEventsAround`, `MarkRoomAsRead`, `ListRoomAttachments` |
 | Messages | `MessageService` | `FetchLinkPreview`, `CreateMessage`, `UpdateMessage`, `DeleteMessage`, `DeleteAttachment`, `DeleteLinkPreview`, `GetMessage`, `BatchGetMessages`, `AddReaction`, `RemoveReaction` |
 | Threads | `ThreadService` | `FollowThread`, `UnfollowThread`, `ListFollowedThreads`, `GetThreadEvents`, `GetThreadEventsAround`, `MarkThreadAsRead` |
 | Notifications | `NotificationService` | `ListNotifications`, `GetNotification`, `BatchGetNotifications`, `ListRoomNotifications`, `ListRoomNotificationCounts`, `HasNotifications`, `DismissNotification`, `DismissAllNotifications` |
 | Notification prefs | `NotificationPreferencesService` | `Get`/`Update` × `Server`/`Room` |
+| Notification policy | `NotificationPolicyService` | `GetNotificationPolicy`, `BatchGetNotificationPolicies`, `UpdateNotificationPolicy` — all scoped (server / room group / room) via `NotificationPolicyScope` |
+| Permissions | `PermissionService` | `ListEffectivePermissions` (the resolved permission decisions for a user) |
 | Push | `PushNotificationService` | `Subscribe`, `Unsubscribe` |
 | Assets | `AssetService` | `GetAsset`, `BatchGetAssets` |
 | Asset uploads | `AssetUploadService` | `CreateUpload`, `UploadChunk`, `GetUpload`, `CompleteUpload`, `CancelUpload`. `upload_attachment(room, path)` helper computes SHA-256, chunks, and completes in one call. |
@@ -110,8 +111,8 @@ to its grants.
 | Admin: event log | `chatto.admin.v1.AdminEventLogService` | `ListEvents`, `ListEventTypes`, `GetEvent` (raw response) |
 | Admin: diagnostics | `chatto.admin.v1.AdminDiagnosticsService` | `GetSystemInfo` (raw response) |
 | Admin: permissions | `chatto.admin.v1.AdminPermissionService` | `GetRole/UserPermissionMatrix`, `ListRole/UserPermissionDecisions`, `ExplainPermissions`, `SetRolePermission`, `SetUserPermission` (raw responses where the permission shape is server-version-dependent) |
-| Voice calls | `VoiceCallService` | `ListActiveCalls`, `GetActiveCall`, `BatchGetActiveCalls`, `JoinCall`, `LeaveCall`, `GetCallToken` |
-| Realtime (WS) | `chatto.realtime.v1` protobuf WS (protocol v1) | `stream_events(client)` / `RealtimeConnection` — full frame set: hello, subscribe, event, heartbeat, ping/pong, error, close |
+| Voice calls | `VoiceCallService` | `ListActiveCalls`, `GetActiveCall`, `BatchGetActiveCalls`, `JoinCall`, `LeaveCall`, `CreateCallToken` |
+| Realtime (WS) | `chatto.realtime.v1` protobuf WS (protocol v4) | `stream_events(client)` / `RealtimeConnection` — the client sends one `RealtimeSubscribe` handshake; the server streams `event` (a 48-member oneof of thin, caller-scoped hints), `snapshot`, `caught_up`, `heartbeat`, and `close` (with a `RealtimeCloseCode` and `retry_after`) |
 
 ### Naming conventions
 
@@ -124,11 +125,12 @@ to its grants.
 
 - The old `RoomType` enum is now `RoomKind` (`ROOM_KIND_CHANNEL` / `ROOM_KIND_DM`).
 - `Room` no longer carries viewer-scoped state (`hasUnread`, etc.). The directory service returns `RoomWithViewerState { room, viewerState }` for that.
-- `PresenceStatus` now includes `UNSPECIFIED`. `UpdatePresence` still rejects both `OFFLINE` and `UNSPECIFIED`.
+- `PresenceStatus` now includes `UNSPECIFIED`. `SetPresence` (was `UpdatePresence`) rejects both `OFFLINE` and `UNSPECIFIED`.
 - `TimeFormat` values changed: `HOUR_12` / `HOUR_24` / `AUTO` (was `TWELVE_HOUR` / `TWENTY_FOUR_HOUR`).
 - Notifications are strongly typed via a `oneof` (`direct_message`, `mention`, `reply`, `room_message`); `Notification.kind` carries the tag.
 - Timeline events (`RoomTimelineEvent`) are also a `oneof`; `TimelineEvent.kind` names the case (`message_posted`, `room_created`, …). Only `message_posted` populates a `Message` payload.
-- File uploads (avatar) use the `ImageUpload` message with base64-encoded bytes, not multipart. `upload_avatar(path)` handles the base64 encoding.
+- `User.is_bot` is gone; a user is a bot when it carries a `bot` (`BotInfo { owner_user_id }`) field. `User.is_bot` is now a derived `@property`.
+- Avatar upload was **removed** in 0.5.0b4 — there is no `UploadAvatar`/`ImageUpload` and no `upload_avatar`/`delete_avatar` client methods anymore.
 - Server profile fields are no longer inside `server.profile`; the shape is now `ServerPublicProfile` returned by `ServerDiscoveryService.GetServer`.
 - No more `motd` on the public profile; it is a separate authenticated RPC (`ServerService.GetMotd`).
 - Room groups can contain `SidebarLink` items (not just rooms). `RoomGroup.sidebar_links` exposes them.
@@ -136,4 +138,5 @@ to its grants.
 
 ### Known bugs
 
-- **`Bot._on_timeline_upsert` crashes on room-lifecycle events** (`chattolib-uuqm`). `RoomTimelineRoomEvent` has a `room_id` string field, not a nested `room` message. The handler calls `sub.HasField("room")` which raises a protobuf error. Affects `room_created`, `user_joined_room`, etc. Fix: use `sub.room_id` and build a minimal `Room` from it. Discovered 2026-08-31 during robochatto 0.5 upgrade testing.
+- **Realtime is now protocol v4 — there are no projection frames.** The v2/v3 "projection" frames (`RealtimeProjectionEvent` / per-op `RealtimeProjectionOperation`) no longer exist. Instead the client sends a single `RealtimeSubscribe` handshake and the server streams `event` frames (a 48-member `oneof` of *thin, caller-scoped hints* — identifiers, not full resources), plus `snapshot` (one initial state), `caught_up` (recovery-to-live boundary), `heartbeat`, and `close` (with a `RealtimeCloseCode` and a `retry_after` duration). Live events carry IDs, so clients hydrate the referenced resource via the matching ConnectRPC (e.g. `get_message`) using the event's `cursor`. `Bot._handle_live` re-derives `BotMessageEvent` by hydrating the posted message.
+- `RealtimeClose.code` is the enum `RealtimeCloseCode` (e.g. `SESSION_TERMINATED`, `RESYNC_REQUIRED`, `UNSUPPORTED_PROTOCOL`); `chattolib.realtime` maps it to its short name for `ChattoRealtimeCloseError.code`. A non-`reconnect` close (e.g. `SESSION_TERMINATED`) means the bot should stop, not reconnect.

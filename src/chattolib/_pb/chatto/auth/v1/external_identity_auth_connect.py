@@ -2,104 +2,104 @@
 
 # source: chatto/auth/v1/external_identity_auth.proto
 
-import chatto.auth.v1.external_identity_auth_pb2 as _pb2
+import chatto.auth.v1.external_identity_auth_pb2 as chatto_auth_v1_external_identity_auth_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class ExternalIdentityAuthServiceClient(ConnectClient):
-    async def get_pending_external_identity(self, request: _pb2.GetPendingExternalIdentityRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetPendingExternalIdentityResponse:
+    async def get_pending_external_identity(self, request: chatto_auth_v1_external_identity_auth_pb2.GetPendingExternalIdentityRequest, *, headers: dict[str, str] | None = None) -> chatto_auth_v1_external_identity_auth_pb2.GetPendingExternalIdentityResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetPendingExternalIdentity",
                 service_name="chatto.auth.v1.ExternalIdentityAuthService",
-                input=_pb2.GetPendingExternalIdentityRequest,
-                output=_pb2.GetPendingExternalIdentityResponse,
+                input=chatto_auth_v1_external_identity_auth_pb2.GetPendingExternalIdentityRequest,
+                output=chatto_auth_v1_external_identity_auth_pb2.GetPendingExternalIdentityResponse,
             ),
             headers=headers,
         )
 
-    async def create_external_identity_account(self, request: _pb2.CreateExternalIdentityAccountRequest, *, headers: dict[str, str] | None = None) -> _pb2.CreateExternalIdentityAccountResponse:
+    async def create_external_identity_account(self, request: chatto_auth_v1_external_identity_auth_pb2.CreateExternalIdentityAccountRequest, *, headers: dict[str, str] | None = None) -> chatto_auth_v1_external_identity_auth_pb2.CreateExternalIdentityAccountResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CreateExternalIdentityAccount",
                 service_name="chatto.auth.v1.ExternalIdentityAuthService",
-                input=_pb2.CreateExternalIdentityAccountRequest,
-                output=_pb2.CreateExternalIdentityAccountResponse,
+                input=chatto_auth_v1_external_identity_auth_pb2.CreateExternalIdentityAccountRequest,
+                output=chatto_auth_v1_external_identity_auth_pb2.CreateExternalIdentityAccountResponse,
             ),
             headers=headers,
         )
 
-    async def confirm_external_identity_link(self, request: _pb2.ConfirmExternalIdentityLinkRequest, *, headers: dict[str, str] | None = None) -> _pb2.ConfirmExternalIdentityLinkResponse:
+    async def confirm_external_identity_link(self, request: chatto_auth_v1_external_identity_auth_pb2.ConfirmExternalIdentityLinkRequest, *, headers: dict[str, str] | None = None) -> chatto_auth_v1_external_identity_auth_pb2.ConfirmExternalIdentityLinkResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ConfirmExternalIdentityLink",
                 service_name="chatto.auth.v1.ExternalIdentityAuthService",
-                input=_pb2.ConfirmExternalIdentityLinkRequest,
-                output=_pb2.ConfirmExternalIdentityLinkResponse,
+                input=chatto_auth_v1_external_identity_auth_pb2.ConfirmExternalIdentityLinkRequest,
+                output=chatto_auth_v1_external_identity_auth_pb2.ConfirmExternalIdentityLinkResponse,
             ),
             headers=headers,
         )
 
-    async def cancel_external_identity_flow(self, request: _pb2.CancelExternalIdentityFlowRequest, *, headers: dict[str, str] | None = None) -> _pb2.CancelExternalIdentityFlowResponse:
+    async def cancel_external_identity_flow(self, request: chatto_auth_v1_external_identity_auth_pb2.CancelExternalIdentityFlowRequest, *, headers: dict[str, str] | None = None) -> chatto_auth_v1_external_identity_auth_pb2.CancelExternalIdentityFlowResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CancelExternalIdentityFlow",
                 service_name="chatto.auth.v1.ExternalIdentityAuthService",
-                input=_pb2.CancelExternalIdentityFlowRequest,
-                output=_pb2.CancelExternalIdentityFlowResponse,
+                input=chatto_auth_v1_external_identity_auth_pb2.CancelExternalIdentityFlowRequest,
+                output=chatto_auth_v1_external_identity_auth_pb2.CancelExternalIdentityFlowResponse,
             ),
             headers=headers,
         )
 
 class ExternalIdentityAuthServiceClientSync(ConnectClientSync):
 
-    def get_pending_external_identity(self, request: _pb2.GetPendingExternalIdentityRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetPendingExternalIdentityResponse:
+    def get_pending_external_identity(self, request: chatto_auth_v1_external_identity_auth_pb2.GetPendingExternalIdentityRequest, *, headers: dict[str, str] | None = None) -> chatto_auth_v1_external_identity_auth_pb2.GetPendingExternalIdentityResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetPendingExternalIdentity",
                 service_name="chatto.auth.v1.ExternalIdentityAuthService",
-                input=_pb2.GetPendingExternalIdentityRequest,
-                output=_pb2.GetPendingExternalIdentityResponse,
+                input=chatto_auth_v1_external_identity_auth_pb2.GetPendingExternalIdentityRequest,
+                output=chatto_auth_v1_external_identity_auth_pb2.GetPendingExternalIdentityResponse,
             ),
             headers=headers,
         )
 
-    def create_external_identity_account(self, request: _pb2.CreateExternalIdentityAccountRequest, *, headers: dict[str, str] | None = None) -> _pb2.CreateExternalIdentityAccountResponse:
+    def create_external_identity_account(self, request: chatto_auth_v1_external_identity_auth_pb2.CreateExternalIdentityAccountRequest, *, headers: dict[str, str] | None = None) -> chatto_auth_v1_external_identity_auth_pb2.CreateExternalIdentityAccountResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CreateExternalIdentityAccount",
                 service_name="chatto.auth.v1.ExternalIdentityAuthService",
-                input=_pb2.CreateExternalIdentityAccountRequest,
-                output=_pb2.CreateExternalIdentityAccountResponse,
+                input=chatto_auth_v1_external_identity_auth_pb2.CreateExternalIdentityAccountRequest,
+                output=chatto_auth_v1_external_identity_auth_pb2.CreateExternalIdentityAccountResponse,
             ),
             headers=headers,
         )
 
-    def confirm_external_identity_link(self, request: _pb2.ConfirmExternalIdentityLinkRequest, *, headers: dict[str, str] | None = None) -> _pb2.ConfirmExternalIdentityLinkResponse:
+    def confirm_external_identity_link(self, request: chatto_auth_v1_external_identity_auth_pb2.ConfirmExternalIdentityLinkRequest, *, headers: dict[str, str] | None = None) -> chatto_auth_v1_external_identity_auth_pb2.ConfirmExternalIdentityLinkResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ConfirmExternalIdentityLink",
                 service_name="chatto.auth.v1.ExternalIdentityAuthService",
-                input=_pb2.ConfirmExternalIdentityLinkRequest,
-                output=_pb2.ConfirmExternalIdentityLinkResponse,
+                input=chatto_auth_v1_external_identity_auth_pb2.ConfirmExternalIdentityLinkRequest,
+                output=chatto_auth_v1_external_identity_auth_pb2.ConfirmExternalIdentityLinkResponse,
             ),
             headers=headers,
         )
 
-    def cancel_external_identity_flow(self, request: _pb2.CancelExternalIdentityFlowRequest, *, headers: dict[str, str] | None = None) -> _pb2.CancelExternalIdentityFlowResponse:
+    def cancel_external_identity_flow(self, request: chatto_auth_v1_external_identity_auth_pb2.CancelExternalIdentityFlowRequest, *, headers: dict[str, str] | None = None) -> chatto_auth_v1_external_identity_auth_pb2.CancelExternalIdentityFlowResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CancelExternalIdentityFlow",
                 service_name="chatto.auth.v1.ExternalIdentityAuthService",
-                input=_pb2.CancelExternalIdentityFlowRequest,
-                output=_pb2.CancelExternalIdentityFlowResponse,
+                input=chatto_auth_v1_external_identity_auth_pb2.CancelExternalIdentityFlowRequest,
+                output=chatto_auth_v1_external_identity_auth_pb2.CancelExternalIdentityFlowResponse,
             ),
             headers=headers,
         )

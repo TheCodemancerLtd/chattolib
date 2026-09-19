@@ -2,368 +2,368 @@
 
 # source: chatto/admin/v1/room_layout.proto
 
-import chatto.admin.v1.room_layout_pb2 as _pb2
+import chatto.admin.v1.room_layout_pb2 as chatto_admin_v1_room_layout_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class AdminRoomLayoutServiceClient(ConnectClient):
-    async def get_room(self, request: _pb2.GetRoomRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRoomResponse:
+    async def get_room(self, request: chatto_admin_v1_room_layout_pb2.GetRoomRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.GetRoomResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRoom",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.GetRoomRequest,
-                output=_pb2.GetRoomResponse,
+                input=chatto_admin_v1_room_layout_pb2.GetRoomRequest,
+                output=chatto_admin_v1_room_layout_pb2.GetRoomResponse,
             ),
             headers=headers,
         )
 
-    async def get_room_group(self, request: _pb2.GetRoomGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRoomGroupResponse:
+    async def get_room_group(self, request: chatto_admin_v1_room_layout_pb2.GetRoomGroupRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.GetRoomGroupResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRoomGroup",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.GetRoomGroupRequest,
-                output=_pb2.GetRoomGroupResponse,
+                input=chatto_admin_v1_room_layout_pb2.GetRoomGroupRequest,
+                output=chatto_admin_v1_room_layout_pb2.GetRoomGroupResponse,
             ),
             headers=headers,
         )
 
-    async def list_room_groups(self, request: _pb2.ListRoomGroupsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListRoomGroupsResponse:
+    async def list_room_groups(self, request: chatto_admin_v1_room_layout_pb2.ListRoomGroupsRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.ListRoomGroupsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListRoomGroups",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.ListRoomGroupsRequest,
-                output=_pb2.ListRoomGroupsResponse,
+                input=chatto_admin_v1_room_layout_pb2.ListRoomGroupsRequest,
+                output=chatto_admin_v1_room_layout_pb2.ListRoomGroupsResponse,
             ),
             headers=headers,
         )
 
-    async def create_room_group(self, request: _pb2.CreateRoomGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.CreateRoomGroupResponse:
+    async def create_room_group(self, request: chatto_admin_v1_room_layout_pb2.CreateRoomGroupRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.CreateRoomGroupResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CreateRoomGroup",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.CreateRoomGroupRequest,
-                output=_pb2.CreateRoomGroupResponse,
+                input=chatto_admin_v1_room_layout_pb2.CreateRoomGroupRequest,
+                output=chatto_admin_v1_room_layout_pb2.CreateRoomGroupResponse,
             ),
             headers=headers,
         )
 
-    async def update_room_group(self, request: _pb2.UpdateRoomGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateRoomGroupResponse:
+    async def update_room_group(self, request: chatto_admin_v1_room_layout_pb2.UpdateRoomGroupRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.UpdateRoomGroupResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateRoomGroup",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.UpdateRoomGroupRequest,
-                output=_pb2.UpdateRoomGroupResponse,
+                input=chatto_admin_v1_room_layout_pb2.UpdateRoomGroupRequest,
+                output=chatto_admin_v1_room_layout_pb2.UpdateRoomGroupResponse,
             ),
             headers=headers,
         )
 
-    async def delete_room_group(self, request: _pb2.DeleteRoomGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteRoomGroupResponse:
+    async def delete_room_group(self, request: chatto_admin_v1_room_layout_pb2.DeleteRoomGroupRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.DeleteRoomGroupResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteRoomGroup",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.DeleteRoomGroupRequest,
-                output=_pb2.DeleteRoomGroupResponse,
+                input=chatto_admin_v1_room_layout_pb2.DeleteRoomGroupRequest,
+                output=chatto_admin_v1_room_layout_pb2.DeleteRoomGroupResponse,
             ),
             headers=headers,
         )
 
-    async def reorder_room_groups(self, request: _pb2.ReorderRoomGroupsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ReorderRoomGroupsResponse:
+    async def reorder_room_groups(self, request: chatto_admin_v1_room_layout_pb2.ReorderRoomGroupsRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.ReorderRoomGroupsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ReorderRoomGroups",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.ReorderRoomGroupsRequest,
-                output=_pb2.ReorderRoomGroupsResponse,
+                input=chatto_admin_v1_room_layout_pb2.ReorderRoomGroupsRequest,
+                output=chatto_admin_v1_room_layout_pb2.ReorderRoomGroupsResponse,
             ),
             headers=headers,
         )
 
-    async def move_room_group(self, request: _pb2.MoveRoomGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.MoveRoomGroupResponse:
+    async def move_room_group(self, request: chatto_admin_v1_room_layout_pb2.MoveRoomGroupRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.MoveRoomGroupResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="MoveRoomGroup",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.MoveRoomGroupRequest,
-                output=_pb2.MoveRoomGroupResponse,
+                input=chatto_admin_v1_room_layout_pb2.MoveRoomGroupRequest,
+                output=chatto_admin_v1_room_layout_pb2.MoveRoomGroupResponse,
             ),
             headers=headers,
         )
 
-    async def move_room_to_group(self, request: _pb2.MoveRoomToGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.MoveRoomToGroupResponse:
+    async def move_room_to_group(self, request: chatto_admin_v1_room_layout_pb2.MoveRoomToGroupRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.MoveRoomToGroupResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="MoveRoomToGroup",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.MoveRoomToGroupRequest,
-                output=_pb2.MoveRoomToGroupResponse,
+                input=chatto_admin_v1_room_layout_pb2.MoveRoomToGroupRequest,
+                output=chatto_admin_v1_room_layout_pb2.MoveRoomToGroupResponse,
             ),
             headers=headers,
         )
 
-    async def reorder_sidebar_items_in_group(self, request: _pb2.ReorderSidebarItemsInGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.ReorderSidebarItemsInGroupResponse:
+    async def reorder_sidebar_items_in_group(self, request: chatto_admin_v1_room_layout_pb2.ReorderSidebarItemsInGroupRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.ReorderSidebarItemsInGroupResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ReorderSidebarItemsInGroup",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.ReorderSidebarItemsInGroupRequest,
-                output=_pb2.ReorderSidebarItemsInGroupResponse,
+                input=chatto_admin_v1_room_layout_pb2.ReorderSidebarItemsInGroupRequest,
+                output=chatto_admin_v1_room_layout_pb2.ReorderSidebarItemsInGroupResponse,
             ),
             headers=headers,
         )
 
-    async def move_sidebar_item(self, request: _pb2.MoveSidebarItemRequest, *, headers: dict[str, str] | None = None) -> _pb2.MoveSidebarItemResponse:
+    async def move_sidebar_item(self, request: chatto_admin_v1_room_layout_pb2.MoveSidebarItemRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.MoveSidebarItemResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="MoveSidebarItem",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.MoveSidebarItemRequest,
-                output=_pb2.MoveSidebarItemResponse,
+                input=chatto_admin_v1_room_layout_pb2.MoveSidebarItemRequest,
+                output=chatto_admin_v1_room_layout_pb2.MoveSidebarItemResponse,
             ),
             headers=headers,
         )
 
-    async def create_sidebar_link(self, request: _pb2.CreateSidebarLinkRequest, *, headers: dict[str, str] | None = None) -> _pb2.CreateSidebarLinkResponse:
+    async def create_sidebar_link(self, request: chatto_admin_v1_room_layout_pb2.CreateSidebarLinkRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.CreateSidebarLinkResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CreateSidebarLink",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.CreateSidebarLinkRequest,
-                output=_pb2.CreateSidebarLinkResponse,
+                input=chatto_admin_v1_room_layout_pb2.CreateSidebarLinkRequest,
+                output=chatto_admin_v1_room_layout_pb2.CreateSidebarLinkResponse,
             ),
             headers=headers,
         )
 
-    async def update_sidebar_link(self, request: _pb2.UpdateSidebarLinkRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateSidebarLinkResponse:
+    async def update_sidebar_link(self, request: chatto_admin_v1_room_layout_pb2.UpdateSidebarLinkRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.UpdateSidebarLinkResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateSidebarLink",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.UpdateSidebarLinkRequest,
-                output=_pb2.UpdateSidebarLinkResponse,
+                input=chatto_admin_v1_room_layout_pb2.UpdateSidebarLinkRequest,
+                output=chatto_admin_v1_room_layout_pb2.UpdateSidebarLinkResponse,
             ),
             headers=headers,
         )
 
-    async def delete_sidebar_link(self, request: _pb2.DeleteSidebarLinkRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteSidebarLinkResponse:
+    async def delete_sidebar_link(self, request: chatto_admin_v1_room_layout_pb2.DeleteSidebarLinkRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.DeleteSidebarLinkResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteSidebarLink",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.DeleteSidebarLinkRequest,
-                output=_pb2.DeleteSidebarLinkResponse,
+                input=chatto_admin_v1_room_layout_pb2.DeleteSidebarLinkRequest,
+                output=chatto_admin_v1_room_layout_pb2.DeleteSidebarLinkResponse,
             ),
             headers=headers,
         )
 
-    async def move_sidebar_link_to_group(self, request: _pb2.MoveSidebarLinkToGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.MoveSidebarLinkToGroupResponse:
+    async def move_sidebar_link_to_group(self, request: chatto_admin_v1_room_layout_pb2.MoveSidebarLinkToGroupRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.MoveSidebarLinkToGroupResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="MoveSidebarLinkToGroup",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.MoveSidebarLinkToGroupRequest,
-                output=_pb2.MoveSidebarLinkToGroupResponse,
+                input=chatto_admin_v1_room_layout_pb2.MoveSidebarLinkToGroupRequest,
+                output=chatto_admin_v1_room_layout_pb2.MoveSidebarLinkToGroupResponse,
             ),
             headers=headers,
         )
 
 class AdminRoomLayoutServiceClientSync(ConnectClientSync):
 
-    def get_room(self, request: _pb2.GetRoomRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRoomResponse:
+    def get_room(self, request: chatto_admin_v1_room_layout_pb2.GetRoomRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.GetRoomResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRoom",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.GetRoomRequest,
-                output=_pb2.GetRoomResponse,
+                input=chatto_admin_v1_room_layout_pb2.GetRoomRequest,
+                output=chatto_admin_v1_room_layout_pb2.GetRoomResponse,
             ),
             headers=headers,
         )
 
-    def get_room_group(self, request: _pb2.GetRoomGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetRoomGroupResponse:
+    def get_room_group(self, request: chatto_admin_v1_room_layout_pb2.GetRoomGroupRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.GetRoomGroupResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetRoomGroup",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.GetRoomGroupRequest,
-                output=_pb2.GetRoomGroupResponse,
+                input=chatto_admin_v1_room_layout_pb2.GetRoomGroupRequest,
+                output=chatto_admin_v1_room_layout_pb2.GetRoomGroupResponse,
             ),
             headers=headers,
         )
 
-    def list_room_groups(self, request: _pb2.ListRoomGroupsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListRoomGroupsResponse:
+    def list_room_groups(self, request: chatto_admin_v1_room_layout_pb2.ListRoomGroupsRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.ListRoomGroupsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListRoomGroups",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.ListRoomGroupsRequest,
-                output=_pb2.ListRoomGroupsResponse,
+                input=chatto_admin_v1_room_layout_pb2.ListRoomGroupsRequest,
+                output=chatto_admin_v1_room_layout_pb2.ListRoomGroupsResponse,
             ),
             headers=headers,
         )
 
-    def create_room_group(self, request: _pb2.CreateRoomGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.CreateRoomGroupResponse:
+    def create_room_group(self, request: chatto_admin_v1_room_layout_pb2.CreateRoomGroupRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.CreateRoomGroupResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CreateRoomGroup",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.CreateRoomGroupRequest,
-                output=_pb2.CreateRoomGroupResponse,
+                input=chatto_admin_v1_room_layout_pb2.CreateRoomGroupRequest,
+                output=chatto_admin_v1_room_layout_pb2.CreateRoomGroupResponse,
             ),
             headers=headers,
         )
 
-    def update_room_group(self, request: _pb2.UpdateRoomGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateRoomGroupResponse:
+    def update_room_group(self, request: chatto_admin_v1_room_layout_pb2.UpdateRoomGroupRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.UpdateRoomGroupResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateRoomGroup",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.UpdateRoomGroupRequest,
-                output=_pb2.UpdateRoomGroupResponse,
+                input=chatto_admin_v1_room_layout_pb2.UpdateRoomGroupRequest,
+                output=chatto_admin_v1_room_layout_pb2.UpdateRoomGroupResponse,
             ),
             headers=headers,
         )
 
-    def delete_room_group(self, request: _pb2.DeleteRoomGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteRoomGroupResponse:
+    def delete_room_group(self, request: chatto_admin_v1_room_layout_pb2.DeleteRoomGroupRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.DeleteRoomGroupResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteRoomGroup",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.DeleteRoomGroupRequest,
-                output=_pb2.DeleteRoomGroupResponse,
+                input=chatto_admin_v1_room_layout_pb2.DeleteRoomGroupRequest,
+                output=chatto_admin_v1_room_layout_pb2.DeleteRoomGroupResponse,
             ),
             headers=headers,
         )
 
-    def reorder_room_groups(self, request: _pb2.ReorderRoomGroupsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ReorderRoomGroupsResponse:
+    def reorder_room_groups(self, request: chatto_admin_v1_room_layout_pb2.ReorderRoomGroupsRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.ReorderRoomGroupsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ReorderRoomGroups",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.ReorderRoomGroupsRequest,
-                output=_pb2.ReorderRoomGroupsResponse,
+                input=chatto_admin_v1_room_layout_pb2.ReorderRoomGroupsRequest,
+                output=chatto_admin_v1_room_layout_pb2.ReorderRoomGroupsResponse,
             ),
             headers=headers,
         )
 
-    def move_room_group(self, request: _pb2.MoveRoomGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.MoveRoomGroupResponse:
+    def move_room_group(self, request: chatto_admin_v1_room_layout_pb2.MoveRoomGroupRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.MoveRoomGroupResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="MoveRoomGroup",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.MoveRoomGroupRequest,
-                output=_pb2.MoveRoomGroupResponse,
+                input=chatto_admin_v1_room_layout_pb2.MoveRoomGroupRequest,
+                output=chatto_admin_v1_room_layout_pb2.MoveRoomGroupResponse,
             ),
             headers=headers,
         )
 
-    def move_room_to_group(self, request: _pb2.MoveRoomToGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.MoveRoomToGroupResponse:
+    def move_room_to_group(self, request: chatto_admin_v1_room_layout_pb2.MoveRoomToGroupRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.MoveRoomToGroupResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="MoveRoomToGroup",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.MoveRoomToGroupRequest,
-                output=_pb2.MoveRoomToGroupResponse,
+                input=chatto_admin_v1_room_layout_pb2.MoveRoomToGroupRequest,
+                output=chatto_admin_v1_room_layout_pb2.MoveRoomToGroupResponse,
             ),
             headers=headers,
         )
 
-    def reorder_sidebar_items_in_group(self, request: _pb2.ReorderSidebarItemsInGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.ReorderSidebarItemsInGroupResponse:
+    def reorder_sidebar_items_in_group(self, request: chatto_admin_v1_room_layout_pb2.ReorderSidebarItemsInGroupRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.ReorderSidebarItemsInGroupResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ReorderSidebarItemsInGroup",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.ReorderSidebarItemsInGroupRequest,
-                output=_pb2.ReorderSidebarItemsInGroupResponse,
+                input=chatto_admin_v1_room_layout_pb2.ReorderSidebarItemsInGroupRequest,
+                output=chatto_admin_v1_room_layout_pb2.ReorderSidebarItemsInGroupResponse,
             ),
             headers=headers,
         )
 
-    def move_sidebar_item(self, request: _pb2.MoveSidebarItemRequest, *, headers: dict[str, str] | None = None) -> _pb2.MoveSidebarItemResponse:
+    def move_sidebar_item(self, request: chatto_admin_v1_room_layout_pb2.MoveSidebarItemRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.MoveSidebarItemResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="MoveSidebarItem",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.MoveSidebarItemRequest,
-                output=_pb2.MoveSidebarItemResponse,
+                input=chatto_admin_v1_room_layout_pb2.MoveSidebarItemRequest,
+                output=chatto_admin_v1_room_layout_pb2.MoveSidebarItemResponse,
             ),
             headers=headers,
         )
 
-    def create_sidebar_link(self, request: _pb2.CreateSidebarLinkRequest, *, headers: dict[str, str] | None = None) -> _pb2.CreateSidebarLinkResponse:
+    def create_sidebar_link(self, request: chatto_admin_v1_room_layout_pb2.CreateSidebarLinkRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.CreateSidebarLinkResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="CreateSidebarLink",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.CreateSidebarLinkRequest,
-                output=_pb2.CreateSidebarLinkResponse,
+                input=chatto_admin_v1_room_layout_pb2.CreateSidebarLinkRequest,
+                output=chatto_admin_v1_room_layout_pb2.CreateSidebarLinkResponse,
             ),
             headers=headers,
         )
 
-    def update_sidebar_link(self, request: _pb2.UpdateSidebarLinkRequest, *, headers: dict[str, str] | None = None) -> _pb2.UpdateSidebarLinkResponse:
+    def update_sidebar_link(self, request: chatto_admin_v1_room_layout_pb2.UpdateSidebarLinkRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.UpdateSidebarLinkResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="UpdateSidebarLink",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.UpdateSidebarLinkRequest,
-                output=_pb2.UpdateSidebarLinkResponse,
+                input=chatto_admin_v1_room_layout_pb2.UpdateSidebarLinkRequest,
+                output=chatto_admin_v1_room_layout_pb2.UpdateSidebarLinkResponse,
             ),
             headers=headers,
         )
 
-    def delete_sidebar_link(self, request: _pb2.DeleteSidebarLinkRequest, *, headers: dict[str, str] | None = None) -> _pb2.DeleteSidebarLinkResponse:
+    def delete_sidebar_link(self, request: chatto_admin_v1_room_layout_pb2.DeleteSidebarLinkRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.DeleteSidebarLinkResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="DeleteSidebarLink",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.DeleteSidebarLinkRequest,
-                output=_pb2.DeleteSidebarLinkResponse,
+                input=chatto_admin_v1_room_layout_pb2.DeleteSidebarLinkRequest,
+                output=chatto_admin_v1_room_layout_pb2.DeleteSidebarLinkResponse,
             ),
             headers=headers,
         )
 
-    def move_sidebar_link_to_group(self, request: _pb2.MoveSidebarLinkToGroupRequest, *, headers: dict[str, str] | None = None) -> _pb2.MoveSidebarLinkToGroupResponse:
+    def move_sidebar_link_to_group(self, request: chatto_admin_v1_room_layout_pb2.MoveSidebarLinkToGroupRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_room_layout_pb2.MoveSidebarLinkToGroupResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="MoveSidebarLinkToGroup",
                 service_name="chatto.admin.v1.AdminRoomLayoutService",
-                input=_pb2.MoveSidebarLinkToGroupRequest,
-                output=_pb2.MoveSidebarLinkToGroupResponse,
+                input=chatto_admin_v1_room_layout_pb2.MoveSidebarLinkToGroupRequest,
+                output=chatto_admin_v1_room_layout_pb2.MoveSidebarLinkToGroupResponse,
             ),
             headers=headers,
         )

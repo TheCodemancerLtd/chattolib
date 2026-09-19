@@ -88,6 +88,7 @@ fetch chatto/discovery/v1/server.proto
 
 # chatto.realtime.v1
 fetch chatto/realtime/v1/realtime.proto
+fetch chatto/realtime/v1/events.proto
 
 # buf.validate — sourced from bufbuild/protovalidate
 curl -sfL \

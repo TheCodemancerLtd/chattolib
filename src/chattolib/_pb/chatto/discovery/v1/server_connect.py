@@ -2,56 +2,56 @@
 
 # source: chatto/discovery/v1/server.proto
 
-import chatto.discovery.v1.server_pb2 as _pb2
+import chatto.discovery.v1.server_pb2 as chatto_discovery_v1_server_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class ServerDiscoveryServiceClient(ConnectClient):
-    async def get_server(self, request: _pb2.GetServerRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetServerResponse:
+    async def get_server(self, request: chatto_discovery_v1_server_pb2.GetServerRequest, *, headers: dict[str, str] | None = None) -> chatto_discovery_v1_server_pb2.GetServerResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetServer",
                 service_name="chatto.discovery.v1.ServerDiscoveryService",
-                input=_pb2.GetServerRequest,
-                output=_pb2.GetServerResponse,
+                input=chatto_discovery_v1_server_pb2.GetServerRequest,
+                output=chatto_discovery_v1_server_pb2.GetServerResponse,
             ),
             headers=headers,
         )
 
-    async def list_neighbors(self, request: _pb2.ListNeighborsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListNeighborsResponse:
+    async def list_neighbors(self, request: chatto_discovery_v1_server_pb2.ListNeighborsRequest, *, headers: dict[str, str] | None = None) -> chatto_discovery_v1_server_pb2.ListNeighborsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListNeighbors",
                 service_name="chatto.discovery.v1.ServerDiscoveryService",
-                input=_pb2.ListNeighborsRequest,
-                output=_pb2.ListNeighborsResponse,
+                input=chatto_discovery_v1_server_pb2.ListNeighborsRequest,
+                output=chatto_discovery_v1_server_pb2.ListNeighborsResponse,
             ),
             headers=headers,
         )
 
 class ServerDiscoveryServiceClientSync(ConnectClientSync):
 
-    def get_server(self, request: _pb2.GetServerRequest, *, headers: dict[str, str] | None = None) -> _pb2.GetServerResponse:
+    def get_server(self, request: chatto_discovery_v1_server_pb2.GetServerRequest, *, headers: dict[str, str] | None = None) -> chatto_discovery_v1_server_pb2.GetServerResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="GetServer",
                 service_name="chatto.discovery.v1.ServerDiscoveryService",
-                input=_pb2.GetServerRequest,
-                output=_pb2.GetServerResponse,
+                input=chatto_discovery_v1_server_pb2.GetServerRequest,
+                output=chatto_discovery_v1_server_pb2.GetServerResponse,
             ),
             headers=headers,
         )
 
-    def list_neighbors(self, request: _pb2.ListNeighborsRequest, *, headers: dict[str, str] | None = None) -> _pb2.ListNeighborsResponse:
+    def list_neighbors(self, request: chatto_discovery_v1_server_pb2.ListNeighborsRequest, *, headers: dict[str, str] | None = None) -> chatto_discovery_v1_server_pb2.ListNeighborsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
                 name="ListNeighbors",
                 service_name="chatto.discovery.v1.ServerDiscoveryService",
-                input=_pb2.ListNeighborsRequest,
-                output=_pb2.ListNeighborsResponse,
+                input=chatto_discovery_v1_server_pb2.ListNeighborsRequest,
+                output=chatto_discovery_v1_server_pb2.ListNeighborsResponse,
             ),
             headers=headers,
         )
