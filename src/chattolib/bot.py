@@ -64,6 +64,7 @@ from chattolib.realtime import (
 )
 from chattolib.types import (
     Message,
+    PresencePreference,
     PresenceStatus,
     Room,
     RoomGroup,
@@ -89,6 +90,7 @@ __all__ = [
     "BotEvent",
     "BotMessageEvent",
     "BotPresenceEvent",
+    "BotPresencePreferenceEvent",
     "BotReactionEvent",
     "BotRoomEvent",
     "BotTypingEvent",
@@ -187,6 +189,17 @@ class BotPresenceEvent(BotEvent):
 
     user_id: str
     status: PresenceStatus
+
+
+@dataclass
+class BotPresencePreferenceEvent(BotEvent):
+    """The bot's own private availability *preference* changed (0.5.0b6).
+
+    Delivered only to the account whose own choice changed. The wire payload is
+    an empty hint: to read the new choice, hydrate it from the bot via
+    ``await event.bot.get_presence_preference()`` (the current
+    :class:`~chattolib.types.PresencePreference`).
+    """
 
 
 @dataclass
@@ -334,7 +347,8 @@ class Bot:
         """Register ``handler`` for events of ``kind``.
 
         ``kind`` is one of: ``message``, ``reaction``, ``presence``,
-        ``typing``, ``room``, ``user``, ``*`` (all events). ``handler`` is an
+        ``presence_preference``, ``typing``, ``room``, ``user``, ``*`` (all
+        events). ``handler`` is an
         ``async def`` taking a single :class:`BotEvent`. Returns the handler
         so ``on`` can be used as a decorator.
         """
@@ -405,6 +419,28 @@ class Bot:
     async def set_presence(self, status: PresenceStatus) -> PresenceStatus:
         """Set the bot's presence (``ONLINE`` / ``AWAY`` / ``DO_NOT_DISTURB``)."""
         return await self._client.set_presence(status)
+
+    async def get_presence_preference(self) -> PresencePreference | None:
+        """Read the bot's saved availability choice (or ``None`` if unset)."""
+        return await self._client.get_presence_preference()
+
+    async def set_presence_preference(
+        self, status: PresenceStatus, *, expected_revision: str = ""
+    ) -> PresencePreference:
+        """Save the bot's availability choice for every device on the server.
+
+        Unlike :meth:`set_presence` this persists across disconnects and
+        accepts ``OFFLINE`` (meaning "Appear Offline"). Echo a prior
+        ``revision`` back as ``expected_revision`` to guard against a
+        concurrent change.
+        """
+        return await self._client.set_presence_preference(
+            status, expected_revision=expected_revision
+        )
+
+    async def refresh_presence(self) -> PresencePreference | None:
+        """Refresh the bot's liveness (call every ~30 s to stay "live")."""
+        return await self._client.refresh_presence()
 
     async def set_status(self, emoji: str, text: str) -> dict[str, Any]:
         """Set the bot's custom status (e.g. a "working on X" note)."""
@@ -540,6 +576,8 @@ class Bot:
                     status=_presence(frame.payload.status),
                 )
             )
+        elif kind == "viewer_presence_preference_changed":
+            await self._dispatch(BotPresencePreferenceEvent(bot=self, kind="presence_preference"))
         elif kind == "user_typing":
             payload = frame.payload
             await self._dispatch(

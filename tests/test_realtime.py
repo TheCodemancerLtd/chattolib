@@ -65,6 +65,23 @@ def test_wrap_event_presence_changed():
     assert wrapped.payload.status == presence_pb2.PresenceStatus.PRESENCE_STATUS_ONLINE
 
 
+def test_wrap_event_viewer_presence_preference_changed():
+    """0.5.0b6: the 48th oneof member is an empty hint delivered only to the
+    account whose own presence preference changed."""
+    from chattolib._pb.chatto.realtime.v1 import events_pb2, realtime_pb2
+
+    envelope = realtime_pb2.RealtimeEvent()
+    envelope.id = "evt_9"
+    envelope.actor_id = "u_me"
+    # Setting the empty message sets the oneof case.
+    envelope.viewer_presence_preference_changed.SetInParent()
+
+    wrapped = _wrap_event(envelope)
+    assert wrapped.kind == "viewer_presence_preference_changed"
+    assert wrapped.actor_id == "u_me"
+    assert isinstance(wrapped.payload, events_pb2.ViewerPresencePreferenceChangedEvent)
+
+
 def test_wrap_event_without_variant():
     """Envelope with no oneof set (server bug or truncation) should still wrap."""
     from chattolib._pb.chatto.realtime.v1 import realtime_pb2

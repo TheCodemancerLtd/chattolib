@@ -326,6 +326,80 @@ async def test_set_presence_offline_rejected(client):
             await client.set_presence(PresenceStatus.OFFLINE)
 
 
+async def test_get_presence_preference(client):
+    resp = presence_pb2.GetPresencePreferenceResponse()
+    resp.preference.status = "PRESENCE_STATUS_OFFLINE"
+    resp.preference.revision = "rev-1"
+    _mock_method(client, "account", "get_presence_preference", resp)
+
+    async with client:
+        pref = await client.get_presence_preference()
+
+    assert pref is not None
+    assert pref.status is PresenceStatus.OFFLINE
+    assert pref.revision == "rev-1"
+
+
+async def test_get_presence_preference_absent(client):
+    # No preference saved yet: the response carries no sub-message.
+    _mock_method(
+        client, "account", "get_presence_preference", presence_pb2.GetPresencePreferenceResponse()
+    )
+
+    async with client:
+        assert await client.get_presence_preference() is None
+
+
+async def test_set_presence_preference(client):
+    resp = presence_pb2.SetPresencePreferenceResponse()
+    resp.preference.status = "PRESENCE_STATUS_DO_NOT_DISTURB"
+    resp.preference.revision = "rev-2"
+    m = _mock_method(client, "account", "set_presence_preference", resp)
+
+    async with client:
+        pref = await client.set_presence_preference(
+            PresenceStatus.DO_NOT_DISTURB, expected_revision="rev-1"
+        )
+
+    assert pref.status is PresenceStatus.DO_NOT_DISTURB
+    assert pref.revision == "rev-2"
+    req = m.await_args.args[0]
+    assert req.status == presence_pb2.PresenceStatus.Value("PRESENCE_STATUS_DO_NOT_DISTURB")
+    assert req.expected_revision == "rev-1"
+
+
+async def test_set_presence_preference_offline_allowed(client):
+    # Unlike set_presence, OFFLINE is a valid saved choice ("Appear Offline").
+    resp = presence_pb2.SetPresencePreferenceResponse()
+    resp.preference.status = "PRESENCE_STATUS_OFFLINE"
+    _mock_method(client, "account", "set_presence_preference", resp)
+
+    async with client:
+        assert (await client.set_presence_preference(PresenceStatus.OFFLINE)).status is (
+            PresenceStatus.OFFLINE
+        )
+
+
+async def test_set_presence_preference_unspecified_rejected(client):
+    async with client:
+        with pytest.raises(ValueError):
+            await client.set_presence_preference(PresenceStatus.UNSPECIFIED)
+
+
+async def test_refresh_presence(client):
+    resp = presence_pb2.RefreshPresenceResponse()
+    resp.preference.status = "PRESENCE_STATUS_ONLINE"
+    resp.preference.revision = "rev-3"
+    _mock_method(client, "account", "refresh_presence", resp)
+
+    async with client:
+        pref = await client.refresh_presence()
+
+    assert pref is not None
+    assert pref.status is PresenceStatus.ONLINE
+    assert pref.revision == "rev-3"
+
+
 async def test_update_settings(client):
     resp = account_pb2.UpdateSettingsResponse()
     resp.settings.timezone = "Europe/Rome"

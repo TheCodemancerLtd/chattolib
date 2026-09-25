@@ -16,6 +16,7 @@ from chattolib.bot import (
     Bot,
     BotMessageEvent,
     BotPresenceEvent,
+    BotPresencePreferenceEvent,
     BotReactionEvent,
     BotRoomEvent,
     BotTypingEvent,
@@ -196,6 +197,26 @@ async def test_dispatch_presence_event():
     assert len(seen) == 1
     assert seen[0].user_id == "u1"
     assert seen[0].status is PresenceStatus.ONLINE
+
+
+async def test_dispatch_presence_preference_event():
+    """0.5.0b6: the empty viewer_presence_preference_changed hint dispatches as
+    a ``presence_preference`` event; handlers hydrate the choice themselves."""
+    bot = _bot()
+    seen: list[BotPresencePreferenceEvent] = []
+
+    async def on_pref(event: BotPresencePreferenceEvent) -> None:
+        seen.append(event)
+
+    bot.on("presence_preference", on_pref)
+
+    await bot._handle_live(
+        _live(
+            "viewer_presence_preference_changed", events_pb2.ViewerPresencePreferenceChangedEvent()
+        )
+    )
+    assert len(seen) == 1
+    assert seen[0].kind == "presence_preference"
 
 
 async def test_dispatch_reaction_event():
