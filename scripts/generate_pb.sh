@@ -2,9 +2,9 @@
 # Regenerate the vendored Python protobuf + ConnectRPC bindings under
 # src/chattolib/_pb.
 #
-# Fetches the .proto sources for a pinned Chatto ref (default: the version
-# recorded in pyproject.toml, as a `v<version>` tag) and runs protoc with
-# the built-in Python generator and the connect-python plugin.
+# Fetches the .proto sources for a pinned Chatto ref (default: a tag derived
+# from the version recorded in pyproject.toml) and runs protoc with the
+# built-in Python generator and the connect-python plugin.
 #
 # ALWAYS pin to a released tag. Fetching from `main` risks shipping
 # unreleased wire changes that the deployed Chatto server does not speak
@@ -33,18 +33,48 @@ fi
 repo_root=$(cd "$(dirname "$0")/.." && pwd)
 cd "$repo_root"
 
-# Default the Chatto ref to `v<base-version-in-pyproject.toml>`. Strip any
-# post/pre-release suffix — those are chattolib-only fixes against the same
-# server release. Callers can override with CHATTO_REF.
-default_version=$(sed -nE 's/^version *= *"([^"]+)".*/\1/p' pyproject.toml | head -1)
+# Default the Chatto ref to a tag derived from `version` in pyproject.toml.
+# Strip any post-release suffix — those are chattolib-only fixes against the
+# same server release. Pre-releases keep their kind and number, because
+# Chatto tags them with SemVer dashes (PEP 440 0.5.0b6 -> v0.5.0-beta.6)
+# rather than the plain `v<base>` tag a final release uses. Candidates are
+# probed in preference order and the first existing tag wins. Callers can
+# override with CHATTO_REF.
+default_version=$(sed -nE 's/^version *= *\"([^\"]+)\".*/\1/p' pyproject.toml | head -1)
 default_base=${default_version%%.post*}
 default_base=${default_base%%.dev*}
 default_base=${default_base%%a*}
 default_base=${default_base%%b*}
 default_base=${default_base%%rc*}
-default_ref="v${default_base}"
+candidates="v${default_base}"
+# Map the PEP 440 pre-release onto the SemVer tag Chatto actually publishes.
+case ${default_version%%.post*} in
+    *a[0-9]*)  candidates="$candidates v${default_base}-alpha.${default_version##*a}" ;;
+    *b[0-9]*)  candidates="$candidates v${default_base}-beta.${default_version##*b}" ;;
+    *rc[0-9]*) candidates="$candidates v${default_base}-rc.${default_version##*rc}" ;;
+esac
 
-chatto_ref=${CHATTO_REF:-$default_ref}
+# The REST /tags/{name} endpoint 404s on lightweight tags, so probe with
+# ls-remote instead: it sees annotated and lightweight tags alike, costs no
+# API quota, and does exact ref-name matching (no prefix false-positives).
+# Note: ls-remote exits 0 even when nothing matches, so test the output.
+tag_exists() {
+    [ -n "$(git ls-remote --tags "https://github.com/chattocorp/chatto" "refs/tags/$1" 2>/dev/null)" ]
+}
+
+chatto_ref=${CHATTO_REF:-}
+if [ -z "$chatto_ref" ]; then
+    for candidate in $candidates; do
+        if tag_exists "$candidate"; then
+            chatto_ref=$candidate
+            break
+        fi
+    done
+    if [ -z "$chatto_ref" ]; then
+        echo "Could not resolve an existing chattocorp/chatto tag for version '$default_version' (tried: $candidates). Set CHATTO_REF explicitly." >&2
+        exit 1
+    fi
+fi
 echo "Fetching proto sources from chattocorp/chatto@${chatto_ref}"
 
 mkdir -p proto/chatto/{api,admin,auth,discovery,realtime}/v1 proto/buf/validate

@@ -153,6 +153,42 @@ class MyAccountServiceClient(ConnectClient):
             headers=headers,
         )
 
+    async def get_presence_preference(self, request: chatto_api_v1_presence_pb2.GetPresencePreferenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_presence_pb2.GetPresencePreferenceResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetPresencePreference",
+                service_name="chatto.api.v1.MyAccountService",
+                input=chatto_api_v1_presence_pb2.GetPresencePreferenceRequest,
+                output=chatto_api_v1_presence_pb2.GetPresencePreferenceResponse,
+            ),
+            headers=headers,
+        )
+
+    async def set_presence_preference(self, request: chatto_api_v1_presence_pb2.SetPresencePreferenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_presence_pb2.SetPresencePreferenceResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="SetPresencePreference",
+                service_name="chatto.api.v1.MyAccountService",
+                input=chatto_api_v1_presence_pb2.SetPresencePreferenceRequest,
+                output=chatto_api_v1_presence_pb2.SetPresencePreferenceResponse,
+            ),
+            headers=headers,
+        )
+
+    async def refresh_presence(self, request: chatto_api_v1_presence_pb2.RefreshPresenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_presence_pb2.RefreshPresenceResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="RefreshPresence",
+                service_name="chatto.api.v1.MyAccountService",
+                input=chatto_api_v1_presence_pb2.RefreshPresenceRequest,
+                output=chatto_api_v1_presence_pb2.RefreshPresenceResponse,
+            ),
+            headers=headers,
+        )
+
     async def set_custom_status(self, request: chatto_api_v1_user_status_pb2.SetCustomStatusRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_user_status_pb2.SetCustomStatusResponse:
         return await self.execute_unary(
             request=request,
@@ -343,6 +379,42 @@ class MyAccountServiceClientSync(ConnectClientSync):
                 service_name="chatto.api.v1.MyAccountService",
                 input=chatto_api_v1_presence_pb2.SetPresenceRequest,
                 output=chatto_api_v1_presence_pb2.SetPresenceResponse,
+            ),
+            headers=headers,
+        )
+
+    def get_presence_preference(self, request: chatto_api_v1_presence_pb2.GetPresencePreferenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_presence_pb2.GetPresencePreferenceResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetPresencePreference",
+                service_name="chatto.api.v1.MyAccountService",
+                input=chatto_api_v1_presence_pb2.GetPresencePreferenceRequest,
+                output=chatto_api_v1_presence_pb2.GetPresencePreferenceResponse,
+            ),
+            headers=headers,
+        )
+
+    def set_presence_preference(self, request: chatto_api_v1_presence_pb2.SetPresencePreferenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_presence_pb2.SetPresencePreferenceResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="SetPresencePreference",
+                service_name="chatto.api.v1.MyAccountService",
+                input=chatto_api_v1_presence_pb2.SetPresencePreferenceRequest,
+                output=chatto_api_v1_presence_pb2.SetPresencePreferenceResponse,
+            ),
+            headers=headers,
+        )
+
+    def refresh_presence(self, request: chatto_api_v1_presence_pb2.RefreshPresenceRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_presence_pb2.RefreshPresenceResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="RefreshPresence",
+                service_name="chatto.api.v1.MyAccountService",
+                input=chatto_api_v1_presence_pb2.RefreshPresenceRequest,
+                output=chatto_api_v1_presence_pb2.RefreshPresenceResponse,
             ),
             headers=headers,
         )

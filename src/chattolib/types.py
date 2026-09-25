@@ -204,6 +204,30 @@ class User:
 
 
 @dataclass
+class PresencePreference:
+    """The authenticated account's private, saved availability choice.
+
+    This is distinct from :class:`PresenceStatus` as a *live* report: the
+    preference survives disconnects and applies across every device on the
+    server. ``revision`` is an opaque token that must be echoed back (as
+    ``expected_revision``) when replacing the choice; a stale one yields
+    ``ABORTED``.
+    """
+
+    status: PresenceStatus = PresenceStatus.UNSPECIFIED
+    revision: str = ""
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> PresencePreference | None:
+        if not data:
+            return None
+        return cls(
+            status=_parse_enum(PresenceStatus, data.get("status"), PresenceStatus.UNSPECIFIED),  # type: ignore[arg-type]
+            revision=data.get("revision", ""),
+        )
+
+
+@dataclass
 class UserSettings:
     timezone: str | None = None
     time_format: TimeFormat = TimeFormat.UNSPECIFIED
@@ -827,6 +851,25 @@ class ThreadSummary:
 
 
 @dataclass
+class MessageViewerState:
+    """Viewer-specific capability for one message, independent of whether its
+    canonical thread has been established. ``can_reply_in_thread`` reflects
+    read access, room policy, and broad or interaction-scoped posting
+    authority; it is ``None`` when the server has not resolved viewer state."""
+
+    can_reply_in_thread: bool | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> MessageViewerState:
+        data = data or {}
+        return cls(
+            can_reply_in_thread=(
+                data.get("canReplyInThread") if "canReplyInThread" in data else None
+            ),
+        )
+
+
+@dataclass
 class Message:
     id: str
     room_id: str
@@ -845,6 +888,7 @@ class Message:
     thread: ThreadSummary | None = None
     deleted_at: datetime | None = None
     pinned: bool = False
+    viewer_state: MessageViewerState | None = None
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> Message | None:
@@ -868,6 +912,7 @@ class Message:
             thread=ThreadSummary.parse(data.get("thread")),
             deleted_at=parse_datetime(data.get("deletedAt")),
             pinned=bool(data.get("pinned", False)),
+            viewer_state=MessageViewerState.parse(data.get("viewerState")),
         )
 
 

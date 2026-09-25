@@ -96,6 +96,7 @@ from chattolib.types import (
     Page,
     PinnedMessage,
     PinnedMessagesPage,
+    PresencePreference,
     PresenceStatus,
     Role,
     Room,
@@ -358,6 +359,14 @@ class ChattoClient:
         *,
         user_selected: bool = True,
     ) -> PresenceStatus:
+        """Report a *live* presence status (the pre-0.5.0b6 mechanism).
+
+        This is the legacy, transient report: it expires after 60 seconds
+        without a refresh and a saved private choice (see
+        :meth:`set_presence_preference`) overrides it, including when
+        ``user_selected`` is set. New clients should prefer the
+        :meth:`set_presence_preference` / :meth:`refresh_presence` pair.
+        """
         if status in (PresenceStatus.UNSPECIFIED, PresenceStatus.OFFLINE):
             raise ValueError(
                 "UNSPECIFIED and OFFLINE cannot be set as presence status; "
@@ -367,6 +376,62 @@ class ChattoClient:
         resp = await self._rpc(self._svc.account.set_presence(req, headers=self._headers()))
         name = presence_pb2.PresenceStatus.Name(resp.status)
         return PresenceStatus(name)
+
+    async def get_presence_preference(self) -> PresencePreference | None:
+        """Read the authenticated account's private saved availability choice.
+
+        Returns ``None`` until the account has saved a choice for the first
+        time. This is the read side of the 0.5.0b6 preference pair; use
+        :meth:`set_presence_preference` to change it.
+        """
+        resp = await self._rpc(
+            self._svc.account.get_presence_preference(
+                presence_pb2.GetPresencePreferenceRequest(), headers=self._headers()
+            )
+        )
+        return PresencePreference.parse(pb_to_dict(resp.preference))
+
+    async def set_presence_preference(
+        self,
+        status: PresenceStatus,
+        *,
+        expected_revision: str = "",
+    ) -> PresencePreference:
+        """Save an availability choice for every device on this server.
+
+        Unlike :meth:`set_presence`, the choice persists across disconnects
+        and ``OFFLINE`` is a valid value (it means "Appear Offline" and
+        suppresses public presence and typing). Pass ``expected_revision``
+        from a prior :meth:`get_presence_preference` to guard against a
+        concurrent change; a stale revision is rejected with ``ABORTED``.
+        Leave it empty only when initialising an absent choice.
+        """
+        if status is PresenceStatus.UNSPECIFIED:
+            raise ValueError("UNSPECIFIED cannot be saved as a presence preference")
+        req = presence_pb2.SetPresencePreferenceRequest(
+            status=status.value, expected_revision=expected_revision
+        )
+        resp = await self._rpc(
+            self._svc.account.set_presence_preference(req, headers=self._headers())
+        )
+        pref = PresencePreference.parse(pb_to_dict(resp.preference))
+        assert pref is not None
+        return pref
+
+    async def refresh_presence(self) -> PresencePreference | None:
+        """Refresh connection liveness without changing the saved choice.
+
+        Call roughly every 30 seconds to stay "live" (liveness expires after
+        60 seconds). Accounts with a saved ``OFFLINE`` choice may refresh
+        without emitting public presence signals. Returns the current private
+        choice so a client can recover a choice it missed while disconnected.
+        """
+        resp = await self._rpc(
+            self._svc.account.refresh_presence(
+                presence_pb2.RefreshPresenceRequest(), headers=self._headers()
+            )
+        )
+        return PresencePreference.parse(pb_to_dict(resp.preference))
 
     async def set_custom_status(
         self,
