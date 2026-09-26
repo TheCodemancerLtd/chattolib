@@ -528,7 +528,7 @@ class RoomGroup:
 
 
 @dataclass
-class RoomBan:
+class RoomSuspension:
     id: str
     room_id: str
     user_id: str
@@ -541,7 +541,7 @@ class RoomBan:
     moderator: DirectoryMember | None = None
 
     @classmethod
-    def parse(cls, data: dict[str, Any] | None) -> RoomBan | None:
+    def parse(cls, data: dict[str, Any] | None) -> RoomSuspension | None:
         if not data:
             return None
         return cls(

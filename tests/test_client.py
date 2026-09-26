@@ -8,6 +8,7 @@ paths without any real network traffic.
 
 from __future__ import annotations
 
+import datetime as dt
 from unittest.mock import AsyncMock
 
 import pytest
@@ -227,11 +228,56 @@ async def test_archive_room(client):
     assert room.archived is True
 
 
-async def test_ban_member(client):
-    _mock_method(client, "rooms", "ban_member", rooms_pb2.BanMemberResponse())
+async def test_remove_user(client):
+    resp = rooms_pb2.RemoveUserResponse()
+    mock = _mock_method(client, "rooms", "remove_user", resp)
 
     async with client:
-        assert await client.ban_member("r1", "u2", "spam") is None
+        await client.remove_user("r1", "u2", "spam")
+        await client.remove_user(
+            "r1", "u2", "spam", suspension_expires_at=dt.datetime.fromtimestamp(0, dt.UTC)
+        )
+        await client.remove_user("r1", "u2", "spam", suspend_indefinitely=True)
+
+    calls = [c.args[0] for c in mock.call_args_list]
+    assert calls[0].WhichOneof("suspension") is None
+    assert calls[1].WhichOneof("suspension") == "suspension_expires_at"
+    assert calls[2].WhichOneof("suspension") == "suspend_indefinitely"
+
+
+async def test_remove_user_rejects_both_suspensions(client):
+    _mock_method(client, "rooms", "remove_user", rooms_pb2.RemoveUserResponse())
+
+    async with client:
+        with pytest.raises(ValueError, match="not both"):
+            await client.remove_user(
+                "r1",
+                "u2",
+                "spam",
+                suspension_expires_at=dt.datetime.fromtimestamp(0, dt.UTC),
+                suspend_indefinitely=True,
+            )
+
+
+async def test_lift_suspension(client):
+    _mock_method(client, "rooms", "lift_suspension", rooms_pb2.LiftSuspensionResponse())
+
+    async with client:
+        assert await client.lift_suspension("r1", "u2", "reinstated") is None
+
+
+async def test_list_suspensions(client):
+    resp = rooms_pb2.ListSuspensionsResponse()
+    s = resp.suspensions.add()
+    s.id = "s1"
+    s.room_id = "r1"
+    s.user_id = "u2"
+    _mock_method(client, "rooms", "list_suspensions", resp)
+
+    async with client:
+        suspensions, _ = await client.list_suspensions(room_id="r1")
+
+    assert [x.id for x in suspensions] == ["s1"]
 
 
 async def test_start_dm(client):
