@@ -189,14 +189,14 @@ class RoomServiceClient(ConnectClient):
             headers=headers,
         )
 
-    async def list_bans(self, request: chatto_api_v1_rooms_pb2.ListBansRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.ListBansResponse:
+    async def list_suspensions(self, request: chatto_api_v1_rooms_pb2.ListSuspensionsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.ListSuspensionsResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="ListBans",
+                name="ListSuspensions",
                 service_name="chatto.api.v1.RoomService",
-                input=chatto_api_v1_rooms_pb2.ListBansRequest,
-                output=chatto_api_v1_rooms_pb2.ListBansResponse,
+                input=chatto_api_v1_rooms_pb2.ListSuspensionsRequest,
+                output=chatto_api_v1_rooms_pb2.ListSuspensionsResponse,
             ),
             headers=headers,
         )
@@ -297,26 +297,26 @@ class RoomServiceClient(ConnectClient):
             headers=headers,
         )
 
-    async def ban_member(self, request: chatto_api_v1_rooms_pb2.BanMemberRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.BanMemberResponse:
+    async def remove_user(self, request: chatto_api_v1_rooms_pb2.RemoveUserRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.RemoveUserResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="BanMember",
+                name="RemoveUser",
                 service_name="chatto.api.v1.RoomService",
-                input=chatto_api_v1_rooms_pb2.BanMemberRequest,
-                output=chatto_api_v1_rooms_pb2.BanMemberResponse,
+                input=chatto_api_v1_rooms_pb2.RemoveUserRequest,
+                output=chatto_api_v1_rooms_pb2.RemoveUserResponse,
             ),
             headers=headers,
         )
 
-    async def unban_member(self, request: chatto_api_v1_rooms_pb2.UnbanMemberRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.UnbanMemberResponse:
+    async def lift_suspension(self, request: chatto_api_v1_rooms_pb2.LiftSuspensionRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.LiftSuspensionResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="UnbanMember",
+                name="LiftSuspension",
                 service_name="chatto.api.v1.RoomService",
-                input=chatto_api_v1_rooms_pb2.UnbanMemberRequest,
-                output=chatto_api_v1_rooms_pb2.UnbanMemberResponse,
+                input=chatto_api_v1_rooms_pb2.LiftSuspensionRequest,
+                output=chatto_api_v1_rooms_pb2.LiftSuspensionResponse,
             ),
             headers=headers,
         )
@@ -503,14 +503,14 @@ class RoomServiceClientSync(ConnectClientSync):
             headers=headers,
         )
 
-    def list_bans(self, request: chatto_api_v1_rooms_pb2.ListBansRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.ListBansResponse:
+    def list_suspensions(self, request: chatto_api_v1_rooms_pb2.ListSuspensionsRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.ListSuspensionsResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="ListBans",
+                name="ListSuspensions",
                 service_name="chatto.api.v1.RoomService",
-                input=chatto_api_v1_rooms_pb2.ListBansRequest,
-                output=chatto_api_v1_rooms_pb2.ListBansResponse,
+                input=chatto_api_v1_rooms_pb2.ListSuspensionsRequest,
+                output=chatto_api_v1_rooms_pb2.ListSuspensionsResponse,
             ),
             headers=headers,
         )
@@ -611,26 +611,26 @@ class RoomServiceClientSync(ConnectClientSync):
             headers=headers,
         )
 
-    def ban_member(self, request: chatto_api_v1_rooms_pb2.BanMemberRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.BanMemberResponse:
+    def remove_user(self, request: chatto_api_v1_rooms_pb2.RemoveUserRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.RemoveUserResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="BanMember",
+                name="RemoveUser",
                 service_name="chatto.api.v1.RoomService",
-                input=chatto_api_v1_rooms_pb2.BanMemberRequest,
-                output=chatto_api_v1_rooms_pb2.BanMemberResponse,
+                input=chatto_api_v1_rooms_pb2.RemoveUserRequest,
+                output=chatto_api_v1_rooms_pb2.RemoveUserResponse,
             ),
             headers=headers,
         )
 
-    def unban_member(self, request: chatto_api_v1_rooms_pb2.UnbanMemberRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.UnbanMemberResponse:
+    def lift_suspension(self, request: chatto_api_v1_rooms_pb2.LiftSuspensionRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.LiftSuspensionResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="UnbanMember",
+                name="LiftSuspension",
                 service_name="chatto.api.v1.RoomService",
-                input=chatto_api_v1_rooms_pb2.UnbanMemberRequest,
-                output=chatto_api_v1_rooms_pb2.UnbanMemberResponse,
+                input=chatto_api_v1_rooms_pb2.LiftSuspensionRequest,
+                output=chatto_api_v1_rooms_pb2.LiftSuspensionResponse,
             ),
             headers=headers,
         )

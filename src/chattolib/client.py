@@ -100,9 +100,9 @@ from chattolib.types import (
     PresenceStatus,
     Role,
     Room,
-    RoomBan,
     RoomDirectoryScope,
     RoomGroup,
+    RoomSuspension,
     RoomThreadingMode,
     RoomWithViewerState,
     ServerConfig,
@@ -733,42 +733,61 @@ class ChattoClient:
             if m is not None
         ]
 
-    async def ban_member(
+    async def remove_user(
         self,
         room_id: str,
         user_id: str,
         reason: str,
         *,
-        expires_at: datetime | None = None,
+        suspension_expires_at: datetime | None = None,
+        suspend_indefinitely: bool = False,
     ) -> None:
-        req = rooms_pb2.BanMemberRequest(room_id=room_id, user_id=user_id, reason=reason)
-        if expires_at is not None:
-            req.expires_at.CopyFrom(_timestamp_pb(expires_at))
-        await self._rpc(self._svc.rooms.ban_member(req, headers=self._headers()))
+        """Remove a current room member, optionally suspending them.
 
-    async def unban_member(self, room_id: str, user_id: str, reason: str) -> None:
+        Maps to ``RoomService.RemoveUser`` (the 0.5.0b7 replacement for
+        ``BanMember``). Without a suspension the user may rejoin under normal
+        room permissions; with one, they cannot rejoin until the suspension
+        expires or ``lift_suspension`` is called. At most one of the two
+        suspension choices may be given.
+        """
+        if suspend_indefinitely and suspension_expires_at is not None:
+            raise ValueError(
+                "choose either suspension_expires_at or suspend_indefinitely, not both"
+            )
+        req = rooms_pb2.RemoveUserRequest(room_id=room_id, user_id=user_id, reason=reason)
+        if suspend_indefinitely:
+            req.suspend_indefinitely = True
+        elif suspension_expires_at is not None:
+            req.suspension_expires_at.CopyFrom(_timestamp_pb(suspension_expires_at))
+        await self._rpc(self._svc.rooms.remove_user(req, headers=self._headers()))
+
+    async def lift_suspension(self, room_id: str, user_id: str, reason: str) -> None:
         await self._rpc(
-            self._svc.rooms.unban_member(
-                rooms_pb2.UnbanMemberRequest(room_id=room_id, user_id=user_id, reason=reason),
+            self._svc.rooms.lift_suspension(
+                rooms_pb2.LiftSuspensionRequest(room_id=room_id, user_id=user_id, reason=reason),
                 headers=self._headers(),
             )
         )
 
-    async def list_bans(
+    async def list_suspensions(
         self,
         *,
         room_id: str = "",
         limit: int | None = None,
         offset: int | None = None,
-    ) -> tuple[list[RoomBan], Page]:
-        req = rooms_pb2.ListBansRequest(room_id=room_id)
+    ) -> tuple[list[RoomSuspension], Page]:
+        req = rooms_pb2.ListSuspensionsRequest(room_id=room_id)
         page = _page_pb(limit, offset)
         if page is not None:
             req.page.CopyFrom(page)
-        resp = await self._rpc(self._svc.rooms.list_bans(req, headers=self._headers()))
+        resp = await self._rpc(self._svc.rooms.list_suspensions(req, headers=self._headers()))
         data = pb_to_dict(resp)
-        bans = [b for b in (RoomBan.parse(row) for row in data.get("bans") or []) if b is not None]
-        return bans, Page.parse(data.get("page"))
+        suspensions = [
+            s
+            for s in (RoomSuspension.parse(row) for row in data.get("suspensions") or [])
+            if s is not None
+        ]
+        return suspensions, Page.parse(data.get("page"))
 
     async def refresh_typing_indicator(
         self, room_id: str, *, thread_root_event_id: str = ""
