@@ -30,6 +30,18 @@ class ServerDiscoveryServiceClient(ConnectClient):
             headers=headers,
         )
 
+    async def list_neighborhood_servers(self, request: chatto_discovery_v1_server_pb2.ListNeighborhoodServersRequest, *, headers: dict[str, str] | None = None) -> chatto_discovery_v1_server_pb2.ListNeighborhoodServersResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListNeighborhoodServers",
+                service_name="chatto.discovery.v1.ServerDiscoveryService",
+                input=chatto_discovery_v1_server_pb2.ListNeighborhoodServersRequest,
+                output=chatto_discovery_v1_server_pb2.ListNeighborhoodServersResponse,
+            ),
+            headers=headers,
+        )
+
 class ServerDiscoveryServiceClientSync(ConnectClientSync):
 
     def get_server(self, request: chatto_discovery_v1_server_pb2.GetServerRequest, *, headers: dict[str, str] | None = None) -> chatto_discovery_v1_server_pb2.GetServerResponse:
@@ -52,6 +64,18 @@ class ServerDiscoveryServiceClientSync(ConnectClientSync):
                 service_name="chatto.discovery.v1.ServerDiscoveryService",
                 input=chatto_discovery_v1_server_pb2.ListNeighborsRequest,
                 output=chatto_discovery_v1_server_pb2.ListNeighborsResponse,
+            ),
+            headers=headers,
+        )
+
+    def list_neighborhood_servers(self, request: chatto_discovery_v1_server_pb2.ListNeighborhoodServersRequest, *, headers: dict[str, str] | None = None) -> chatto_discovery_v1_server_pb2.ListNeighborhoodServersResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListNeighborhoodServers",
+                service_name="chatto.discovery.v1.ServerDiscoveryService",
+                input=chatto_discovery_v1_server_pb2.ListNeighborhoodServersRequest,
+                output=chatto_discovery_v1_server_pb2.ListNeighborhoodServersResponse,
             ),
             headers=headers,
         )

@@ -84,6 +84,39 @@ async def test_get_server(client):
     assert login.authorize_url == "/oauth"
 
 
+async def test_list_neighborhood_servers(client):
+    resp = discovery_server_pb2.ListNeighborhoodServersResponse()
+    s1 = resp.servers.add()
+    s1.origin = "https://neighbor.example"
+    s1.profile.name = "Neighbor"
+    s1.profile.version = "0.5.0"
+    s1.profile.logo_url = "/logos/neighbor.png"
+    s1.direct_neighbor = True
+    s2 = resp.servers.add()
+    s2.origin = "https://referred.example"
+    s2.profile.name = "Referred"
+    s2.direct_neighbor = False
+    s2.recommended_by_origins.append("https://neighbor.example")
+    resp.refreshed_at.FromJsonString("2026-09-26T12:00:00Z")
+    mocked = _mock_method(client, "server_discovery", "list_neighborhood_servers", resp)
+
+    async with client:
+        page = await client.list_neighborhood_servers()
+
+    mocked.assert_awaited_once()
+    assert [s.origin for s in page.servers] == [
+        "https://neighbor.example",
+        "https://referred.example",
+    ]
+    assert page.servers[0].profile is not None
+    assert page.servers[0].profile.name == "Neighbor"
+    assert page.servers[0].profile.logo_url == "/logos/neighbor.png"
+    assert page.servers[0].direct_neighbor is True
+    assert page.servers[1].direct_neighbor is False
+    assert page.servers[1].recommended_by_origins == ["https://neighbor.example"]
+    assert page.refreshed_at == dt.datetime(2026, 9, 26, 12, 0, tzinfo=dt.UTC)
+
+
 # --- Viewer -------------------------------------------------------------
 
 
@@ -481,15 +514,28 @@ async def test_list_followed_threads(client):
     ft.thread.viewer_state.has_unread_replies = False
     resp.page.total_count = 1
     resp.page.has_more = False
-    _mock_method(client, "threads", "list_followed_threads", resp)
+    mocked = _mock_method(client, "threads", "list_followed_threads", resp)
 
     async with client:
         page = await client.list_followed_threads()
+        await client.list_followed_threads(
+            limit=5,
+            offset=5,
+            include_direct_message_threads=True,
+            unread_only=True,
+        )
 
     assert page.page.total_count == 1
     assert page.threads[0].thread is not None
     assert page.threads[0].thread.reply_count == 3
     assert page.threads[0].thread.is_following is True
+    calls = [c.args[0] for c in mocked.call_args_list]
+    assert calls[0].include_direct_message_threads is False
+    assert calls[0].unread_only is False
+    assert calls[1].include_direct_message_threads is True
+    assert calls[1].unread_only is True
+    assert calls[1].page.limit == 5
+    assert calls[1].page.offset == 5
 
 
 async def test_follow_and_unfollow_thread(client):

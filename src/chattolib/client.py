@@ -88,6 +88,7 @@ from chattolib.types import (
     LinkPreview,
     Message,
     Neighbor,
+    NeighborhoodServersPage,
     NotificationLevel,
     NotificationOccurrence,
     NotificationOccurrencesPage,
@@ -275,6 +276,23 @@ class ChattoClient:
             )
         )
         return list(resp.origins)
+
+    async def list_neighborhood_servers(self) -> NeighborhoodServersPage:
+        """Servers in the Neighborhood the called server has discovered.
+
+        Does not require auth. The server loads other servers' public profiles
+        in the background and caches the result (refreshed at least hourly),
+        so the call itself contacts no other server. The response has no
+        ordering contract; ``refreshed_at`` is absent before the server's
+        first completed discovery.
+        """
+        resp = await self._rpc(
+            self._svc.server_discovery.list_neighborhood_servers(
+                discovery_server_pb2.ListNeighborhoodServersRequest(),
+                headers=self._headers(),
+            )
+        )
+        return NeighborhoodServersPage.parse(pb_to_dict(resp))
 
     async def get_motd(self) -> str | None:
         resp = await self._rpc(
@@ -1055,12 +1073,27 @@ class ChattoClient:
         )
 
     async def list_followed_threads(
-        self, *, limit: int | None = None, offset: int | None = None
+        self,
+        *,
+        limit: int | None = None,
+        offset: int | None = None,
+        include_direct_message_threads: bool | None = None,
+        unread_only: bool | None = None,
     ) -> FollowedThreadsPage:
+        """Followed threads, newest activity first.
+
+        ``unread_only`` returns only threads with unread replies (older
+        servers ignore it); ``include_direct_message_threads`` also lists
+        followed direct-message threads.
+        """
         req = threads_pb2.ListFollowedThreadsRequest()
         page = _page_pb(limit, offset)
         if page is not None:
             req.page.CopyFrom(page)
+        if include_direct_message_threads is not None:
+            req.include_direct_message_threads = include_direct_message_threads
+        if unread_only is not None:
+            req.unread_only = unread_only
         resp = await self._rpc(
             self._svc.threads.list_followed_threads(req, headers=self._headers())
         )

@@ -337,6 +337,58 @@ class ProviderMetadata:
 
 
 @dataclass
+class NeighborhoodServer:
+    """One server in the Neighborhood discovered by the called server.
+
+    ``profile`` is the public profile the called server loaded (no welcome
+    message); its ``logoUrl``/``bannerUrl`` are server-relative paths of
+    copies on the called server — resolve them against that server's origin.
+    """
+
+    origin: str
+    profile: ServerProfile | None = None
+    direct_neighbor: bool = False
+    recommended_by_origins: list[str] = field(default_factory=list)
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> NeighborhoodServer | None:
+        if not data:
+            return None
+        return cls(
+            origin=data.get("origin", ""),
+            profile=ServerProfile.parse(data.get("profile")),
+            direct_neighbor=bool(data.get("directNeighbor", False)),
+            recommended_by_origins=list(data.get("recommendedByOrigins") or []),
+        )
+
+
+@dataclass
+class NeighborhoodServersPage:
+    """The Neighborhood of the called server, as it last discovered it.
+
+    The called server lists each Neighbor whose public profile loaded, plus
+    servers that a mutually advertising Neighbor recommends when the
+    recommendation is also mutual. No ordering contract. ``refreshed_at`` is
+    absent before the server's first completed discovery.
+    """
+
+    servers: list[NeighborhoodServer] = field(default_factory=list)
+    refreshed_at: datetime | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> NeighborhoodServersPage:
+        data = data or {}
+        return cls(
+            servers=[
+                s
+                for s in (NeighborhoodServer.parse(s) for s in data.get("servers") or [])
+                if s is not None
+            ],
+            refreshed_at=parse_datetime(data.get("refreshedAt")),
+        )
+
+
+@dataclass
 class ServerLogin:
     direct_registration_enabled: bool = False
     providers: list[ProviderMetadata] = field(default_factory=list)
