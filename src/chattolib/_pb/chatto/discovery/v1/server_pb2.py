@@ -23,9 +23,10 @@ _sym_db = _symbol_database.Default()
 
 
 from chatto.api.v1 import server_pb2 as chatto_dot_api_dot_v1_dot_server__pb2
+from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n chatto/discovery/v1/server.proto\x12\x13\x63hatto.discovery.v1\x1a\x1a\x63hatto/api/v1/server.proto\"\x12\n\x10GetServerRequest\"\x8b\x01\n\x11GetServerResponse\x12\x33\n\x07profile\x18\x01 \x01(\x0b\x32\".chatto.api.v1.ServerPublicProfile\x12)\n\x05login\x18\x02 \x01(\x0b\x32\x1a.chatto.api.v1.ServerLogin\x12\x16\n\x0esetup_required\x18\x03 \x01(\x08\"\x16\n\x14ListNeighborsRequest\"9\n\x15ListNeighborsResponse\x12\x0f\n\x07origins\x18\x01 \x03(\tJ\x04\x08\x02\x10\x03R\tneighbors2\xe6\x01\n\x16ServerDiscoveryService\x12_\n\tGetServer\x12%.chatto.discovery.v1.GetServerRequest\x1a&.chatto.discovery.v1.GetServerResponse\"\x03\x90\x02\x01\x12k\n\rListNeighbors\x12).chatto.discovery.v1.ListNeighborsRequest\x1a*.chatto.discovery.v1.ListNeighborsResponse\"\x03\x90\x02\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n chatto/discovery/v1/server.proto\x12\x13\x63hatto.discovery.v1\x1a\x1a\x63hatto/api/v1/server.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x12\n\x10GetServerRequest\"\x8b\x01\n\x11GetServerResponse\x12\x33\n\x07profile\x18\x01 \x01(\x0b\x32\".chatto.api.v1.ServerPublicProfile\x12)\n\x05login\x18\x02 \x01(\x0b\x32\x1a.chatto.api.v1.ServerLogin\x12\x16\n\x0esetup_required\x18\x03 \x01(\x08\"\x16\n\x14ListNeighborsRequest\"9\n\x15ListNeighborsResponse\x12\x0f\n\x07origins\x18\x01 \x03(\tJ\x04\x08\x02\x10\x03R\tneighbors\" \n\x1eListNeighborhoodServersRequest\"\x92\x01\n\x12NeighborhoodServer\x12\x0e\n\x06origin\x18\x01 \x01(\t\x12\x33\n\x07profile\x18\x02 \x01(\x0b\x32\".chatto.api.v1.ServerPublicProfile\x12\x17\n\x0f\x64irect_neighbor\x18\x03 \x01(\x08\x12\x1e\n\x16recommended_by_origins\x18\x04 \x03(\t\"\x8d\x01\n\x1fListNeighborhoodServersResponse\x12\x38\n\x07servers\x18\x01 \x03(\x0b\x32\'.chatto.discovery.v1.NeighborhoodServer\x12\x30\n\x0crefreshed_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp2\xf2\x02\n\x16ServerDiscoveryService\x12_\n\tGetServer\x12%.chatto.discovery.v1.GetServerRequest\x1a&.chatto.discovery.v1.GetServerResponse\"\x03\x90\x02\x01\x12k\n\rListNeighbors\x12).chatto.discovery.v1.ListNeighborsRequest\x1a*.chatto.discovery.v1.ListNeighborsResponse\"\x03\x90\x02\x01\x12\x89\x01\n\x17ListNeighborhoodServers\x12\x33.chatto.discovery.v1.ListNeighborhoodServersRequest\x1a\x34.chatto.discovery.v1.ListNeighborhoodServersResponse\"\x03\x90\x02\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -36,14 +37,22 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_SERVERDISCOVERYSERVICE'].methods_by_name['GetServer']._serialized_options = b'\220\002\001'
   _globals['_SERVERDISCOVERYSERVICE'].methods_by_name['ListNeighbors']._loaded_options = None
   _globals['_SERVERDISCOVERYSERVICE'].methods_by_name['ListNeighbors']._serialized_options = b'\220\002\001'
-  _globals['_GETSERVERREQUEST']._serialized_start=85
-  _globals['_GETSERVERREQUEST']._serialized_end=103
-  _globals['_GETSERVERRESPONSE']._serialized_start=106
-  _globals['_GETSERVERRESPONSE']._serialized_end=245
-  _globals['_LISTNEIGHBORSREQUEST']._serialized_start=247
-  _globals['_LISTNEIGHBORSREQUEST']._serialized_end=269
-  _globals['_LISTNEIGHBORSRESPONSE']._serialized_start=271
-  _globals['_LISTNEIGHBORSRESPONSE']._serialized_end=328
-  _globals['_SERVERDISCOVERYSERVICE']._serialized_start=331
-  _globals['_SERVERDISCOVERYSERVICE']._serialized_end=561
+  _globals['_SERVERDISCOVERYSERVICE'].methods_by_name['ListNeighborhoodServers']._loaded_options = None
+  _globals['_SERVERDISCOVERYSERVICE'].methods_by_name['ListNeighborhoodServers']._serialized_options = b'\220\002\001'
+  _globals['_GETSERVERREQUEST']._serialized_start=118
+  _globals['_GETSERVERREQUEST']._serialized_end=136
+  _globals['_GETSERVERRESPONSE']._serialized_start=139
+  _globals['_GETSERVERRESPONSE']._serialized_end=278
+  _globals['_LISTNEIGHBORSREQUEST']._serialized_start=280
+  _globals['_LISTNEIGHBORSREQUEST']._serialized_end=302
+  _globals['_LISTNEIGHBORSRESPONSE']._serialized_start=304
+  _globals['_LISTNEIGHBORSRESPONSE']._serialized_end=361
+  _globals['_LISTNEIGHBORHOODSERVERSREQUEST']._serialized_start=363
+  _globals['_LISTNEIGHBORHOODSERVERSREQUEST']._serialized_end=395
+  _globals['_NEIGHBORHOODSERVER']._serialized_start=398
+  _globals['_NEIGHBORHOODSERVER']._serialized_end=544
+  _globals['_LISTNEIGHBORHOODSERVERSRESPONSE']._serialized_start=547
+  _globals['_LISTNEIGHBORHOODSERVERSRESPONSE']._serialized_end=688
+  _globals['_SERVERDISCOVERYSERVICE']._serialized_start=691
+  _globals['_SERVERDISCOVERYSERVICE']._serialized_end=1061
 # @@protoc_insertion_point(module_scope)
