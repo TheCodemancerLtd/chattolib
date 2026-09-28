@@ -66,18 +66,6 @@ class AdminUserServiceClient(ConnectClient):
             headers=headers,
         )
 
-    async def update_user(self, request: chatto_admin_v1_members_pb2.UpdateUserRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.UpdateUserResponse:
-        return await self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="UpdateUser",
-                service_name="chatto.admin.v1.AdminUserService",
-                input=chatto_admin_v1_members_pb2.UpdateUserRequest,
-                output=chatto_admin_v1_members_pb2.UpdateUserResponse,
-            ),
-            headers=headers,
-        )
-
     async def change_user_password(self, request: chatto_admin_v1_members_pb2.ChangeUserPasswordRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.ChangeUserPasswordResponse:
         return await self.execute_unary(
             request=request,
@@ -172,18 +160,6 @@ class AdminUserServiceClientSync(ConnectClientSync):
                 service_name="chatto.admin.v1.AdminUserService",
                 input=chatto_admin_v1_members_pb2.RevokeRoleRequest,
                 output=chatto_admin_v1_members_pb2.RevokeRoleResponse,
-            ),
-            headers=headers,
-        )
-
-    def update_user(self, request: chatto_admin_v1_members_pb2.UpdateUserRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.UpdateUserResponse:
-        return self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="UpdateUser",
-                service_name="chatto.admin.v1.AdminUserService",
-                input=chatto_admin_v1_members_pb2.UpdateUserRequest,
-                output=chatto_admin_v1_members_pb2.UpdateUserResponse,
             ),
             headers=headers,
         )

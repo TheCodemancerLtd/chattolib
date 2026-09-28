@@ -96,8 +96,8 @@ for f in \
     notifications.proto pagination.proto permissions.proto presence.proto \
     push_notifications.proto reactions.proto read_state.proto \
     room_directory.proto rooms.proto room_timeline.proto roles.proto \
-    server.proto server_state.proto threads.proto users.proto \
-    user_status.proto viewer.proto voice_calls.proto
+    server.proto server_state.proto threads.proto user_service.proto \
+    users.proto user_status.proto viewer.proto voice_calls.proto
 do
     fetch "chatto/api/v1/$f"
 done
