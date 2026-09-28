@@ -65,6 +65,7 @@ from chattolib._pb.chatto.api.v1.room_directory_connect import (
 from chattolib._pb.chatto.api.v1.rooms_connect import RoomServiceClient
 from chattolib._pb.chatto.api.v1.server_state_connect import ServerServiceClient
 from chattolib._pb.chatto.api.v1.threads_connect import ThreadServiceClient
+from chattolib._pb.chatto.api.v1.user_service_connect import UserServiceClient
 from chattolib._pb.chatto.api.v1.viewer_connect import ViewerServiceClient
 from chattolib._pb.chatto.api.v1.voice_calls_connect import VoiceCallServiceClient
 from chattolib._pb.chatto.discovery.v1.server_connect import (
@@ -88,6 +89,7 @@ class ServiceClients:
     rooms: RoomServiceClient
     messages: MessageServiceClient
     threads: ThreadServiceClient
+    user: UserServiceClient
     notifications: NotificationServiceClient
     notification_policy: NotificationPolicyServiceClient
     notification_prefs: NotificationPreferencesServiceClient
@@ -132,6 +134,7 @@ def build_service_clients(base_url: str) -> ServiceClients:
         rooms=make(RoomServiceClient),
         messages=make(MessageServiceClient),
         threads=make(ThreadServiceClient),
+        user=make(UserServiceClient),
         notifications=make(NotificationServiceClient),
         notification_policy=make(NotificationPolicyServiceClient),
         notification_prefs=make(NotificationPreferencesServiceClient),

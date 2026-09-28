@@ -9,18 +9,6 @@ import chatto.api.v1.user_status_pb2 as chatto_api_v1_user_status_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class MyAccountServiceClient(ConnectClient):
-    async def update_profile(self, request: chatto_api_v1_account_pb2.UpdateProfileRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.UpdateProfileResponse:
-        return await self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="UpdateProfile",
-                service_name="chatto.api.v1.MyAccountService",
-                input=chatto_api_v1_account_pb2.UpdateProfileRequest,
-                output=chatto_api_v1_account_pb2.UpdateProfileResponse,
-            ),
-            headers=headers,
-        )
-
     async def change_password(self, request: chatto_api_v1_account_pb2.ChangePasswordRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.ChangePasswordResponse:
         return await self.execute_unary(
             request=request,
@@ -238,18 +226,6 @@ class MyAccountServiceClient(ConnectClient):
         )
 
 class MyAccountServiceClientSync(ConnectClientSync):
-
-    def update_profile(self, request: chatto_api_v1_account_pb2.UpdateProfileRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.UpdateProfileResponse:
-        return self.execute_unary(
-            request=request,
-            method=MethodInfo(
-                name="UpdateProfile",
-                service_name="chatto.api.v1.MyAccountService",
-                input=chatto_api_v1_account_pb2.UpdateProfileRequest,
-                output=chatto_api_v1_account_pb2.UpdateProfileResponse,
-            ),
-            headers=headers,
-        )
 
     def change_password(self, request: chatto_api_v1_account_pb2.ChangePasswordRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_account_pb2.ChangePasswordResponse:
         return self.execute_unary(

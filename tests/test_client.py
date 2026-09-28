@@ -35,6 +35,7 @@ from chattolib._pb.chatto.api.v1 import (
     room_timeline_pb2,
     rooms_pb2,
     threads_pb2,
+    user_service_pb2,
     viewer_pb2,
     voice_calls_pb2,
 )
@@ -373,19 +374,49 @@ async def test_mark_room_as_read(client):
 # --- Profile / account ------------------------------------------------
 
 
+async def test_update_user_profile(client):
+    resp = user_service_pb2.UpdateUserProfileResponse()
+    resp.user.id = "u1"
+    resp.user.login = "newname"
+    resp.user.display_name = "New Name"
+    resp.user.bio = "# Hi"
+    resp.user.presence_status = "PRESENCE_STATUS_ONLINE"
+    _mock_method(client, "user", "update_user_profile", resp)
+
+    async with client:
+        user = await client.update_user_profile(
+            "u1", login="newname", display_name="New Name", bio="# Hi"
+        )
+
+    assert user.id == "u1"
+    assert user.login == "newname"
+    assert user.display_name == "New Name"
+    assert user.bio == "# Hi"
+
+
 async def test_update_profile(client):
-    resp = account_pb2.UpdateProfileResponse()
+    """Self-service update resolves the caller id via the viewer, then
+    delegates to the new UserService.UpdateUserProfile wire call."""
+    viewer = viewer_pb2.GetViewerResponse()
+    viewer.user.profile.id = "u1"
+    viewer.user.profile.login = "alice"
+    viewer.user.profile.display_name = "Alice"
+    _mock_method(client, "viewer", "get_viewer", viewer)
+
+    resp = user_service_pb2.UpdateUserProfileResponse()
     resp.user.id = "u1"
     resp.user.login = "newname"
     resp.user.display_name = "New Name"
     resp.user.presence_status = "PRESENCE_STATUS_ONLINE"
-    _mock_method(client, "account", "update_profile", resp)
+    update = _mock_method(client, "user", "update_user_profile", resp)
 
     async with client:
         user = await client.update_profile(login="newname", display_name="New Name")
 
     assert user.login == "newname"
     assert user.display_name == "New Name"
+    (req,) = update.await_args.args
+    assert req.user_id == "u1"
 
 
 async def test_set_presence(client):

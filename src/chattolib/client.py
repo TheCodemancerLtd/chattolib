@@ -62,6 +62,7 @@ from chattolib._pb.chatto.api.v1 import (
     rooms_pb2,
     server_state_pb2,
     threads_pb2,
+    user_service_pb2,
     user_status_pb2,
     viewer_pb2,
     voice_calls_pb2,
@@ -338,21 +339,54 @@ class ChattoClient:
 
     # --- MyAccount -----------------------------------------------------
 
+    async def update_user_profile(
+        self,
+        user_id: str,
+        *,
+        display_name: str | None = None,
+        login: str | None = None,
+        bio: str | None = None,
+    ) -> User:
+        """Update a user's public profile via ``UserService.UpdateUserProfile``.
+
+        This is the one wire path for profile edits in 0.5.0-beta.9. Users
+        update their own account without extra authority; updating another
+        human requires ``user.manage-accounts`` (and, for a bot target,
+        ownership of the bot, ``user.manage-accounts``, or ``bot.manage``) —
+        the server enforces that. A ``login`` change is rate-limited by the
+        server's username-change cooldown. Returns the updated ``User``.
+        """
+        req = user_service_pb2.UpdateUserProfileRequest(user_id=user_id)
+        if display_name is not None:
+            req.display_name = display_name
+        if login is not None:
+            req.login = login
+        if bio is not None:
+            req.bio = bio
+        resp = await self._rpc(self._svc.user.update_user_profile(req, headers=self._headers()))
+        user = User.parse(pb_to_dict(resp.user))
+        assert user is not None
+        return user
+
     async def update_profile(
         self,
         *,
         display_name: str | None = None,
         login: str | None = None,
+        bio: str | None = None,
     ) -> User:
-        req = account_pb2.UpdateProfileRequest()
-        if display_name is not None:
-            req.display_name = display_name
-        if login is not None:
-            req.login = login
-        resp = await self._rpc(self._svc.account.update_profile(req, headers=self._headers()))
-        user = User.parse(pb_to_dict(resp.user))
-        assert user is not None
-        return user
+        """Update the authenticated user's own public profile.
+
+        The pre-0.5.0b9 ``MyAccountService.UpdateProfile`` RPC was removed;
+        profile edits now go through ``UserService.UpdateUserProfile``, which
+        needs a target ``user_id`` — so this resolves the caller's own id from
+        the viewer snapshot first and then delegates to
+        :meth:`update_user_profile`.
+        """
+        me = await self.me()
+        return await self.update_user_profile(
+            me.id, display_name=display_name, login=login, bio=bio
+        )
 
     async def update_settings(
         self,
@@ -2038,17 +2072,21 @@ class ChattoClient:
         *,
         display_name: str | None = None,
         login: str | None = None,
+        bio: str | None = None,
     ) -> tuple[User | None, AdminMember | None]:
-        req = admin_members_pb2.UpdateUserRequest(user_id=user_id)
-        if display_name is not None:
-            req.display_name = display_name
-        if login is not None:
-            req.login = login
-        resp = await self._rpc(self._svc.admin_users.update_user(req, headers=self._headers()))
-        return (
-            User.parse(pb_to_dict(resp.user)),
-            AdminMember.parse(pb_to_dict(resp.member)),
+        """Update a user's login / display name / bio as a server-admin action.
+
+        The pre-0.5.0b9 ``AdminUserService.UpdateUser`` RPC was removed; admin
+        profile edits are now just a privileged
+        :meth:`update_user_profile` (``user.manage-accounts`` bypasses the
+        username-change cooldown and does not start one), so the second
+        returned value is always ``None`` — re-fetch the member row with
+        :meth:`admin_get_member` when it is needed.
+        """
+        user = await self.update_user_profile(
+            user_id, display_name=display_name, login=login, bio=bio
         )
+        return user, None
 
     async def admin_change_user_password(self, user_id: str, password: str) -> AdminMember | None:
         resp = await self._rpc(

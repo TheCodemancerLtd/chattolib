@@ -32,19 +32,13 @@ from chatto.api.v1 import users_pb2 as chatto_dot_api_dot_v1_dot_users__pb2
 from chatto.api.v1 import viewer_pb2 as chatto_dot_api_dot_v1_dot_viewer__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1b\x63hatto/api/v1/account.proto\x12\rchatto.api.v1\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1b\x62uf/validate/validate.proto\x1a\'chatto/api/v1/external_identities.proto\x1a\x1c\x63hatto/api/v1/presence.proto\x1a\x1f\x63hatto/api/v1/user_status.proto\x1a\x19\x63hatto/api/v1/users.proto\x1a\x1a\x63hatto/api/v1/viewer.proto\"\xcb\x01\n\x14UpdateProfileRequest\x12$\n\x0c\x64isplay_name\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18 H\x00\x88\x01\x01\x12\x1d\n\x05login\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x02\x18 H\x01\x88\x01\x01\x12\x1a\n\x03\x62io\x18\x03 \x01(\tB\x08\xbaH\x05r\x03\x18\xe8\x07H\x02\x88\x01\x01\x12/\n\x0bupdate_mask\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.FieldMaskB\x0f\n\r_display_nameB\x08\n\x06_loginB\x06\n\x04_bio\":\n\x15UpdateProfileResponse\x12!\n\x04user\x18\x01 \x01(\x0b\x32\x13.chatto.api.v1.User\"Y\n\x15\x43hangePasswordRequest\x12\x1c\n\x08password\x18\x01 \x01(\tB\n\xbaH\x07r\x05\x10\x08\x18\x80\x01\x12\"\n\x10\x63urrent_password\x18\x02 \x01(\tB\x08\xbaH\x05r\x03\x18\x80\x01\";\n\x16\x43hangePasswordResponse\x12!\n\x04user\x18\x01 \x01(\x0b\x32\x13.chatto.api.v1.User\"`\n\rVerifiedEmail\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12/\n\x0bverified_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0f\n\x07primary\x18\x03 \x01(\x08\">\n\x19ListVerifiedEmailsRequest\x12!\n\x10\x65xpected_user_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"S\n\x1aListVerifiedEmailsResponse\x12\x35\n\x0fverified_emails\x18\x01 \x03(\x0b\x32\x1c.chatto.api.v1.VerifiedEmail\"_\n\x1fRequestEmailVerificationRequest\x12\x19\n\x05\x65mail\x18\x01 \x01(\tB\n\xbaH\x07r\x05\x18\xfe\x01`\x01\x12!\n\x10\x65xpected_user_id\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"\"\n RequestEmailVerificationResponse\"x\n\x1f\x43onfirmEmailVerificationRequest\x12\x19\n\x05\x65mail\x18\x01 \x01(\tB\n\xbaH\x07r\x05\x18\xfe\x01`\x01\x12\x17\n\x04\x63ode\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18 \x12!\n\x10\x65xpected_user_id\x18\x03 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"Y\n ConfirmEmailVerificationResponse\x12\x35\n\x0fverified_emails\x18\x01 \x03(\x0b\x32\x1c.chatto.api.v1.VerifiedEmail\"V\n\x16SetPrimaryEmailRequest\x12\x19\n\x05\x65mail\x18\x01 \x01(\tB\n\xbaH\x07r\x05\x18\xfe\x01`\x01\x12!\n\x10\x65xpected_user_id\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"P\n\x17SetPrimaryEmailResponse\x12\x35\n\x0fverified_emails\x18\x01 \x03(\x0b\x32\x1c.chatto.api.v1.VerifiedEmail\"\x14\n\x12GetSettingsRequest\"D\n\x13GetSettingsResponse\x12-\n\x08settings\x18\x01 \x01(\x0b\x32\x1b.chatto.api.v1.UserSettings\"\xeb\x01\n\x15UpdateSettingsRequest\x12\x15\n\x08timezone\x18\x01 \x01(\tH\x00\x88\x01\x01\x12=\n\x0btime_format\x18\x02 \x01(\x0e\x32\x19.chatto.api.v1.TimeFormatB\x08\xbaH\x05\x82\x01\x02\x10\x01H\x01\x88\x01\x01\x12\x1b\n\x0eshare_timezone\x18\x03 \x01(\x08H\x02\x88\x01\x01\x12/\n\x0bupdate_mask\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.FieldMaskB\x0b\n\t_timezoneB\x0e\n\x0c_time_formatB\x11\n\x0f_share_timezone\"G\n\x16UpdateSettingsResponse\x12-\n\x08settings\x18\x01 \x01(\x0b\x32\x1b.chatto.api.v1.UserSettings\"\x1f\n\x1dRequestAccountDeletionRequest\"<\n\x1eRequestAccountDeletionResponse\x12\x1a\n\x12\x63onfirmation_token\x18\x01 \x01(\t\"4\n\x16\x44\x65leteMyAccountRequest\x12\x1a\n\x12\x63onfirmation_token\x18\x01 \x01(\t\"(\n\x17\x44\x65leteMyAccountResponseJ\x04\x08\x01\x10\x02R\x07\x64\x65leted2\x94\x10\n\x10MyAccountService\x12Z\n\rUpdateProfile\x12#.chatto.api.v1.UpdateProfileRequest\x1a$.chatto.api.v1.UpdateProfileResponse\x12]\n\x0e\x43hangePassword\x12$.chatto.api.v1.ChangePasswordRequest\x1a%.chatto.api.v1.ChangePasswordResponse\x12n\n\x12ListVerifiedEmails\x12(.chatto.api.v1.ListVerifiedEmailsRequest\x1a).chatto.api.v1.ListVerifiedEmailsResponse\"\x03\x90\x02\x01\x12{\n\x18RequestEmailVerification\x12..chatto.api.v1.RequestEmailVerificationRequest\x1a/.chatto.api.v1.RequestEmailVerificationResponse\x12{\n\x18\x43onfirmEmailVerification\x12..chatto.api.v1.ConfirmEmailVerificationRequest\x1a/.chatto.api.v1.ConfirmEmailVerificationResponse\x12`\n\x0fSetPrimaryEmail\x12%.chatto.api.v1.SetPrimaryEmailRequest\x1a&.chatto.api.v1.SetPrimaryEmailResponse\x12T\n\x0bGetSettings\x12!.chatto.api.v1.GetSettingsRequest\x1a\".chatto.api.v1.GetSettingsResponse\x12]\n\x0eUpdateSettings\x12$.chatto.api.v1.UpdateSettingsRequest\x1a%.chatto.api.v1.UpdateSettingsResponse\x12u\n\x16ListExternalIdentities\x12,.chatto.api.v1.ListExternalIdentitiesRequest\x1a-.chatto.api.v1.ListExternalIdentitiesResponse\x12~\n\x19StartExternalIdentityLink\x12/.chatto.api.v1.StartExternalIdentityLinkRequest\x1a\x30.chatto.api.v1.StartExternalIdentityLinkResponse\x12\x81\x01\n\x1a\x44isconnectExternalIdentity\x12\x30.chatto.api.v1.DisconnectExternalIdentityRequest\x1a\x31.chatto.api.v1.DisconnectExternalIdentityResponse\x12T\n\x0bSetPresence\x12!.chatto.api.v1.SetPresenceRequest\x1a\".chatto.api.v1.SetPresenceResponse\x12r\n\x15GetPresencePreference\x12+.chatto.api.v1.GetPresencePreferenceRequest\x1a,.chatto.api.v1.GetPresencePreferenceResponse\x12r\n\x15SetPresencePreference\x12+.chatto.api.v1.SetPresencePreferenceRequest\x1a,.chatto.api.v1.SetPresencePreferenceResponse\x12`\n\x0fRefreshPresence\x12%.chatto.api.v1.RefreshPresenceRequest\x1a&.chatto.api.v1.RefreshPresenceResponse\x12`\n\x0fSetCustomStatus\x12%.chatto.api.v1.SetCustomStatusRequest\x1a&.chatto.api.v1.SetCustomStatusResponse\x12n\n\x12\x44\x65leteCustomStatus\x12(.chatto.api.v1.DeleteCustomStatusRequest\x1a).chatto.api.v1.DeleteCustomStatusResponse\"\x03\x90\x02\x02\x12u\n\x16RequestAccountDeletion\x12,.chatto.api.v1.RequestAccountDeletionRequest\x1a-.chatto.api.v1.RequestAccountDeletionResponse\x12`\n\x0f\x44\x65leteMyAccount\x12%.chatto.api.v1.DeleteMyAccountRequest\x1a&.chatto.api.v1.DeleteMyAccountResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1b\x63hatto/api/v1/account.proto\x12\rchatto.api.v1\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1b\x62uf/validate/validate.proto\x1a\'chatto/api/v1/external_identities.proto\x1a\x1c\x63hatto/api/v1/presence.proto\x1a\x1f\x63hatto/api/v1/user_status.proto\x1a\x19\x63hatto/api/v1/users.proto\x1a\x1a\x63hatto/api/v1/viewer.proto\"Y\n\x15\x43hangePasswordRequest\x12\x1c\n\x08password\x18\x01 \x01(\tB\n\xbaH\x07r\x05\x10\x08\x18\x80\x01\x12\"\n\x10\x63urrent_password\x18\x02 \x01(\tB\x08\xbaH\x05r\x03\x18\x80\x01\";\n\x16\x43hangePasswordResponse\x12!\n\x04user\x18\x01 \x01(\x0b\x32\x13.chatto.api.v1.User\"`\n\rVerifiedEmail\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12/\n\x0bverified_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0f\n\x07primary\x18\x03 \x01(\x08\">\n\x19ListVerifiedEmailsRequest\x12!\n\x10\x65xpected_user_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"S\n\x1aListVerifiedEmailsResponse\x12\x35\n\x0fverified_emails\x18\x01 \x03(\x0b\x32\x1c.chatto.api.v1.VerifiedEmail\"_\n\x1fRequestEmailVerificationRequest\x12\x19\n\x05\x65mail\x18\x01 \x01(\tB\n\xbaH\x07r\x05\x18\xfe\x01`\x01\x12!\n\x10\x65xpected_user_id\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"\"\n RequestEmailVerificationResponse\"x\n\x1f\x43onfirmEmailVerificationRequest\x12\x19\n\x05\x65mail\x18\x01 \x01(\tB\n\xbaH\x07r\x05\x18\xfe\x01`\x01\x12\x17\n\x04\x63ode\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18 \x12!\n\x10\x65xpected_user_id\x18\x03 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"Y\n ConfirmEmailVerificationResponse\x12\x35\n\x0fverified_emails\x18\x01 \x03(\x0b\x32\x1c.chatto.api.v1.VerifiedEmail\"V\n\x16SetPrimaryEmailRequest\x12\x19\n\x05\x65mail\x18\x01 \x01(\tB\n\xbaH\x07r\x05\x18\xfe\x01`\x01\x12!\n\x10\x65xpected_user_id\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"P\n\x17SetPrimaryEmailResponse\x12\x35\n\x0fverified_emails\x18\x01 \x03(\x0b\x32\x1c.chatto.api.v1.VerifiedEmail\"\x14\n\x12GetSettingsRequest\"D\n\x13GetSettingsResponse\x12-\n\x08settings\x18\x01 \x01(\x0b\x32\x1b.chatto.api.v1.UserSettings\"\xeb\x01\n\x15UpdateSettingsRequest\x12\x15\n\x08timezone\x18\x01 \x01(\tH\x00\x88\x01\x01\x12=\n\x0btime_format\x18\x02 \x01(\x0e\x32\x19.chatto.api.v1.TimeFormatB\x08\xbaH\x05\x82\x01\x02\x10\x01H\x01\x88\x01\x01\x12\x1b\n\x0eshare_timezone\x18\x03 \x01(\x08H\x02\x88\x01\x01\x12/\n\x0bupdate_mask\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.FieldMaskB\x0b\n\t_timezoneB\x0e\n\x0c_time_formatB\x11\n\x0f_share_timezone\"G\n\x16UpdateSettingsResponse\x12-\n\x08settings\x18\x01 \x01(\x0b\x32\x1b.chatto.api.v1.UserSettings\"\x1f\n\x1dRequestAccountDeletionRequest\"<\n\x1eRequestAccountDeletionResponse\x12\x1a\n\x12\x63onfirmation_token\x18\x01 \x01(\t\"4\n\x16\x44\x65leteMyAccountRequest\x12\x1a\n\x12\x63onfirmation_token\x18\x01 \x01(\t\"(\n\x17\x44\x65leteMyAccountResponseJ\x04\x08\x01\x10\x02R\x07\x64\x65leted2\xb8\x0f\n\x10MyAccountService\x12]\n\x0e\x43hangePassword\x12$.chatto.api.v1.ChangePasswordRequest\x1a%.chatto.api.v1.ChangePasswordResponse\x12n\n\x12ListVerifiedEmails\x12(.chatto.api.v1.ListVerifiedEmailsRequest\x1a).chatto.api.v1.ListVerifiedEmailsResponse\"\x03\x90\x02\x01\x12{\n\x18RequestEmailVerification\x12..chatto.api.v1.RequestEmailVerificationRequest\x1a/.chatto.api.v1.RequestEmailVerificationResponse\x12{\n\x18\x43onfirmEmailVerification\x12..chatto.api.v1.ConfirmEmailVerificationRequest\x1a/.chatto.api.v1.ConfirmEmailVerificationResponse\x12`\n\x0fSetPrimaryEmail\x12%.chatto.api.v1.SetPrimaryEmailRequest\x1a&.chatto.api.v1.SetPrimaryEmailResponse\x12T\n\x0bGetSettings\x12!.chatto.api.v1.GetSettingsRequest\x1a\".chatto.api.v1.GetSettingsResponse\x12]\n\x0eUpdateSettings\x12$.chatto.api.v1.UpdateSettingsRequest\x1a%.chatto.api.v1.UpdateSettingsResponse\x12u\n\x16ListExternalIdentities\x12,.chatto.api.v1.ListExternalIdentitiesRequest\x1a-.chatto.api.v1.ListExternalIdentitiesResponse\x12~\n\x19StartExternalIdentityLink\x12/.chatto.api.v1.StartExternalIdentityLinkRequest\x1a\x30.chatto.api.v1.StartExternalIdentityLinkResponse\x12\x81\x01\n\x1a\x44isconnectExternalIdentity\x12\x30.chatto.api.v1.DisconnectExternalIdentityRequest\x1a\x31.chatto.api.v1.DisconnectExternalIdentityResponse\x12T\n\x0bSetPresence\x12!.chatto.api.v1.SetPresenceRequest\x1a\".chatto.api.v1.SetPresenceResponse\x12r\n\x15GetPresencePreference\x12+.chatto.api.v1.GetPresencePreferenceRequest\x1a,.chatto.api.v1.GetPresencePreferenceResponse\x12r\n\x15SetPresencePreference\x12+.chatto.api.v1.SetPresencePreferenceRequest\x1a,.chatto.api.v1.SetPresencePreferenceResponse\x12`\n\x0fRefreshPresence\x12%.chatto.api.v1.RefreshPresenceRequest\x1a&.chatto.api.v1.RefreshPresenceResponse\x12`\n\x0fSetCustomStatus\x12%.chatto.api.v1.SetCustomStatusRequest\x1a&.chatto.api.v1.SetCustomStatusResponse\x12n\n\x12\x44\x65leteCustomStatus\x12(.chatto.api.v1.DeleteCustomStatusRequest\x1a).chatto.api.v1.DeleteCustomStatusResponse\"\x03\x90\x02\x02\x12u\n\x16RequestAccountDeletion\x12,.chatto.api.v1.RequestAccountDeletionRequest\x1a-.chatto.api.v1.RequestAccountDeletionResponse\x12`\n\x0f\x44\x65leteMyAccount\x12%.chatto.api.v1.DeleteMyAccountRequest\x1a&.chatto.api.v1.DeleteMyAccountResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'chatto.api.v1.account_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_UPDATEPROFILEREQUEST'].fields_by_name['display_name']._loaded_options = None
-  _globals['_UPDATEPROFILEREQUEST'].fields_by_name['display_name']._serialized_options = b'\272H\006r\004\020\001\030 '
-  _globals['_UPDATEPROFILEREQUEST'].fields_by_name['login']._loaded_options = None
-  _globals['_UPDATEPROFILEREQUEST'].fields_by_name['login']._serialized_options = b'\272H\006r\004\020\002\030 '
-  _globals['_UPDATEPROFILEREQUEST'].fields_by_name['bio']._loaded_options = None
-  _globals['_UPDATEPROFILEREQUEST'].fields_by_name['bio']._serialized_options = b'\272H\005r\003\030\350\007'
   _globals['_CHANGEPASSWORDREQUEST'].fields_by_name['password']._loaded_options = None
   _globals['_CHANGEPASSWORDREQUEST'].fields_by_name['password']._serialized_options = b'\272H\007r\005\020\010\030\200\001'
   _globals['_CHANGEPASSWORDREQUEST'].fields_by_name['current_password']._loaded_options = None
@@ -71,48 +65,44 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_MYACCOUNTSERVICE'].methods_by_name['ListVerifiedEmails']._serialized_options = b'\220\002\001'
   _globals['_MYACCOUNTSERVICE'].methods_by_name['DeleteCustomStatus']._loaded_options = None
   _globals['_MYACCOUNTSERVICE'].methods_by_name['DeleteCustomStatus']._serialized_options = b'\220\002\002'
-  _globals['_UPDATEPROFILEREQUEST']._serialized_start=302
-  _globals['_UPDATEPROFILEREQUEST']._serialized_end=505
-  _globals['_UPDATEPROFILERESPONSE']._serialized_start=507
-  _globals['_UPDATEPROFILERESPONSE']._serialized_end=565
-  _globals['_CHANGEPASSWORDREQUEST']._serialized_start=567
-  _globals['_CHANGEPASSWORDREQUEST']._serialized_end=656
-  _globals['_CHANGEPASSWORDRESPONSE']._serialized_start=658
-  _globals['_CHANGEPASSWORDRESPONSE']._serialized_end=717
-  _globals['_VERIFIEDEMAIL']._serialized_start=719
-  _globals['_VERIFIEDEMAIL']._serialized_end=815
-  _globals['_LISTVERIFIEDEMAILSREQUEST']._serialized_start=817
-  _globals['_LISTVERIFIEDEMAILSREQUEST']._serialized_end=879
-  _globals['_LISTVERIFIEDEMAILSRESPONSE']._serialized_start=881
-  _globals['_LISTVERIFIEDEMAILSRESPONSE']._serialized_end=964
-  _globals['_REQUESTEMAILVERIFICATIONREQUEST']._serialized_start=966
-  _globals['_REQUESTEMAILVERIFICATIONREQUEST']._serialized_end=1061
-  _globals['_REQUESTEMAILVERIFICATIONRESPONSE']._serialized_start=1063
-  _globals['_REQUESTEMAILVERIFICATIONRESPONSE']._serialized_end=1097
-  _globals['_CONFIRMEMAILVERIFICATIONREQUEST']._serialized_start=1099
-  _globals['_CONFIRMEMAILVERIFICATIONREQUEST']._serialized_end=1219
-  _globals['_CONFIRMEMAILVERIFICATIONRESPONSE']._serialized_start=1221
-  _globals['_CONFIRMEMAILVERIFICATIONRESPONSE']._serialized_end=1310
-  _globals['_SETPRIMARYEMAILREQUEST']._serialized_start=1312
-  _globals['_SETPRIMARYEMAILREQUEST']._serialized_end=1398
-  _globals['_SETPRIMARYEMAILRESPONSE']._serialized_start=1400
-  _globals['_SETPRIMARYEMAILRESPONSE']._serialized_end=1480
-  _globals['_GETSETTINGSREQUEST']._serialized_start=1482
-  _globals['_GETSETTINGSREQUEST']._serialized_end=1502
-  _globals['_GETSETTINGSRESPONSE']._serialized_start=1504
-  _globals['_GETSETTINGSRESPONSE']._serialized_end=1572
-  _globals['_UPDATESETTINGSREQUEST']._serialized_start=1575
-  _globals['_UPDATESETTINGSREQUEST']._serialized_end=1810
-  _globals['_UPDATESETTINGSRESPONSE']._serialized_start=1812
-  _globals['_UPDATESETTINGSRESPONSE']._serialized_end=1883
-  _globals['_REQUESTACCOUNTDELETIONREQUEST']._serialized_start=1885
-  _globals['_REQUESTACCOUNTDELETIONREQUEST']._serialized_end=1916
-  _globals['_REQUESTACCOUNTDELETIONRESPONSE']._serialized_start=1918
-  _globals['_REQUESTACCOUNTDELETIONRESPONSE']._serialized_end=1978
-  _globals['_DELETEMYACCOUNTREQUEST']._serialized_start=1980
-  _globals['_DELETEMYACCOUNTREQUEST']._serialized_end=2032
-  _globals['_DELETEMYACCOUNTRESPONSE']._serialized_start=2034
-  _globals['_DELETEMYACCOUNTRESPONSE']._serialized_end=2074
-  _globals['_MYACCOUNTSERVICE']._serialized_start=2077
-  _globals['_MYACCOUNTSERVICE']._serialized_end=4145
+  _globals['_CHANGEPASSWORDREQUEST']._serialized_start=301
+  _globals['_CHANGEPASSWORDREQUEST']._serialized_end=390
+  _globals['_CHANGEPASSWORDRESPONSE']._serialized_start=392
+  _globals['_CHANGEPASSWORDRESPONSE']._serialized_end=451
+  _globals['_VERIFIEDEMAIL']._serialized_start=453
+  _globals['_VERIFIEDEMAIL']._serialized_end=549
+  _globals['_LISTVERIFIEDEMAILSREQUEST']._serialized_start=551
+  _globals['_LISTVERIFIEDEMAILSREQUEST']._serialized_end=613
+  _globals['_LISTVERIFIEDEMAILSRESPONSE']._serialized_start=615
+  _globals['_LISTVERIFIEDEMAILSRESPONSE']._serialized_end=698
+  _globals['_REQUESTEMAILVERIFICATIONREQUEST']._serialized_start=700
+  _globals['_REQUESTEMAILVERIFICATIONREQUEST']._serialized_end=795
+  _globals['_REQUESTEMAILVERIFICATIONRESPONSE']._serialized_start=797
+  _globals['_REQUESTEMAILVERIFICATIONRESPONSE']._serialized_end=831
+  _globals['_CONFIRMEMAILVERIFICATIONREQUEST']._serialized_start=833
+  _globals['_CONFIRMEMAILVERIFICATIONREQUEST']._serialized_end=953
+  _globals['_CONFIRMEMAILVERIFICATIONRESPONSE']._serialized_start=955
+  _globals['_CONFIRMEMAILVERIFICATIONRESPONSE']._serialized_end=1044
+  _globals['_SETPRIMARYEMAILREQUEST']._serialized_start=1046
+  _globals['_SETPRIMARYEMAILREQUEST']._serialized_end=1132
+  _globals['_SETPRIMARYEMAILRESPONSE']._serialized_start=1134
+  _globals['_SETPRIMARYEMAILRESPONSE']._serialized_end=1214
+  _globals['_GETSETTINGSREQUEST']._serialized_start=1216
+  _globals['_GETSETTINGSREQUEST']._serialized_end=1236
+  _globals['_GETSETTINGSRESPONSE']._serialized_start=1238
+  _globals['_GETSETTINGSRESPONSE']._serialized_end=1306
+  _globals['_UPDATESETTINGSREQUEST']._serialized_start=1309
+  _globals['_UPDATESETTINGSREQUEST']._serialized_end=1544
+  _globals['_UPDATESETTINGSRESPONSE']._serialized_start=1546
+  _globals['_UPDATESETTINGSRESPONSE']._serialized_end=1617
+  _globals['_REQUESTACCOUNTDELETIONREQUEST']._serialized_start=1619
+  _globals['_REQUESTACCOUNTDELETIONREQUEST']._serialized_end=1650
+  _globals['_REQUESTACCOUNTDELETIONRESPONSE']._serialized_start=1652
+  _globals['_REQUESTACCOUNTDELETIONRESPONSE']._serialized_end=1712
+  _globals['_DELETEMYACCOUNTREQUEST']._serialized_start=1714
+  _globals['_DELETEMYACCOUNTREQUEST']._serialized_end=1766
+  _globals['_DELETEMYACCOUNTRESPONSE']._serialized_start=1768
+  _globals['_DELETEMYACCOUNTRESPONSE']._serialized_end=1808
+  _globals['_MYACCOUNTSERVICE']._serialized_start=1811
+  _globals['_MYACCOUNTSERVICE']._serialized_end=3787
 # @@protoc_insertion_point(module_scope)
