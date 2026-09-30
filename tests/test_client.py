@@ -166,6 +166,28 @@ async def test_list_rooms(client):
     assert rooms[0].viewer_state.is_member is True
 
 
+async def test_list_rooms_dm_keeps_deleted_participants(client):
+    # Since Chatto 0.5.0-beta.10, a DM's member_user_ids keeps participants
+    # whose accounts were deleted; the client must surface the full list
+    # (resolution to a User then legitimately fails for the deleted one).
+    resp = room_directory_pb2.ListRoomsResponse()
+    entry = resp.rooms.add()
+    entry.room.id = "r-dm"
+    entry.room.kind = "ROOM_KIND_DM"
+    entry.room.name = "me & u2"
+    entry.viewer_state.is_member = True
+    entry.member_user_ids.extend(["u1", "u-deleted"])
+    _mock_method(client, "room_directory", "list_rooms", resp)
+
+    async with client:
+        rooms = await client.list_rooms()
+
+    assert len(rooms) == 1
+    assert rooms[0].room is not None
+    assert rooms[0].room.kind is RoomKind.DM
+    assert rooms[0].member_user_ids == ["u1", "u-deleted"]
+
+
 # --- Messages ----------------------------------------------------------
 
 
