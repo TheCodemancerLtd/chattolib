@@ -14,6 +14,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 from chattolib._pb.chatto.admin.v1 import (
+    diagnostics_pb2,
     room_layout_pb2,
 )
 from chattolib._pb.chatto.admin.v1 import (
@@ -903,6 +904,39 @@ async def test_admin_move_sidebar_item(client):
     assert sent.item.sidebar_link_id == "sl1"
     assert sent.before.room_id == "r1"
     assert sent.group_id == "g1"
+
+
+async def test_admin_get_system_info_livekit(client):
+    resp = diagnostics_pb2.GetSystemInfoResponse()
+    resp.projections_available = True
+    resp.livekit.enabled = True
+    resp.livekit.configured = True
+    resp.livekit.url = "wss://livekit.example"
+    resp.livekit.api_key = "AP1234"
+    resp.livekit.separate_webhook_key = True
+    resp.livekit.webhook_url = "https://chat.example/api/admin/livekit/webhook"
+    resp.livekit.connection_state = diagnostics_pb2.ADMIN_LIVE_KIT_CONNECTION_STATE_OK
+    resp.livekit.insecure_url = False
+    _mock_method(client, "admin_diagnostics", "get_system_info", resp)
+
+    async with client:
+        data = await client.admin_get_system_info()
+
+    lk = data["livekit"]
+    assert lk["enabled"] is True
+    assert lk["configured"] is True
+    assert lk["url"] == "wss://livekit.example"
+    assert lk["apiKey"] == "AP1234"
+    assert lk["separateWebhookKey"] is True
+    # enums render as their full name in Connect JSON (use_integers_for_enums=False)
+    assert lk["connectionState"] == "ADMIN_LIVE_KIT_CONNECTION_STATE_OK"
+    assert (
+        diagnostics_pb2.AdminLiveKitConnectionState.Value(
+            "ADMIN_LIVE_KIT_CONNECTION_STATE_UNREACHABLE"
+        )
+        == 3
+    )
+    assert "connectionError" not in lk  # empty string omitted by MessageToDict
 
 
 async def test_admin_update_server_config(client):
