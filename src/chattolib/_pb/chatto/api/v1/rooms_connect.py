@@ -105,7 +105,7 @@ class RoomServiceClient(ConnectClient):
             headers=headers,
         )
 
-    async def start_d_m(self, request: chatto_api_v1_rooms_pb2.StartDMRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.StartDMResponse:
+    async def start_dm(self, request: chatto_api_v1_rooms_pb2.StartDMRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.StartDMResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
@@ -419,7 +419,7 @@ class RoomServiceClientSync(ConnectClientSync):
             headers=headers,
         )
 
-    def start_d_m(self, request: chatto_api_v1_rooms_pb2.StartDMRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.StartDMResponse:
+    def start_dm(self, request: chatto_api_v1_rooms_pb2.StartDMRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.StartDMResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(

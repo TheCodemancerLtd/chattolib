@@ -104,6 +104,43 @@ def test_cross_file_message_reference_uses_defining_module():
     assert "chatto_api_v1_account_pb2.ListExternalIdentitiesRequest" not in content
 
 
+def test_acronym_rpc_keeps_acronym_whole():
+    """Regression: ``StartDM`` must snake_case to ``start_dm``, not ``start_d_m``.
+
+    (The old per-capital splitter chopped consecutive capitals — acronym runs
+    like ``DM`` — into single letters, so the generated stub was
+    ``start_d_m`` while ``client.py`` called ``start_dm``: an AttributeError
+    only reachable at call time.)
+    """
+    req = g.CodeGeneratorRequest()
+    req.file_to_generate.append("chatto/api/v1/rooms.proto")
+    fd = req.proto_file.add()
+    fd.name = "chatto/api/v1/rooms.proto"
+    fd.package = "chatto.api.v1"
+    for name in (
+        "StartDMRequest",
+        "StartDMResponse",
+        "GetRoomDMStatsRequest",
+        "GetRoomDMStatsResponse",
+    ):
+        fd.message_type.add().name = name
+    svc = fd.service.add()
+    svc.name = "RoomService"
+    for name in ("StartDM", "GetRoomDMStats"):
+        m = svc.method.add()
+        m.name = name
+        m.input_type = f".chatto.api.v1.{name}Request"
+        m.output_type = f".chatto.api.v1.{name}Response"
+    resp = generate(req)
+    content = resp.file[0].content
+    assert "async def start_dm(" in content
+    assert "def start_dm(" in content  # sync variant
+    assert "start_d_m" not in content
+    # acronym followed by another word: boundary before the acronym AND before
+    # the word that follows it
+    assert "async def get_room_dm_stats(" in content
+
+
 def test_skips_files_without_services():
     req = g.CodeGeneratorRequest()
     req.file_to_generate.append("chatto/realtime/v1/realtime.proto")
