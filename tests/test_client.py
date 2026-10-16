@@ -1024,3 +1024,15 @@ async def test_update_settings_share_timezone(client):
 
     assert settings.timezone == "Europe/Berlin"
     assert settings.share_timezone is True
+
+
+def test_snake_case_is_acronym_aware():
+    """``types._snake_case`` must not chop acronym runs (same bug class as
+    the protoc plugin's old ``StartDM`` -> ``start_d_m``)."""
+    from chattolib.types import _snake_case
+
+    assert _snake_case("messagePosted") == "message_posted"
+    assert _snake_case("directMessageReceived") == "direct_message_received"
+    # hypothetical acronym field: DM stays whole, boundary before the word after it
+    assert _snake_case("startDMReceived") == "start_dm_received"
+    assert _snake_case("getDMStats") == "get_dm_stats"

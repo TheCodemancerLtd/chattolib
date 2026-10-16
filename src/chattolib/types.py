@@ -1012,10 +1012,22 @@ class TimelineEvent:
 
 
 def _snake_case(name: str) -> str:
+    """snake_case a camelCase oneof field name (acronym-aware).
+
+    Mirrors the chattolib protoc plugin's ``_method_name``: an underscore
+    goes before an uppercase letter only at a word boundary — after a
+    lowercase/digit, or before the final capital of a run that is followed
+    by a lowercase letter. A naive per-capital split would turn a future
+    acronym field like ``startDMReceived`` into ``start_d_m_received`` and
+    silently break any ``kind == "..."`` comparison.
+    """
     out: list[str] = []
-    for ch in name:
+    for i, ch in enumerate(name):
         if ch.isupper() and out:
-            out.append("_")
+            prev = name[i - 1]
+            nxt = name[i + 1] if i + 1 < len(name) else ""
+            if not prev.isupper() or nxt.islower():
+                out.append("_")
         out.append(ch.lower())
     return "".join(out)
 
