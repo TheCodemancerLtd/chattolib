@@ -48,6 +48,7 @@ from chattolib.types import (
     NotificationLevel,
     PresenceStatus,
     RoomKind,
+    ThreadRootAuthorFilter,
     TimeFormat,
 )
 
@@ -577,6 +578,10 @@ async def test_list_followed_threads(client):
             offset=5,
             include_direct_message_threads=True,
             unread_only=True,
+            root_author_filter=ThreadRootAuthorFilter.VIEWER,
+        )
+        await client.list_followed_threads(
+            root_author_filter=ThreadRootAuthorFilter.OTHERS,
         )
 
     assert page.page.total_count == 1
@@ -586,8 +591,15 @@ async def test_list_followed_threads(client):
     calls = [c.args[0] for c in mocked.call_args_list]
     assert calls[0].include_direct_message_threads is False
     assert calls[0].unread_only is False
+    assert calls[0].root_author_filter == 0
     assert calls[1].include_direct_message_threads is True
     assert calls[1].unread_only is True
+    assert calls[1].root_author_filter == threads_pb2.ThreadRootAuthorFilter.Value(
+        "THREAD_ROOT_AUTHOR_FILTER_VIEWER"
+    )
+    assert calls[2].root_author_filter == threads_pb2.ThreadRootAuthorFilter.Value(
+        "THREAD_ROOT_AUTHOR_FILTER_OTHERS"
+    )
     assert calls[1].page.limit == 5
     assert calls[1].page.offset == 5
 

@@ -83,6 +83,12 @@ class NotificationLevel(StrEnum):
     ALL_MESSAGES = "NOTIFICATION_LEVEL_ALL_MESSAGES"
 
 
+class ThreadRootAuthorFilter(StrEnum):
+    UNSPECIFIED = "THREAD_ROOT_AUTHOR_FILTER_UNSPECIFIED"
+    VIEWER = "THREAD_ROOT_AUTHOR_FILTER_VIEWER"
+    OTHERS = "THREAD_ROOT_AUTHOR_FILTER_OTHERS"
+
+
 class ImageFitMode(StrEnum):
     UNSPECIFIED = "IMAGE_FIT_MODE_UNSPECIFIED"
     CONTAIN = "IMAGE_FIT_MODE_CONTAIN"
@@ -434,6 +440,8 @@ class ServerRuntimeConfig:
     livekit_url: str | None = None
     video_processing_enabled: bool = False
     max_upload_size: int = 0
+    # Deprecated since 0.5.0b16: an alias of ``max_upload_size`` (same value).
+    # Since 0.5.0b16 one size limit applies to all attachments, GIFs/videos included.
     max_video_upload_size: int = 0
     message_edit_window_seconds: int = 0
 

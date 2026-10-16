@@ -25,13 +25,15 @@ _sym_db = _symbol_database.Default()
 from chatto.api.v1 import server_pb2 as chatto_dot_api_dot_v1_dot_server__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n chatto/api/v1/server_state.proto\x12\rchatto.api.v1\x1a\x1a\x63hatto/api/v1/server.proto\"\x19\n\x17GetServerProfileRequest\"O\n\x18GetServerProfileResponse\x12\x33\n\x07profile\x18\x01 \x01(\x0b\x32\".chatto.api.v1.ServerPublicProfile\"\x10\n\x0eGetMotdRequest\"-\n\x0fGetMotdResponse\x12\x11\n\x04motd\x18\x01 \x01(\tH\x00\x88\x01\x01\x42\x07\n\x05_motd\"\xb9\x02\n\x13ServerRuntimeConfig\x12\"\n\x1apush_notifications_enabled\x18\x01 \x01(\x08\x12\x1d\n\x10vapid_public_key\x18\x02 \x01(\tH\x00\x88\x01\x01\x12\x18\n\x0blivekit_url\x18\x03 \x01(\tH\x01\x88\x01\x01\x12 \n\x18video_processing_enabled\x18\x05 \x01(\x08\x12\x17\n\x0fmax_upload_size\x18\x06 \x01(\x03\x12\x1d\n\x15max_video_upload_size\x18\x07 \x01(\x03\x12#\n\x1bmessage_edit_window_seconds\x18\x08 \x01(\x05\x42\x13\n\x11_vapid_public_keyB\x0e\n\x0c_livekit_urlJ\x04\x08\x04\x10\x05R\x1b\x64irect_registration_enabled\"\x19\n\x17GetRuntimeConfigRequest\"O\n\x18GetRuntimeConfigResponse\x12\x33\n\x07runtime\x18\x01 \x01(\x0b\x32\".chatto.api.v1.ServerRuntimeConfig2\xa3\x02\n\rServerService\x12\x63\n\x10GetServerProfile\x12&.chatto.api.v1.GetServerProfileRequest\x1a\'.chatto.api.v1.GetServerProfileResponse\x12H\n\x07GetMotd\x12\x1d.chatto.api.v1.GetMotdRequest\x1a\x1e.chatto.api.v1.GetMotdResponse\x12\x63\n\x10GetRuntimeConfig\x12&.chatto.api.v1.GetRuntimeConfigRequest\x1a\'.chatto.api.v1.GetRuntimeConfigResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n chatto/api/v1/server_state.proto\x12\rchatto.api.v1\x1a\x1a\x63hatto/api/v1/server.proto\"\x19\n\x17GetServerProfileRequest\"O\n\x18GetServerProfileResponse\x12\x33\n\x07profile\x18\x01 \x01(\x0b\x32\".chatto.api.v1.ServerPublicProfile\"\x10\n\x0eGetMotdRequest\"-\n\x0fGetMotdResponse\x12\x11\n\x04motd\x18\x01 \x01(\tH\x00\x88\x01\x01\x42\x07\n\x05_motd\"\xbd\x02\n\x13ServerRuntimeConfig\x12\"\n\x1apush_notifications_enabled\x18\x01 \x01(\x08\x12\x1d\n\x10vapid_public_key\x18\x02 \x01(\tH\x00\x88\x01\x01\x12\x18\n\x0blivekit_url\x18\x03 \x01(\tH\x01\x88\x01\x01\x12 \n\x18video_processing_enabled\x18\x05 \x01(\x08\x12\x17\n\x0fmax_upload_size\x18\x06 \x01(\x03\x12!\n\x15max_video_upload_size\x18\x07 \x01(\x03\x42\x02\x18\x01\x12#\n\x1bmessage_edit_window_seconds\x18\x08 \x01(\x05\x42\x13\n\x11_vapid_public_keyB\x0e\n\x0c_livekit_urlJ\x04\x08\x04\x10\x05R\x1b\x64irect_registration_enabled\"\x19\n\x17GetRuntimeConfigRequest\"O\n\x18GetRuntimeConfigResponse\x12\x33\n\x07runtime\x18\x01 \x01(\x0b\x32\".chatto.api.v1.ServerRuntimeConfig2\xa3\x02\n\rServerService\x12\x63\n\x10GetServerProfile\x12&.chatto.api.v1.GetServerProfileRequest\x1a\'.chatto.api.v1.GetServerProfileResponse\x12H\n\x07GetMotd\x12\x1d.chatto.api.v1.GetMotdRequest\x1a\x1e.chatto.api.v1.GetMotdResponse\x12\x63\n\x10GetRuntimeConfig\x12&.chatto.api.v1.GetRuntimeConfigRequest\x1a\'.chatto.api.v1.GetRuntimeConfigResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'chatto.api.v1.server_state_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
+  _globals['_SERVERRUNTIMECONFIG'].fields_by_name['max_video_upload_size']._loaded_options = None
+  _globals['_SERVERRUNTIMECONFIG'].fields_by_name['max_video_upload_size']._serialized_options = b'\030\001'
   _globals['_GETSERVERPROFILEREQUEST']._serialized_start=79
   _globals['_GETSERVERPROFILEREQUEST']._serialized_end=104
   _globals['_GETSERVERPROFILERESPONSE']._serialized_start=106
@@ -41,11 +43,11 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GETMOTDRESPONSE']._serialized_start=205
   _globals['_GETMOTDRESPONSE']._serialized_end=250
   _globals['_SERVERRUNTIMECONFIG']._serialized_start=253
-  _globals['_SERVERRUNTIMECONFIG']._serialized_end=566
-  _globals['_GETRUNTIMECONFIGREQUEST']._serialized_start=568
-  _globals['_GETRUNTIMECONFIGREQUEST']._serialized_end=593
-  _globals['_GETRUNTIMECONFIGRESPONSE']._serialized_start=595
-  _globals['_GETRUNTIMECONFIGRESPONSE']._serialized_end=674
-  _globals['_SERVERSERVICE']._serialized_start=677
-  _globals['_SERVERSERVICE']._serialized_end=968
+  _globals['_SERVERRUNTIMECONFIG']._serialized_end=570
+  _globals['_GETRUNTIMECONFIGREQUEST']._serialized_start=572
+  _globals['_GETRUNTIMECONFIGREQUEST']._serialized_end=597
+  _globals['_GETRUNTIMECONFIGRESPONSE']._serialized_start=599
+  _globals['_GETRUNTIMECONFIGRESPONSE']._serialized_end=678
+  _globals['_SERVERSERVICE']._serialized_start=681
+  _globals['_SERVERSERVICE']._serialized_end=972
 # @@protoc_insertion_point(module_scope)

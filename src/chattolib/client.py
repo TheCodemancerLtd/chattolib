@@ -111,6 +111,7 @@ from chattolib.types import (
     ServerLogin,
     ServerProfile,
     ServerRuntimeConfig,
+    ThreadRootAuthorFilter,
     TimeFormat,
     TimelinePage,
     User,
@@ -1113,12 +1114,16 @@ class ChattoClient:
         offset: int | None = None,
         include_direct_message_threads: bool | None = None,
         unread_only: bool | None = None,
+        root_author_filter: ThreadRootAuthorFilter | None = None,
     ) -> FollowedThreadsPage:
         """Followed threads, newest activity first.
 
         ``unread_only`` returns only threads with unread replies (older
         servers ignore it); ``include_direct_message_threads`` also lists
-        followed direct-message threads.
+        followed direct-message threads; ``root_author_filter`` (since
+        0.5.0b16) filters by the author of the thread *root* —
+        ``VIEWER`` for threads you started, ``OTHERS`` for threads started
+        by someone else (older servers ignore it).
         """
         req = threads_pb2.ListFollowedThreadsRequest()
         page = _page_pb(limit, offset)
@@ -1128,6 +1133,10 @@ class ChattoClient:
             req.include_direct_message_threads = include_direct_message_threads
         if unread_only is not None:
             req.unread_only = unread_only
+        if root_author_filter is not None:
+            req.root_author_filter = threads_pb2.ThreadRootAuthorFilter.Value(
+                root_author_filter.value
+            )
         resp = await self._rpc(
             self._svc.threads.list_followed_threads(req, headers=self._headers())
         )
