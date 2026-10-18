@@ -29,7 +29,13 @@ from chattolib._pb.chatto.admin.v1 import (
     room_layout_pb2,
 )
 from chattolib._pb.chatto.admin.v1 import (
+    invitations_pb2 as admin_invitations_pb2,
+)
+from chattolib._pb.chatto.admin.v1 import (
     members_pb2 as admin_members_pb2,
+)
+from chattolib._pb.chatto.admin.v1 import (
+    oauth_clients_pb2 as admin_oauth_clients_pb2,
 )
 from chattolib._pb.chatto.admin.v1 import (
     permissions_pb2 as admin_permissions_pb2,
@@ -44,11 +50,12 @@ from chattolib._pb.chatto.api.v1 import (
     account_pb2,
     asset_uploads_pb2,
     attachments_pb2,
+    bots_pb2,
     common_pb2,
     link_previews_pb2,
     member_directory_pb2,
+    message_search_pb2,
     messages_pb2,
-    notification_preferences_pb2,
     notifications_pb2,
     pagination_pb2,
     permissions_pb2,
@@ -67,6 +74,11 @@ from chattolib._pb.chatto.api.v1 import (
     viewer_pb2,
     voice_calls_pb2,
 )
+from chattolib._pb.chatto.auth.v1 import (
+    external_identity_auth_pb2,
+    push_subscription_cleanup_pb2,
+    setup_pb2,
+)
 from chattolib._pb.chatto.discovery.v1 import server_pb2 as discovery_server_pb2
 from chattolib._transport import (
     ServiceClients,
@@ -77,25 +89,40 @@ from chattolib._transport import (
 from chattolib.exceptions import ChattoAuthError, ChattoError
 from chattolib.types import (
     ActiveCall,
+    ActiveCallParticipant,
     AdminMember,
     AdminRole,
     AdminRoomLayoutGroup,
     Asset,
     AssetUpload,
+    BotAccount,
+    BotApiKey,
+    BotOutboundWebhook,
+    BotWebhookFailure,
+    CallMediaPublisherKind,
     DirectoryMember,
+    ExternalIdentityProvider,
     FollowedThread,
     FollowedThreadsPage,
     ImageTransformOptions,
+    InviteLink,
+    LinkedExternalIdentity,
     LinkPreview,
     Message,
+    MessageSearchGroupBy,
+    MessageSearchOrder,
+    MessageSearchScope,
     Neighbor,
     NeighborhoodServersPage,
-    NotificationLevel,
     NotificationOccurrence,
     NotificationOccurrencesPage,
     NotificationPolicy,
-    NotificationPreference,
+    OAuthClient,
+    OauthClientPolicy,
     Page,
+    PendingExternalIdentity,
+    PermissionDecision,
+    PermissionScopeKind,
     PinnedMessage,
     PinnedMessagesPage,
     PresencePreference,
@@ -104,18 +131,23 @@ from chattolib.types import (
     Room,
     RoomDirectoryScope,
     RoomGroup,
+    RoomReadState,
     RoomSuspension,
     RoomThreadingMode,
     RoomWithViewerState,
+    SearchResultsPage,
+    SearchStatus,
     ServerConfig,
     ServerLogin,
     ServerProfile,
     ServerRuntimeConfig,
+    ThreadReadState,
     ThreadRootAuthorFilter,
     TimeFormat,
     TimelinePage,
     User,
     UserSettings,
+    VerifiedEmail,
     ViewerUser,
     format_datetime,
     parse_datetime,
@@ -170,6 +202,15 @@ def _timestamp_pb(value: datetime | None) -> Any:
     ts = timestamp_pb2.Timestamp()
     ts.FromJsonString(format_datetime(value))
     return ts
+
+
+def _permission_scope_pb(kind: PermissionScopeKind, scope_id: str) -> Any:
+    """Build an ``admin.v1.PermissionScope`` (SERVER/DM take an empty ID)."""
+    scope = admin_permissions_pb2.PermissionScope()
+    scope.kind = admin_permissions_pb2.PermissionScopeKind.Value(kind.value)
+    if scope_id:
+        scope.id = scope_id
+    return scope
 
 
 class ChattoClient:
@@ -1360,52 +1401,6 @@ class ChattoClient:
         )
         return NotificationPolicy.parse(pb_to_dict(resp.policy.policy))
 
-    # --- Notification preferences --------------------------------------
-
-    async def get_server_notification_preference(self) -> NotificationPreference:
-        resp = await self._rpc(
-            self._svc.notification_prefs.get_server_notification_preference(
-                notification_preferences_pb2.GetServerNotificationPreferenceRequest(),
-                headers=self._headers(),
-            )
-        )
-        return NotificationPreference.parse(pb_to_dict(resp.preference))
-
-    async def update_server_notification_preference(
-        self, level: NotificationLevel
-    ) -> NotificationPreference:
-        resp = await self._rpc(
-            self._svc.notification_prefs.update_server_notification_preference(
-                notification_preferences_pb2.UpdateServerNotificationPreferenceRequest(
-                    level=level.value
-                ),
-                headers=self._headers(),
-            )
-        )
-        return NotificationPreference.parse(pb_to_dict(resp.preference))
-
-    async def get_room_notification_preference(self, room_id: str) -> NotificationPreference:
-        resp = await self._rpc(
-            self._svc.notification_prefs.get_room_notification_preference(
-                notification_preferences_pb2.GetRoomNotificationPreferenceRequest(room_id=room_id),
-                headers=self._headers(),
-            )
-        )
-        return NotificationPreference.parse(pb_to_dict(resp.preference))
-
-    async def update_room_notification_preference(
-        self, room_id: str, level: NotificationLevel
-    ) -> NotificationPreference:
-        resp = await self._rpc(
-            self._svc.notification_prefs.update_room_notification_preference(
-                notification_preferences_pb2.UpdateRoomNotificationPreferenceRequest(
-                    room_id=room_id, level=level.value
-                ),
-                headers=self._headers(),
-            )
-        )
-        return NotificationPreference.parse(pb_to_dict(resp.preference))
-
     # --- Push notifications --------------------------------------------
 
     async def subscribe_push(
@@ -2303,3 +2298,973 @@ class ChattoClient:
             )
         )
         return pb_to_dict(resp)
+
+    # --- Message search -------------------------------------------------
+
+    async def get_search_status(self) -> SearchStatus:
+        """Current message-search availability on this server.
+
+        Available even when search is disabled. ``FAILED_PRECONDITION``
+        means the operator disabled search; ``UNAVAILABLE`` means the
+        search provider is not ready to answer queries yet.
+        """
+        resp = await self._rpc(
+            self._svc.message_search.get_status(
+                message_search_pb2.GetStatusRequest(),
+                headers=self._headers(),
+            )
+        )
+        return SearchStatus.parse(pb_to_dict(resp))
+
+    async def search_messages(
+        self,
+        query: str,
+        *,
+        room_id: str | None = None,
+        author_id: str | None = None,
+        created_after: datetime | None = None,
+        created_before: datetime | None = None,
+        has_attachments: bool | None = None,
+        order: MessageSearchOrder | None = None,
+        page_size: int | None = None,
+        cursor: str | None = None,
+        scope: MessageSearchScope | None = None,
+        group_by: MessageSearchGroupBy | None = None,
+        root_author_filter: ThreadRootAuthorFilter | None = None,
+    ) -> SearchResultsPage:
+        """Full-text search over current message bodies you can read.
+
+        ``query`` supports required words, quoted exact phrases, and the
+        ``in:``, ``from:``, ``before:``, ``after:``, and ``has:attachment``
+        filters. ``group_by=THREAD`` returns one row per matching thread
+        (with ``thread_context`` and ``thread_total_count`` populated).
+        Scope, grouping, and ordering are part of the cursor: keep them
+        identical when paging with ``cursor``. Raises ``ChattoConnectError``
+        with ``code='failed_precondition'`` when search is disabled and
+        ``code='unavailable'`` while the provider is catching up.
+        """
+        req = message_search_pb2.SearchMessagesRequest(query=query)
+        if room_id is not None:
+            req.room_id = room_id
+        if author_id is not None:
+            req.author_id = author_id
+        if created_after is not None:
+            req.created_after.CopyFrom(_timestamp_pb(created_after))
+        if created_before is not None:
+            req.created_before.CopyFrom(_timestamp_pb(created_before))
+        if has_attachments is not None:
+            req.has_attachments = has_attachments
+        if order is not None:
+            req.order = message_search_pb2.MessageSearchOrder.Value(order.value)
+        if page_size is not None:
+            req.page_size = page_size
+        if cursor is not None:
+            req.cursor = cursor
+        if scope is not None:
+            req.scope = message_search_pb2.MessageSearchScope.Value(scope.value)
+        if group_by is not None:
+            req.group_by = message_search_pb2.MessageSearchGroupBy.Value(group_by.value)
+        if root_author_filter is not None:
+            req.root_author_filter = threads_pb2.ThreadRootAuthorFilter.Value(
+                root_author_filter.value
+            )
+        resp = await self._rpc(
+            self._svc.message_search.search_messages(req, headers=self._headers())
+        )
+        return SearchResultsPage.parse(pb_to_dict(resp))
+
+    # --- Read state ------------------------------------------------------
+
+    async def get_room_read_state(self, room_id: str) -> RoomReadState | None:
+        resp = await self._rpc(
+            self._svc.rooms.get_room_read_state(
+                read_state_pb2.GetRoomReadStateRequest(room_id=room_id),
+                headers=self._headers(),
+            )
+        )
+        return RoomReadState.parse(pb_to_dict(resp.state))
+
+    async def batch_get_room_read_states(self, room_ids: list[str]) -> list[RoomReadState]:
+        resp = await self._rpc(
+            self._svc.rooms.batch_get_room_read_states(
+                read_state_pb2.BatchGetRoomReadStatesRequest(room_ids=room_ids),
+                headers=self._headers(),
+            )
+        )
+        data = pb_to_dict(resp)
+        return [
+            s
+            for s in (RoomReadState.parse(row) for row in data.get("states") or [])
+            if s is not None
+        ]
+
+    async def get_thread_read_state(
+        self, room_id: str, thread_root_event_id: str
+    ) -> ThreadReadState | None:
+        resp = await self._rpc(
+            self._svc.threads.get_thread_read_state(
+                read_state_pb2.GetThreadReadStateRequest(
+                    room_id=room_id, thread_root_event_id=thread_root_event_id
+                ),
+                headers=self._headers(),
+            )
+        )
+        return ThreadReadState.parse(pb_to_dict(resp.state))
+
+    async def batch_get_thread_read_states(
+        self, targets: list[tuple[str, str]]
+    ) -> list[ThreadReadState]:
+        """Thread read states for (room_id, thread_root_event_id) pairs."""
+        req = read_state_pb2.BatchGetThreadReadStatesRequest()
+        for room_id, thread_root_event_id in targets:
+            req.targets.add(room_id=room_id, thread_root_event_id=thread_root_event_id)
+        resp = await self._rpc(
+            self._svc.threads.batch_get_thread_read_states(req, headers=self._headers())
+        )
+        data = pb_to_dict(resp)
+        return [
+            s
+            for s in (ThreadReadState.parse(row) for row in data.get("states") or [])
+            if s is not None
+        ]
+
+    # --- Messages: extras -------------------------------------------------
+
+    async def list_reaction_users(
+        self,
+        room_id: str,
+        message_event_id: str,
+        emoji: str,
+        *,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> tuple[list[str], Page]:
+        """User IDs who added ``emoji`` to a message (ordered by user ID).
+
+        Use :meth:`batch_get_users` to hydrate profiles.
+        """
+        req = reactions_pb2.ListReactionUsersRequest(
+            room_id=room_id, message_event_id=message_event_id, emoji=emoji
+        )
+        page = _page_pb(limit, offset)
+        if page is not None:
+            req.page.CopyFrom(page)
+        resp = await self._rpc(self._svc.messages.list_reaction_users(req, headers=self._headers()))
+        data = pb_to_dict(resp)
+        return list(data.get("userIds") or []), Page.parse(data.get("page"))
+
+    async def set_attachment_description(
+        self, room_id: str, event_id: str, attachment_id: str, description: str
+    ) -> Message:
+        """Set or clear (empty string) one attachment's alt description."""
+        resp = await self._rpc(
+            self._svc.messages.set_attachment_description(
+                messages_pb2.SetAttachmentDescriptionRequest(
+                    room_id=room_id,
+                    event_id=event_id,
+                    attachment_id=attachment_id,
+                    description=description,
+                ),
+                headers=self._headers(),
+            )
+        )
+        message = Message.parse(pb_to_dict(resp.message))
+        assert message is not None
+        return message
+
+    # --- Threads: extras --------------------------------------------------
+
+    async def list_thread_participants(
+        self,
+        room_id: str,
+        thread_root_event_id: str,
+        *,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> tuple[list[str], Page]:
+        """Distinct authors of non-retracted replies in a thread."""
+        req = threads_pb2.ListThreadParticipantsRequest(
+            room_id=room_id, thread_root_event_id=thread_root_event_id
+        )
+        page = _page_pb(limit, offset)
+        if page is not None:
+            req.page.CopyFrom(page)
+        resp = await self._rpc(
+            self._svc.threads.list_thread_participants(req, headers=self._headers())
+        )
+        data = pb_to_dict(resp)
+        return list(data.get("userIds") or []), Page.parse(data.get("page"))
+
+    # --- Server -----------------------------------------------------------
+
+    async def get_server_profile(self) -> ServerProfile:
+        """Public server profile for an authenticated caller."""
+        resp = await self._rpc(
+            self._svc.server.get_server_profile(
+                server_state_pb2.GetServerProfileRequest(),
+                headers=self._headers(),
+            )
+        )
+        return ServerProfile.parse(pb_to_dict(resp.profile))
+
+    # --- Users ------------------------------------------------------------
+
+    async def list_users(
+        self,
+        *,
+        search: str = "",
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> tuple[list[DirectoryMember], Page]:
+        """User directory page, oldest account first."""
+        req = user_service_pb2.ListUsersRequest(search=search)
+        page = _page_pb(limit, offset)
+        if page is not None:
+            req.page.CopyFrom(page)
+        resp = await self._rpc(self._svc.user.list_users(req, headers=self._headers()))
+        data = pb_to_dict(resp)
+        users = [
+            u
+            for u in (DirectoryMember.parse(row) for row in data.get("users") or [])
+            if u is not None
+        ]
+        return users, Page.parse(data.get("page"))
+
+    async def batch_get_users(self, user_ids: list[str]) -> list[DirectoryMember]:
+        """Directory rows for several user IDs; unknown IDs are omitted."""
+        resp = await self._rpc(
+            self._svc.user.batch_get_users(
+                user_service_pb2.BatchGetUsersRequest(user_ids=user_ids),
+                headers=self._headers(),
+            )
+        )
+        data = pb_to_dict(resp)
+        return [
+            u
+            for u in (DirectoryMember.parse(row) for row in data.get("users") or [])
+            if u is not None
+        ]
+
+    async def upload_avatar(
+        self,
+        user_id: str,
+        file_path: str | Path,
+        *,
+        content_type: str = "image/png",
+    ) -> User:
+        """Upload and set one user's avatar (self, or managed accounts)."""
+        p = Path(file_path)
+        req = user_service_pb2.UploadAvatarRequest(
+            user_id=user_id,
+            image=common_pb2.ImageUpload(
+                image=p.read_bytes(), filename=p.name, content_type=content_type
+            ),
+        )
+        resp = await self._rpc(self._svc.user.upload_avatar(req, headers=self._headers()))
+        user = User.parse(pb_to_dict(resp.user))
+        assert user is not None
+        return user
+
+    async def delete_avatar(self, user_id: str) -> User:
+        resp = await self._rpc(
+            self._svc.user.delete_avatar(
+                user_service_pb2.DeleteAvatarRequest(user_id=user_id),
+                headers=self._headers(),
+            )
+        )
+        user = User.parse(pb_to_dict(resp.user))
+        assert user is not None
+        return user
+
+    # --- My account: password, email, settings, identities, lifecycle -----
+
+    async def change_password(self, password: str, current_password: str = "") -> User:
+        """Set or change the authenticated account's password.
+
+        ``current_password`` is required when the account already has a
+        password and omitted when adding the first one.
+        """
+        req = account_pb2.ChangePasswordRequest(password=password)
+        if current_password:
+            req.current_password = current_password
+        resp = await self._rpc(self._svc.account.change_password(req, headers=self._headers()))
+        user = User.parse(pb_to_dict(resp.user))
+        assert user is not None
+        return user
+
+    async def list_verified_emails(self, expected_user_id: str) -> list[VerifiedEmail]:
+        resp = await self._rpc(
+            self._svc.account.list_verified_emails(
+                account_pb2.ListVerifiedEmailsRequest(expected_user_id=expected_user_id),
+                headers=self._headers(),
+            )
+        )
+        data = pb_to_dict(resp)
+        return [VerifiedEmail.parse(e) for e in data.get("verifiedEmails") or []]
+
+    async def request_email_verification(self, email: str, expected_user_id: str) -> None:
+        """Send a six-digit verification code to a new email address."""
+        await self._rpc(
+            self._svc.account.request_email_verification(
+                account_pb2.RequestEmailVerificationRequest(
+                    email=email, expected_user_id=expected_user_id
+                ),
+                headers=self._headers(),
+            )
+        )
+
+    async def confirm_email_verification(
+        self, email: str, code: str, expected_user_id: str
+    ) -> list[VerifiedEmail]:
+        resp = await self._rpc(
+            self._svc.account.confirm_email_verification(
+                account_pb2.ConfirmEmailVerificationRequest(
+                    email=email, code=code, expected_user_id=expected_user_id
+                ),
+                headers=self._headers(),
+            )
+        )
+        data = pb_to_dict(resp)
+        return [VerifiedEmail.parse(e) for e in data.get("verifiedEmails") or []]
+
+    async def set_primary_email(self, email: str, expected_user_id: str) -> list[VerifiedEmail]:
+        resp = await self._rpc(
+            self._svc.account.set_primary_email(
+                account_pb2.SetPrimaryEmailRequest(email=email, expected_user_id=expected_user_id),
+                headers=self._headers(),
+            )
+        )
+        data = pb_to_dict(resp)
+        return [VerifiedEmail.parse(e) for e in data.get("verifiedEmails") or []]
+
+    async def get_settings(self) -> UserSettings:
+        """The authenticated user's display preferences."""
+        resp = await self._rpc(
+            self._svc.account.get_settings(
+                account_pb2.GetSettingsRequest(), headers=self._headers()
+            )
+        )
+        return UserSettings.parse(pb_to_dict(resp.settings))
+
+    async def list_external_identities(
+        self,
+    ) -> tuple[list[ExternalIdentityProvider], list[LinkedExternalIdentity]]:
+        """Configured providers and identities linked to this account."""
+        resp = await self._rpc(
+            self._svc.account.list_external_identities(
+                account_pb2.ListExternalIdentitiesRequest(), headers=self._headers()
+            )
+        )
+        data = pb_to_dict(resp)
+        providers = [ExternalIdentityProvider.parse(p) for p in data.get("providers") or []]
+        linked = [LinkedExternalIdentity.parse(x) for x in data.get("linkedIdentities") or []]
+        return providers, linked
+
+    async def start_external_identity_link(
+        self,
+        provider_id: str,
+        *,
+        redirect_path: str = "",
+        current_password: str = "",
+    ) -> str:
+        """Begin linking a provider; returns the browser start URL."""
+        req = account_pb2.StartExternalIdentityLinkRequest(provider_id=provider_id)
+        if redirect_path:
+            req.redirect_path = redirect_path
+        if current_password:
+            req.current_password = current_password
+        resp = await self._rpc(
+            self._svc.account.start_external_identity_link(req, headers=self._headers())
+        )
+        return resp.start_url
+
+    async def disconnect_external_identity(
+        self, subject_hash: str, *, current_password: str = ""
+    ) -> None:
+        req = account_pb2.DisconnectExternalIdentityRequest(subject_hash=subject_hash)
+        if current_password:
+            req.current_password = current_password
+        await self._rpc(
+            self._svc.account.disconnect_external_identity(req, headers=self._headers())
+        )
+
+    async def request_account_deletion(self) -> str:
+        """Get the short-lived confirmation token for account deletion."""
+        resp = await self._rpc(
+            self._svc.account.request_account_deletion(
+                account_pb2.RequestAccountDeletionRequest(), headers=self._headers()
+            )
+        )
+        return resp.confirmation_token
+
+    async def delete_my_account(self, confirmation_token: str) -> None:
+        """Permanently delete the authenticated account. Irreversible."""
+        await self._rpc(
+            self._svc.account.delete_my_account(
+                account_pb2.DeleteMyAccountRequest(confirmation_token=confirmation_token),
+                headers=self._headers(),
+            )
+        )
+
+    # --- Viewer: privileged mode ------------------------------------------
+
+    async def activate_privileged_mode(self) -> dict[str, Any]:
+        """Elevate entitled permissions for a fixed window (humans only)."""
+        resp = await self._rpc(
+            self._svc.viewer.activate_privileged_mode(
+                viewer_pb2.ActivatePrivilegedModeRequest(), headers=self._headers()
+            )
+        )
+        return pb_to_dict(resp)
+
+    async def deactivate_privileged_mode(self) -> dict[str, Any]:
+        resp = await self._rpc(
+            self._svc.viewer.deactivate_privileged_mode(
+                viewer_pb2.DeactivatePrivilegedModeRequest(), headers=self._headers()
+            )
+        )
+        return pb_to_dict(resp)
+
+    # --- Push ---------------------------------------------------------------
+
+    async def send_test_notification(self) -> None:
+        """Send a test Web Push notification to this account's subscriptions."""
+        await self._rpc(
+            self._svc.push.send_test_notification(
+                push_notifications_pb2.SendTestNotificationRequest(),
+                headers=self._headers(),
+            )
+        )
+
+    # --- Voice calls ---------------------------------------------------------
+
+    async def list_call_participants(self, room_id: str) -> list[ActiveCallParticipant]:
+        resp = await self._rpc(
+            self._svc.voice_calls.list_call_participants(
+                voice_calls_pb2.ListCallParticipantsRequest(room_id=room_id),
+                headers=self._headers(),
+            )
+        )
+        data = pb_to_dict(resp)
+        return [ActiveCallParticipant.parse(p) for p in data.get("participants") or []]
+
+    async def create_call_media_publisher_token(
+        self, room_id: str, kind: CallMediaPublisherKind
+    ) -> dict[str, Any]:
+        """Native companion publisher credential (token, e2ee_key, call_id)."""
+        resp = await self._rpc(
+            self._svc.voice_calls.create_call_media_publisher_token(
+                voice_calls_pb2.CreateCallMediaPublisherTokenRequest(
+                    room_id=room_id,
+                    kind=voice_calls_pb2.CallMediaPublisherKind.Value(kind.value),
+                ),
+                headers=self._headers(),
+            )
+        )
+        return pb_to_dict(resp)
+
+    # --- Bots ---------------------------------------------------------------
+
+    async def list_bots(
+        self,
+        *,
+        search: str = "",
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> tuple[list[BotAccount], Page]:
+        """Bots visible to the caller (owners see their own; managers all)."""
+        req = bots_pb2.ListBotsRequest(search=search)
+        page = _page_pb(limit, offset)
+        if page is not None:
+            req.page.CopyFrom(page)
+        resp = await self._rpc(self._svc.bots.list_bots(req, headers=self._headers()))
+        data = pb_to_dict(resp)
+        bots = [
+            b for b in (BotAccount.parse(row) for row in data.get("bots") or []) if b is not None
+        ]
+        return bots, Page.parse(data.get("page"))
+
+    async def get_bot(self, bot_user_id: str) -> BotAccount | None:
+        resp = await self._rpc(
+            self._svc.bots.get_bot(
+                bots_pb2.GetBotRequest(bot_user_id=bot_user_id),
+                headers=self._headers(),
+            )
+        )
+        return BotAccount.parse(pb_to_dict(resp.bot))
+
+    async def batch_get_bots(self, bot_user_ids: list[str]) -> list[BotAccount]:
+        resp = await self._rpc(
+            self._svc.bots.batch_get_bots(
+                bots_pb2.BatchGetBotsRequest(bot_user_ids=bot_user_ids),
+                headers=self._headers(),
+            )
+        )
+        data = pb_to_dict(resp)
+        return [
+            b for b in (BotAccount.parse(row) for row in data.get("bots") or []) if b is not None
+        ]
+
+    async def create_bot(
+        self, login: str, display_name: str, *, api_key_name: str | None = None
+    ) -> tuple[BotAccount, str, BotApiKey]:
+        """Create a bot owned by the authenticated human. Requires bot.create.
+
+        Returns (bot, api_key, api_key_metadata). ``api_key`` is shown once.
+        """
+        req = bots_pb2.CreateBotRequest(login=login, display_name=display_name)
+        if api_key_name is not None:
+            req.api_key_name = api_key_name
+        resp = await self._rpc(self._svc.bots.create_bot(req, headers=self._headers()))
+        bot = BotAccount.parse(pb_to_dict(resp.bot))
+        assert bot is not None
+        meta = BotApiKey.parse(pb_to_dict(resp.api_key_metadata))
+        return bot, resp.api_key, meta
+
+    async def delete_bot(self, bot_user_id: str) -> bool:
+        resp = await self._rpc(
+            self._svc.bots.delete_bot(
+                bots_pb2.DeleteBotRequest(bot_user_id=bot_user_id),
+                headers=self._headers(),
+            )
+        )
+        return resp.deleted
+
+    async def create_bot_api_key(
+        self, bot_user_id: str, name: str
+    ) -> tuple[BotAccount, str, BotApiKey]:
+        """Issue a named API key. ``api_key`` is shown once."""
+        resp = await self._rpc(
+            self._svc.bots.create_bot_api_key(
+                bots_pb2.CreateBotApiKeyRequest(bot_user_id=bot_user_id, name=name),
+                headers=self._headers(),
+            )
+        )
+        bot = BotAccount.parse(pb_to_dict(resp.bot))
+        assert bot is not None
+        meta = BotApiKey.parse(pb_to_dict(resp.api_key_metadata))
+        return bot, resp.api_key, meta
+
+    async def revoke_bot_api_key(self, bot_user_id: str, key_id: str) -> BotAccount:
+        resp = await self._rpc(
+            self._svc.bots.revoke_bot_api_key(
+                bots_pb2.RevokeBotApiKeyRequest(bot_user_id=bot_user_id, key_id=key_id),
+                headers=self._headers(),
+            )
+        )
+        bot = BotAccount.parse(pb_to_dict(resp.bot))
+        assert bot is not None
+        return bot
+
+    async def create_bot_incoming_webhook(
+        self, bot_user_id: str, name: str
+    ) -> tuple[BotAccount, str]:
+        """Create a named incoming webhook. Returns (bot, webhook_url-once)."""
+        resp = await self._rpc(
+            self._svc.bots.create_bot_incoming_webhook(
+                bots_pb2.CreateBotIncomingWebhookRequest(bot_user_id=bot_user_id, name=name),
+                headers=self._headers(),
+            )
+        )
+        bot = BotAccount.parse(pb_to_dict(resp.bot))
+        assert bot is not None
+        return bot, resp.webhook_url
+
+    async def revoke_bot_incoming_webhook(self, bot_user_id: str, webhook_id: str) -> BotAccount:
+        resp = await self._rpc(
+            self._svc.bots.revoke_bot_incoming_webhook(
+                bots_pb2.RevokeBotIncomingWebhookRequest(
+                    bot_user_id=bot_user_id, webhook_id=webhook_id
+                ),
+                headers=self._headers(),
+            )
+        )
+        bot = BotAccount.parse(pb_to_dict(resp.bot))
+        assert bot is not None
+        return bot
+
+    async def reassign_bot_owner(self, bot_user_id: str, owner_user_id: str) -> BotAccount:
+        resp = await self._rpc(
+            self._svc.bots.reassign_bot_owner(
+                bots_pb2.ReassignBotOwnerRequest(
+                    bot_user_id=bot_user_id, owner_user_id=owner_user_id
+                ),
+                headers=self._headers(),
+            )
+        )
+        bot = BotAccount.parse(pb_to_dict(resp.bot))
+        assert bot is not None
+        return bot
+
+    async def list_bot_outbound_webhooks(self, bot_user_id: str) -> list[BotOutboundWebhook]:
+        resp = await self._rpc(
+            self._svc.bots.list_bot_outbound_webhooks(
+                bots_pb2.ListBotOutboundWebhooksRequest(bot_user_id=bot_user_id),
+                headers=self._headers(),
+            )
+        )
+        data = pb_to_dict(resp)
+        return [BotOutboundWebhook.parse(w) for w in data.get("webhooks") or []]
+
+    async def get_bot_outbound_webhook(
+        self, bot_user_id: str, webhook_id: str
+    ) -> BotOutboundWebhook | None:
+        resp = await self._rpc(
+            self._svc.bots.get_bot_outbound_webhook(
+                bots_pb2.GetBotOutboundWebhookRequest(
+                    bot_user_id=bot_user_id, webhook_id=webhook_id
+                ),
+                headers=self._headers(),
+            )
+        )
+        return BotOutboundWebhook.parse(pb_to_dict(resp.webhook))
+
+    async def create_bot_outbound_webhook(
+        self,
+        bot_user_id: str,
+        url: str,
+        name: str,
+        *,
+        enabled: bool = True,
+        authorization: str = "",
+    ) -> tuple[BotOutboundWebhook, str]:
+        """Create an outbound webhook. Returns (webhook, signing_secret-once)."""
+        resp = await self._rpc(
+            self._svc.bots.create_bot_outbound_webhook(
+                bots_pb2.CreateBotOutboundWebhookRequest(
+                    bot_user_id=bot_user_id,
+                    url=url,
+                    authorization=authorization,
+                    enabled=enabled,
+                    name=name,
+                ),
+                headers=self._headers(),
+            )
+        )
+        webhook = BotOutboundWebhook.parse(pb_to_dict(resp.webhook))
+        assert webhook is not None
+        return webhook, resp.signing_secret
+
+    async def update_bot_outbound_webhook(
+        self,
+        bot_user_id: str,
+        webhook_id: str,
+        *,
+        enabled: bool | None = None,
+        url: str | None = None,
+        authorization: str | None = None,
+    ) -> BotOutboundWebhook:
+        req = bots_pb2.UpdateBotOutboundWebhookRequest(
+            bot_user_id=bot_user_id, webhook_id=webhook_id
+        )
+        fields: list[str] = []
+        if enabled is not None:
+            req.enabled = enabled
+            fields.append("enabled")
+        if url is not None:
+            req.url = url
+            fields.append("url")
+        if authorization is not None:
+            req.authorization = authorization
+            fields.append("authorization")
+        if fields:
+            req.update_mask.paths.extend(fields)
+        resp = await self._rpc(
+            self._svc.bots.update_bot_outbound_webhook(req, headers=self._headers())
+        )
+        webhook = BotOutboundWebhook.parse(pb_to_dict(resp.webhook))
+        assert webhook is not None
+        return webhook
+
+    async def revoke_bot_outbound_webhook(self, bot_user_id: str, webhook_id: str) -> None:
+        await self._rpc(
+            self._svc.bots.revoke_bot_outbound_webhook(
+                bots_pb2.RevokeBotOutboundWebhookRequest(
+                    bot_user_id=bot_user_id, webhook_id=webhook_id
+                ),
+                headers=self._headers(),
+            )
+        )
+
+    async def list_bot_webhook_failures(
+        self,
+        bot_user_id: str,
+        webhook_id: str,
+        *,
+        page_size: int | None = None,
+        cursor: str | None = None,
+    ) -> tuple[list[BotWebhookFailure], str]:
+        """Retained outbound delivery failures, oldest first.
+
+        Returns (failures, next_cursor); empty ``next_cursor`` means done.
+        """
+        req = bots_pb2.ListBotWebhookFailuresRequest(bot_user_id=bot_user_id, webhook_id=webhook_id)
+        if page_size is not None:
+            req.page_size = page_size
+        if cursor is not None:
+            req.cursor = cursor
+        resp = await self._rpc(
+            self._svc.bots.list_bot_webhook_failures(req, headers=self._headers())
+        )
+        data = pb_to_dict(resp)
+        return (
+            [BotWebhookFailure.parse(f) for f in data.get("failures") or []],
+            data.get("nextCursor", ""),
+        )
+
+    # --- External identity auth (public, capability-token flows) ----------
+
+    async def get_pending_external_identity(self, token: str) -> PendingExternalIdentity | None:
+        resp = await self._rpc(
+            self._svc.external_identity_auth.get_pending_external_identity(
+                external_identity_auth_pb2.GetPendingExternalIdentityRequest(token=token),
+                headers=self._headers(),
+            )
+        )
+        return PendingExternalIdentity.parse(pb_to_dict(resp.pending))
+
+    async def create_external_identity_account(
+        self, token: str, login: str, display_name: str = ""
+    ) -> dict[str, Any]:
+        """Create a passwordless account from a pending provider identity."""
+        req = external_identity_auth_pb2.CreateExternalIdentityAccountRequest(
+            token=token, login=login
+        )
+        if display_name:
+            req.display_name = display_name
+        resp = await self._rpc(
+            self._svc.external_identity_auth.create_external_identity_account(
+                req, headers=self._headers()
+            )
+        )
+        return pb_to_dict(resp)
+
+    async def confirm_external_identity_link(self, token: str) -> LinkedExternalIdentity | None:
+        resp = await self._rpc(
+            self._svc.external_identity_auth.confirm_external_identity_link(
+                external_identity_auth_pb2.ConfirmExternalIdentityLinkRequest(token=token),
+                headers=self._headers(),
+            )
+        )
+        return LinkedExternalIdentity.parse(pb_to_dict(resp.linked_identity))
+
+    async def cancel_external_identity_flow(self, token: str) -> None:
+        await self._rpc(
+            self._svc.external_identity_auth.cancel_external_identity_flow(
+                external_identity_auth_pb2.CancelExternalIdentityFlowRequest(token=token),
+                headers=self._headers(),
+            )
+        )
+
+    # --- Admin: permission writes ------------------------------------------
+
+    async def admin_get_role_permission_tier_matrix(
+        self,
+        *,
+        scope_kind: PermissionScopeKind = PermissionScopeKind.SERVER,
+        scope_id: str = "",
+    ) -> dict[str, Any]:
+        req = admin_permissions_pb2.GetRolePermissionTierMatrixRequest()
+        if scope_kind != PermissionScopeKind.SERVER or scope_id:
+            req.scope.CopyFrom(_permission_scope_pb(scope_kind, scope_id))
+        resp = await self._rpc(
+            self._svc.admin_permissions.get_role_permission_tier_matrix(
+                req, headers=self._headers()
+            )
+        )
+        return pb_to_dict(resp)
+
+    async def admin_explain_permissions(
+        self,
+        user_id: str,
+        *,
+        room_id: str = "",
+        scope_kind: PermissionScopeKind | None = None,
+        scope_id: str = "",
+    ) -> list[dict[str, Any]]:
+        req = admin_permissions_pb2.ExplainPermissionsRequest(user_id=user_id)
+        if room_id:
+            req.room_id = room_id
+        if scope_kind is not None:
+            req.scope.CopyFrom(_permission_scope_pb(scope_kind, scope_id))
+        resp = await self._rpc(
+            self._svc.admin_permissions.explain_permissions(req, headers=self._headers())
+        )
+        data = pb_to_dict(resp)
+        return list(data.get("explanations") or [])
+
+    async def admin_set_role_permission(
+        self,
+        role_name: str,
+        permission: str,
+        decision: PermissionDecision,
+        *,
+        scope_kind: PermissionScopeKind = PermissionScopeKind.SERVER,
+        scope_id: str = "",
+    ) -> dict[str, Any]:
+        req = admin_permissions_pb2.SetRolePermissionRequest(
+            role_name=role_name,
+            permission=permission,
+            decision=admin_permissions_pb2.PermissionDecision.Value(decision.value),
+        )
+        if scope_kind != PermissionScopeKind.SERVER or scope_id:
+            req.scope.CopyFrom(_permission_scope_pb(scope_kind, scope_id))
+        resp = await self._rpc(
+            self._svc.admin_permissions.set_role_permission(req, headers=self._headers())
+        )
+        return pb_to_dict(resp)
+
+    async def admin_set_user_permission(
+        self,
+        user_id: str,
+        permission: str,
+        decision: PermissionDecision,
+        *,
+        scope_kind: PermissionScopeKind = PermissionScopeKind.SERVER,
+        scope_id: str = "",
+    ) -> dict[str, Any]:
+        req = admin_permissions_pb2.SetUserPermissionRequest(
+            user_id=user_id,
+            permission=permission,
+            decision=admin_permissions_pb2.PermissionDecision.Value(decision.value),
+        )
+        if scope_kind != PermissionScopeKind.SERVER or scope_id:
+            req.scope.CopyFrom(_permission_scope_pb(scope_kind, scope_id))
+        resp = await self._rpc(
+            self._svc.admin_permissions.set_user_permission(req, headers=self._headers())
+        )
+        return pb_to_dict(resp)
+
+    # --- Admin: invite links ------------------------------------------------
+
+    async def admin_list_invite_links(
+        self, *, limit: int | None = None, offset: int | None = None
+    ) -> tuple[list[InviteLink], Page]:
+        req = admin_invitations_pb2.ListInviteLinksRequest()
+        page = _page_pb(limit, offset)
+        if page is not None:
+            req.page.CopyFrom(page)
+        resp = await self._rpc(
+            self._svc.admin_invite_links.list_invite_links(req, headers=self._headers())
+        )
+        data = pb_to_dict(resp)
+        return (
+            [
+                link
+                for link in (InviteLink.parse(row) for row in data.get("inviteLinks") or [])
+                if link is not None
+            ],
+            Page.parse(data.get("page")),
+        )
+
+    async def admin_get_invite_link(self, link_id: str) -> InviteLink | None:
+        resp = await self._rpc(
+            self._svc.admin_invite_links.get_invite_link(
+                admin_invitations_pb2.GetInviteLinkRequest(id=link_id),
+                headers=self._headers(),
+            )
+        )
+        return InviteLink.parse(pb_to_dict(resp.invite_link))
+
+    async def admin_create_invite_link(
+        self, *, max_uses: int | None = None, expires_at: datetime | None = None
+    ) -> InviteLink:
+        req = admin_invitations_pb2.CreateInviteLinkRequest()
+        if max_uses is not None:
+            req.max_uses = max_uses
+        if expires_at is not None:
+            req.expires_at.CopyFrom(_timestamp_pb(expires_at))
+        resp = await self._rpc(
+            self._svc.admin_invite_links.create_invite_link(req, headers=self._headers())
+        )
+        link = InviteLink.parse(pb_to_dict(resp.invite_link))
+        assert link is not None
+        return link
+
+    async def admin_revoke_invite_link(self, link_id: str) -> InviteLink:
+        resp = await self._rpc(
+            self._svc.admin_invite_links.revoke_invite_link(
+                admin_invitations_pb2.RevokeInviteLinkRequest(id=link_id),
+                headers=self._headers(),
+            )
+        )
+        link = InviteLink.parse(pb_to_dict(resp.invite_link))
+        assert link is not None
+        return link
+
+    # --- Admin: OAuth clients -------------------------------------------------
+
+    async def admin_list_oauth_clients(
+        self, *, limit: int | None = None, offset: int | None = None
+    ) -> tuple[list[OAuthClient], Page]:
+        req = admin_oauth_clients_pb2.ListOAuthClientsRequest()
+        page = _page_pb(limit, offset)
+        if page is not None:
+            req.page.CopyFrom(page)
+        resp = await self._rpc(
+            self._svc.admin_oauth_clients.list_oauth_clients(req, headers=self._headers())
+        )
+        data = pb_to_dict(resp)
+        return (
+            [
+                c
+                for c in (OAuthClient.parse(row) for row in data.get("oauthClients") or [])
+                if c is not None
+            ],
+            Page.parse(data.get("page")),
+        )
+
+    async def admin_get_oauth_client(self, client_id: str) -> OAuthClient | None:
+        resp = await self._rpc(
+            self._svc.admin_oauth_clients.get_oauth_client(
+                admin_oauth_clients_pb2.GetOAuthClientRequest(client_id=client_id),
+                headers=self._headers(),
+            )
+        )
+        return OAuthClient.parse(pb_to_dict(resp.oauth_client))
+
+    async def admin_update_oauth_client_policy(
+        self, client_id: str, policy: OauthClientPolicy
+    ) -> OAuthClient:
+        resp = await self._rpc(
+            self._svc.admin_oauth_clients.update_oauth_client_policy(
+                admin_oauth_clients_pb2.UpdateOAuthClientPolicyRequest(
+                    client_id=client_id,
+                    policy=admin_oauth_clients_pb2.OauthClientPolicy.Value(policy.value),
+                ),
+                headers=self._headers(),
+            )
+        )
+        client = OAuthClient.parse(pb_to_dict(resp.oauth_client))
+        assert client is not None
+        return client
+
+    # --- Auth: setup & push cleanup (public, unauthenticated) --------------
+
+    async def complete_server_setup(
+        self,
+        server_name: str,
+        login: str,
+        display_name: str,
+        password: str,
+        *,
+        description: str = "",
+    ) -> None:
+        """Create the first owner on a fresh server (public until used)."""
+        req = setup_pb2.CompleteSetupRequest(
+            server_name=server_name, login=login, display_name=display_name, password=password
+        )
+        if description:
+            req.description = description
+        await self._rpc(self._svc.setup.complete_setup(req, headers=self._headers()))
+
+    async def delete_push_subscription(self, endpoint: str, auth: str, cleanup_token: str) -> None:
+        """Capability-authenticated cleanup of a browser push subscription."""
+        await self._rpc(
+            self._svc.push_cleanup.delete_subscription(
+                push_subscription_cleanup_pb2.DeleteSubscriptionRequest(
+                    endpoint=endpoint, auth=auth, cleanup_token=cleanup_token
+                ),
+                headers=self._headers(),
+            )
+        )

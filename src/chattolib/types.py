@@ -89,6 +89,88 @@ class ThreadRootAuthorFilter(StrEnum):
     OTHERS = "THREAD_ROOT_AUTHOR_FILTER_OTHERS"
 
 
+class MessageSearchOrder(StrEnum):
+    UNSPECIFIED = "MESSAGE_SEARCH_ORDER_UNSPECIFIED"
+    RELEVANCE = "MESSAGE_SEARCH_ORDER_RELEVANCE"
+    NEWEST = "MESSAGE_SEARCH_ORDER_NEWEST"
+    THREAD_ACTIVITY = "MESSAGE_SEARCH_ORDER_THREAD_ACTIVITY"
+    THREAD_CREATED = "MESSAGE_SEARCH_ORDER_THREAD_CREATED"
+
+
+class MessageSearchScope(StrEnum):
+    UNSPECIFIED = "MESSAGE_SEARCH_SCOPE_UNSPECIFIED"
+    FOLLOWED_THREADS = "MESSAGE_SEARCH_SCOPE_FOLLOWED_THREADS"
+
+
+class MessageSearchGroupBy(StrEnum):
+    UNSPECIFIED = "MESSAGE_SEARCH_GROUP_BY_UNSPECIFIED"
+    THREAD = "MESSAGE_SEARCH_GROUP_BY_THREAD"
+
+
+class MessageSearchState(StrEnum):
+    UNSPECIFIED = "MESSAGE_SEARCH_STATE_UNSPECIFIED"
+    DISABLED = "MESSAGE_SEARCH_STATE_DISABLED"
+    STARTING = "MESSAGE_SEARCH_STATE_STARTING"
+    INDEXING = "MESSAGE_SEARCH_STATE_INDEXING"
+    READY = "MESSAGE_SEARCH_STATE_READY"
+    DEGRADED = "MESSAGE_SEARCH_STATE_DEGRADED"
+    UNAVAILABLE = "MESSAGE_SEARCH_STATE_UNAVAILABLE"
+
+
+class InviteLinkStatus(StrEnum):
+    UNSPECIFIED = "INVITE_LINK_STATUS_UNSPECIFIED"
+    ACTIVE = "INVITE_LINK_STATUS_ACTIVE"
+    EXPIRED = "INVITE_LINK_STATUS_EXPIRED"
+    EXHAUSTED = "INVITE_LINK_STATUS_EXHAUSTED"
+    REVOKED = "INVITE_LINK_STATUS_REVOKED"
+
+
+class OauthClientSource(StrEnum):
+    UNSPECIFIED = "OAUTH_CLIENT_SOURCE_UNSPECIFIED"
+    CIMD = "OAUTH_CLIENT_SOURCE_CIMD"
+    BUILT_IN = "OAUTH_CLIENT_SOURCE_BUILT_IN"
+
+
+class OauthClientPolicy(StrEnum):
+    UNSPECIFIED = "OAUTH_CLIENT_POLICY_UNSPECIFIED"
+    DEFAULT = "OAUTH_CLIENT_POLICY_DEFAULT"
+    TRUSTED = "OAUTH_CLIENT_POLICY_TRUSTED"
+    BLOCKED = "OAUTH_CLIENT_POLICY_BLOCKED"
+
+
+class PermissionDecision(StrEnum):
+    UNSPECIFIED = "PERMISSION_DECISION_UNSPECIFIED"
+    ALLOW = "PERMISSION_DECISION_ALLOW"
+    DENY = "PERMISSION_DECISION_DENY"
+    NONE = "PERMISSION_DECISION_NONE"
+
+
+class PermissionScopeKind(StrEnum):
+    UNSPECIFIED = "PERMISSION_SCOPE_KIND_UNSPECIFIED"
+    SERVER = "PERMISSION_SCOPE_KIND_SERVER"
+    GROUP = "PERMISSION_SCOPE_KIND_GROUP"
+    ROOM = "PERMISSION_SCOPE_KIND_ROOM"
+    DM = "PERMISSION_SCOPE_KIND_DM"
+
+
+class CallMediaPublisherKind(StrEnum):
+    UNSPECIFIED = "CALL_MEDIA_PUBLISHER_KIND_UNSPECIFIED"
+    GAME_SHARE = "CALL_MEDIA_PUBLISHER_KIND_GAME_SHARE"
+
+
+class ExternalIdentityFlowKind(StrEnum):
+    UNSPECIFIED = "EXTERNAL_IDENTITY_FLOW_KIND_UNSPECIFIED"
+    CREATE_ACCOUNT = "EXTERNAL_IDENTITY_FLOW_KIND_CREATE_ACCOUNT"
+    LINK_ACCOUNT = "EXTERNAL_IDENTITY_FLOW_KIND_LINK_ACCOUNT"
+
+
+class CredentialLastUsedState(StrEnum):
+    UNSPECIFIED = "CREDENTIAL_LAST_USED_STATE_UNSPECIFIED"
+    NO_USE_RECORDED = "CREDENTIAL_LAST_USED_STATE_NO_USE_RECORDED"
+    RECORDED = "CREDENTIAL_LAST_USED_STATE_RECORDED"
+    UNAVAILABLE = "CREDENTIAL_LAST_USED_STATE_UNAVAILABLE"
+
+
 class ImageFitMode(StrEnum):
     UNSPECIFIED = "IMAGE_FIT_MODE_UNSPECIFIED"
     CONTAIN = "IMAGE_FIT_MODE_CONTAIN"
@@ -1558,4 +1640,408 @@ class AdminRoomLayoutGroup:
             rooms=rooms,
             sidebar_links=links,
             can_create_room=bool(data.get("canCreateRoom", False)),
+        )
+
+
+# --- Message search --------------------------------------------------------
+
+
+@dataclass
+class SearchStatus:
+    state: MessageSearchState = MessageSearchState.UNSPECIFIED
+    retry_after_seconds: int | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> SearchStatus:
+        data = data or {}
+        retry = data.get("retryAfter")
+        retry_seconds: int | None = None
+        if retry is not None:
+            try:
+                retry_seconds = int(str(retry).rstrip("s"))
+            except ValueError:
+                retry_seconds = None
+        return cls(
+            state=_parse_enum(
+                MessageSearchState, data.get("state"), MessageSearchState.UNSPECIFIED
+            ),  # type: ignore[arg-type]
+            retry_after_seconds=retry_seconds,
+        )
+
+
+@dataclass
+class ThreadSearchContext:
+    root_message: Message | None = None
+    room: RoomSummary | None = None
+    thread: ThreadSummary | None = None
+    latest_reply: Message | None = None
+    direct_message_participant_user_ids: list[str] = field(default_factory=list)
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> ThreadSearchContext | None:
+        if not data:
+            return None
+        return cls(
+            root_message=Message.parse(data.get("rootMessage")),
+            room=RoomSummary.parse(data.get("room")),
+            thread=ThreadSummary.parse(data.get("thread")),
+            latest_reply=Message.parse(data.get("latestReply")),
+            direct_message_participant_user_ids=list(
+                data.get("directMessageParticipantUserIds") or []
+            ),
+        )
+
+
+@dataclass
+class MessageSearchResult:
+    message: Message | None = None
+    relevance_score: float = 0.0
+    thread_context: ThreadSearchContext | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any]) -> MessageSearchResult:
+        return cls(
+            message=Message.parse(data.get("message")),
+            relevance_score=float(data.get("relevanceScore", 0.0)),
+            thread_context=ThreadSearchContext.parse(data.get("threadContext")),
+        )
+
+
+@dataclass
+class SearchResultsPage:
+    results: list[MessageSearchResult] = field(default_factory=list)
+    next_cursor: str = ""
+    thread_total_count: int | None = None
+    users_by_id: dict[str, User] = field(default_factory=dict)
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> SearchResultsPage:
+        data = data or {}
+        users: dict[str, User] = {}
+        includes = data.get("includes") or {}
+        for uid, user_data in (includes.get("users") or {}).items():
+            parsed = User.parse(user_data)
+            if parsed is not None:
+                users[uid] = parsed
+        return cls(
+            results=[MessageSearchResult.parse(r) for r in data.get("results") or []],
+            next_cursor=data.get("nextCursor", ""),
+            thread_total_count=(
+                int(data["threadTotalCount"]) if "threadTotalCount" in data else None
+            ),
+            users_by_id=users,
+        )
+
+
+# --- Read state ------------------------------------------------------------
+
+
+@dataclass
+class ReadMarker:
+    last_read_event_id: str = ""
+    last_read_at: datetime | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> ReadMarker | None:
+        if not data:
+            return None
+        return cls(
+            last_read_event_id=data.get("lastReadEventId", ""),
+            last_read_at=parse_datetime(data.get("lastReadAt")),
+        )
+
+
+@dataclass
+class RoomReadState:
+    room_id: str = ""
+    marker: ReadMarker | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> RoomReadState | None:
+        if not data:
+            return None
+        return cls(
+            room_id=data.get("roomId", ""),
+            marker=ReadMarker.parse(data.get("marker")),
+        )
+
+
+@dataclass
+class ThreadReadState:
+    room_id: str = ""
+    thread_root_event_id: str = ""
+    marker: ReadMarker | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> ThreadReadState | None:
+        if not data:
+            return None
+        return cls(
+            room_id=data.get("roomId", ""),
+            thread_root_event_id=data.get("threadRootEventId", ""),
+            marker=ReadMarker.parse(data.get("marker")),
+        )
+
+
+# --- Account: emails, external identities, privileged mode ----------------
+
+
+@dataclass
+class VerifiedEmail:
+    email: str = ""
+    verified_at: datetime | None = None
+    primary: bool = False
+
+    @classmethod
+    def parse(cls, data: dict[str, Any]) -> VerifiedEmail:
+        return cls(
+            email=data.get("email", ""),
+            verified_at=parse_datetime(data.get("verifiedAt")),
+            primary=bool(data.get("primary", False)),
+        )
+
+
+@dataclass
+class PendingExternalIdentity:
+    kind: ExternalIdentityFlowKind = ExternalIdentityFlowKind.UNSPECIFIED
+    provider_id: str = ""
+    provider_type: str = ""
+    provider_label: str = ""
+    verified_email: str = ""
+    login_hint: str = ""
+    display_name_hint: str = ""
+    bound_user_id: str = ""
+    redirect_path: str = ""
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> PendingExternalIdentity | None:
+        if not data:
+            return None
+        return cls(
+            kind=_parse_enum(  # type: ignore[arg-type]
+                ExternalIdentityFlowKind, data.get("kind"), ExternalIdentityFlowKind.UNSPECIFIED
+            ),
+            provider_id=data.get("providerId", ""),
+            provider_type=data.get("providerType", ""),
+            provider_label=data.get("providerLabel", ""),
+            verified_email=data.get("verifiedEmail", ""),
+            login_hint=data.get("loginHint", ""),
+            display_name_hint=data.get("displayNameHint", ""),
+            bound_user_id=data.get("boundUserId", ""),
+            redirect_path=data.get("redirectPath", ""),
+        )
+
+
+@dataclass
+class PrivilegedModeState:
+    available: bool = False
+    active: bool = False
+    expires_at: datetime | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> PrivilegedModeState | None:
+        if not data:
+            return None
+        return cls(
+            available=bool(data.get("available", False)),
+            active=bool(data.get("active", False)),
+            expires_at=parse_datetime(data.get("expiresAt")),
+        )
+
+
+# --- Bots ------------------------------------------------------------------
+
+
+@dataclass
+class BotApiKey:
+    id: str = ""
+    name: str = ""
+    created_at: datetime | None = None
+    last_used_state: CredentialLastUsedState = CredentialLastUsedState.UNSPECIFIED
+    last_used_at: datetime | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any]) -> BotApiKey:
+        return cls(
+            id=data.get("id", ""),
+            name=data.get("name", ""),
+            created_at=parse_datetime(data.get("createdAt")),
+            last_used_state=_parse_enum(  # type: ignore[arg-type]
+                CredentialLastUsedState,
+                data.get("lastUsedState"),
+                CredentialLastUsedState.UNSPECIFIED,
+            ),
+            last_used_at=parse_datetime(data.get("lastUsedAt")),
+        )
+
+
+@dataclass
+class BotIncomingWebhook:
+    id: str = ""
+    name: str = ""
+    created_at: datetime | None = None
+    last_used_state: CredentialLastUsedState = CredentialLastUsedState.UNSPECIFIED
+    last_used_at: datetime | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any]) -> BotIncomingWebhook:
+        return cls(
+            id=data.get("id", ""),
+            name=data.get("name", ""),
+            created_at=parse_datetime(data.get("createdAt")),
+            last_used_state=_parse_enum(  # type: ignore[arg-type]
+                CredentialLastUsedState,
+                data.get("lastUsedState"),
+                CredentialLastUsedState.UNSPECIFIED,
+            ),
+            last_used_at=parse_datetime(data.get("lastUsedAt")),
+        )
+
+
+@dataclass
+class BotAccount:
+    """A managed bot account (proto ``Bot``).
+
+    Named ``BotAccount`` rather than ``Bot`` to avoid clashing with
+    chattolib's ``chattolib.bot.Bot`` framework facade, which is what the
+    package exports as ``Bot``.
+    """
+
+    user: User | None = None
+    owner_user_id: str = ""
+    created_at: datetime | None = None
+    api_key_created_at: datetime | None = None
+    incoming_webhooks: list[BotIncomingWebhook] = field(default_factory=list)
+    api_keys: list[BotApiKey] = field(default_factory=list)
+    last_login_change: datetime | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> BotAccount | None:
+        if not data:
+            return None
+        return cls(
+            user=User.parse(data.get("user")),
+            owner_user_id=data.get("ownerUserId", ""),
+            created_at=parse_datetime(data.get("createdAt")),
+            api_key_created_at=parse_datetime(data.get("apiKeyCreatedAt")),
+            incoming_webhooks=[
+                BotIncomingWebhook.parse(w) for w in data.get("incomingWebhooks") or []
+            ],
+            api_keys=[BotApiKey.parse(k) for k in data.get("apiKeys") or []],
+            last_login_change=parse_datetime(data.get("lastLoginChange")),
+        )
+
+
+@dataclass
+class BotWebhookFailure:
+    id: str = ""
+    reason: str = ""
+    attempts: int = 0
+    http_status: int = 0
+    completed_at: datetime | None = None
+    source_event_id: str = ""
+
+    @classmethod
+    def parse(cls, data: dict[str, Any]) -> BotWebhookFailure:
+        return cls(
+            id=data.get("id", ""),
+            reason=data.get("reason", ""),
+            attempts=int(data.get("attempts", 0)),
+            http_status=int(data.get("httpStatus", 0)),
+            completed_at=parse_datetime(data.get("completedAt")),
+            source_event_id=data.get("sourceEventId", ""),
+        )
+
+
+@dataclass
+class BotOutboundWebhook:
+    id: str = ""
+    enabled: bool = False
+    has_authorization: bool = False
+    latest_failure: BotWebhookFailure | None = None
+    url: str = ""
+    name: str = ""
+    created_at: datetime | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any]) -> BotOutboundWebhook:
+        return cls(
+            id=data.get("id", ""),
+            enabled=bool(data.get("enabled", False)),
+            has_authorization=bool(data.get("hasAuthorization", False)),
+            latest_failure=(
+                BotWebhookFailure.parse(data["latestFailure"])
+                if data.get("latestFailure")
+                else None
+            ),
+            url=data.get("url", ""),
+            name=data.get("name", ""),
+            created_at=parse_datetime(data.get("createdAt")),
+        )
+
+
+# --- Admin: invite links, OAuth clients ------------------------------------
+
+
+@dataclass
+class InviteLink:
+    id: str = ""
+    link: str = ""
+    created_by: str = ""
+    created_at: datetime | None = None
+    max_uses: int | None = None
+    expires_at: datetime | None = None
+    use_count: int = 0
+    status: InviteLinkStatus = InviteLinkStatus.UNSPECIFIED
+    revoked_at: datetime | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> InviteLink | None:
+        if not data:
+            return None
+        return cls(
+            id=data.get("id", ""),
+            link=data.get("link", ""),
+            created_by=data.get("createdBy", ""),
+            created_at=parse_datetime(data.get("createdAt")),
+            max_uses=int(data["maxUses"]) if "maxUses" in data else None,
+            expires_at=parse_datetime(data.get("expiresAt")),
+            use_count=int(data.get("useCount", 0)),
+            status=_parse_enum(  # type: ignore[arg-type]
+                InviteLinkStatus, data.get("status"), InviteLinkStatus.UNSPECIFIED
+            ),
+            revoked_at=parse_datetime(data.get("revokedAt")),
+        )
+
+
+@dataclass
+class OAuthClient:
+    client_id: str = ""
+    client_name: str = ""
+    client_origin: str = ""
+    source: OauthClientSource = OauthClientSource.UNSPECIFIED
+    policy: OauthClientPolicy = OauthClientPolicy.UNSPECIFIED
+    first_authorization_at: datetime | None = None
+    last_authorization_at: datetime | None = None
+    redirect_origins: list[str] = field(default_factory=list)
+    authorized_user_count: int = 0
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> OAuthClient | None:
+        if not data:
+            return None
+        return cls(
+            client_id=data.get("clientId", ""),
+            client_name=data.get("clientName", ""),
+            client_origin=data.get("clientOrigin", ""),
+            source=_parse_enum(
+                OauthClientSource, data.get("source"), OauthClientSource.UNSPECIFIED
+            ),  # type: ignore[arg-type]
+            policy=_parse_enum(
+                OauthClientPolicy, data.get("policy"), OauthClientPolicy.UNSPECIFIED
+            ),  # type: ignore[arg-type]
+            first_authorization_at=parse_datetime(data.get("firstAuthorizationAt")),
+            last_authorization_at=parse_datetime(data.get("lastAuthorizationAt")),
+            redirect_origins=list(data.get("redirectOrigins") or []),
+            authorized_user_count=int(data.get("authorizedUserCount", 0)),
         )

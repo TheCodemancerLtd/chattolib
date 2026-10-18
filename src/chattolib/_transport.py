@@ -34,7 +34,11 @@ from chattolib._pb.chatto.admin.v1.diagnostics_connect import (
     AdminDiagnosticsServiceClient,
 )
 from chattolib._pb.chatto.admin.v1.event_log_connect import AdminEventLogServiceClient
+from chattolib._pb.chatto.admin.v1.invitations_connect import AdminInviteLinkServiceClient
 from chattolib._pb.chatto.admin.v1.members_connect import AdminUserServiceClient
+from chattolib._pb.chatto.admin.v1.oauth_clients_connect import (
+    AdminOAuthClientServiceClient,
+)
 from chattolib._pb.chatto.admin.v1.permissions_connect import (
     AdminPermissionServiceClient,
 )
@@ -46,10 +50,11 @@ from chattolib._pb.chatto.admin.v1.server_connect import AdminServerServiceClien
 from chattolib._pb.chatto.api.v1.account_connect import MyAccountServiceClient
 from chattolib._pb.chatto.api.v1.asset_uploads_connect import AssetUploadServiceClient
 from chattolib._pb.chatto.api.v1.attachments_connect import AssetServiceClient
-from chattolib._pb.chatto.api.v1.messages_connect import MessageServiceClient
-from chattolib._pb.chatto.api.v1.notification_preferences_connect import (
-    NotificationPreferencesServiceClient,
+from chattolib._pb.chatto.api.v1.bots_connect import BotServiceClient
+from chattolib._pb.chatto.api.v1.message_search_connect import (
+    MessageSearchServiceClient,
 )
+from chattolib._pb.chatto.api.v1.messages_connect import MessageServiceClient
 from chattolib._pb.chatto.api.v1.notifications_connect import (
     NotificationPolicyServiceClient,
     NotificationServiceClient,
@@ -68,6 +73,13 @@ from chattolib._pb.chatto.api.v1.threads_connect import ThreadServiceClient
 from chattolib._pb.chatto.api.v1.user_service_connect import UserServiceClient
 from chattolib._pb.chatto.api.v1.viewer_connect import ViewerServiceClient
 from chattolib._pb.chatto.api.v1.voice_calls_connect import VoiceCallServiceClient
+from chattolib._pb.chatto.auth.v1.external_identity_auth_connect import (
+    ExternalIdentityAuthServiceClient,
+)
+from chattolib._pb.chatto.auth.v1.push_subscription_cleanup_connect import (
+    PushSubscriptionCleanupServiceClient,
+)
+from chattolib._pb.chatto.auth.v1.setup_connect import ServerSetupServiceClient
 from chattolib._pb.chatto.discovery.v1.server_connect import (
     ServerDiscoveryServiceClient,
 )
@@ -92,12 +104,16 @@ class ServiceClients:
     user: UserServiceClient
     notifications: NotificationServiceClient
     notification_policy: NotificationPolicyServiceClient
-    notification_prefs: NotificationPreferencesServiceClient
+    message_search: MessageSearchServiceClient
+    bots: BotServiceClient
     permissions: PermissionServiceClient
     push: PushNotificationServiceClient
     assets: AssetServiceClient
     asset_uploads: AssetUploadServiceClient
     voice_calls: VoiceCallServiceClient
+    external_identity_auth: ExternalIdentityAuthServiceClient
+    push_cleanup: PushSubscriptionCleanupServiceClient
+    setup: ServerSetupServiceClient
     admin_server: AdminServerServiceClient
     admin_room_layout: AdminRoomLayoutServiceClient
     admin_users: AdminUserServiceClient
@@ -105,6 +121,8 @@ class ServiceClients:
     admin_event_log: AdminEventLogServiceClient
     admin_diagnostics: AdminDiagnosticsServiceClient
     admin_permissions: AdminPermissionServiceClient
+    admin_invite_links: AdminInviteLinkServiceClient
+    admin_oauth_clients: AdminOAuthClientServiceClient
 
     async def close(self) -> None:
         for name in self.__dataclass_fields__:
@@ -137,12 +155,16 @@ def build_service_clients(base_url: str) -> ServiceClients:
         user=make(UserServiceClient),
         notifications=make(NotificationServiceClient),
         notification_policy=make(NotificationPolicyServiceClient),
-        notification_prefs=make(NotificationPreferencesServiceClient),
+        message_search=make(MessageSearchServiceClient),
+        bots=make(BotServiceClient),
         permissions=make(PermissionServiceClient),
         push=make(PushNotificationServiceClient),
         assets=make(AssetServiceClient),
         asset_uploads=make(AssetUploadServiceClient),
         voice_calls=make(VoiceCallServiceClient),
+        external_identity_auth=make(ExternalIdentityAuthServiceClient),
+        push_cleanup=make(PushSubscriptionCleanupServiceClient),
+        setup=make(ServerSetupServiceClient),
         admin_server=make(AdminServerServiceClient),
         admin_room_layout=make(AdminRoomLayoutServiceClient),
         admin_users=make(AdminUserServiceClient),
@@ -150,6 +172,8 @@ def build_service_clients(base_url: str) -> ServiceClients:
         admin_event_log=make(AdminEventLogServiceClient),
         admin_diagnostics=make(AdminDiagnosticsServiceClient),
         admin_permissions=make(AdminPermissionServiceClient),
+        admin_invite_links=make(AdminInviteLinkServiceClient),
+        admin_oauth_clients=make(AdminOAuthClientServiceClient),
     )
 
 

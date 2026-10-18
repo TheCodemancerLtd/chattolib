@@ -18,14 +18,24 @@ from chattolib._pb.chatto.admin.v1 import (
     room_layout_pb2,
 )
 from chattolib._pb.chatto.admin.v1 import (
+    invitations_pb2 as admin_invitations_pb2,
+)
+from chattolib._pb.chatto.admin.v1 import (
+    oauth_clients_pb2 as admin_oauth_clients_pb2,
+)
+from chattolib._pb.chatto.admin.v1 import (
+    permissions_pb2 as admin_permissions_pb2,
+)
+from chattolib._pb.chatto.admin.v1 import (
     server_pb2 as admin_server_pb2,
 )
 from chattolib._pb.chatto.api.v1 import (
     account_pb2,
     asset_uploads_pb2,
     attachments_pb2,
+    bots_pb2,
+    message_search_pb2,
     messages_pb2,
-    notification_preferences_pb2,
     notifications_pb2,
     presence_pb2,
     push_notifications_pb2,
@@ -45,7 +55,9 @@ from chattolib.client import ChattoClient
 from chattolib.types import (
     ImageFitMode,
     ImageTransformOptions,
-    NotificationLevel,
+    MessageSearchGroupBy,
+    MessageSearchOrder,
+    PermissionDecision,
     PresenceStatus,
     RoomKind,
     ThreadRootAuthorFilter,
@@ -665,24 +677,6 @@ async def test_mark_and_delete_notification_occurrence(client):
         assert await client.delete_all_notification_occurrences() == 3
 
 
-async def test_notification_preference(client):
-    resp = notification_preferences_pb2.UpdateNotificationPreferenceResponse()
-    resp.preference.level = "NOTIFICATION_LEVEL_MUTED"
-    resp.preference.effective_level = "NOTIFICATION_LEVEL_MUTED"
-    _mock_method(
-        client,
-        "notification_prefs",
-        "update_room_notification_preference",
-        resp,
-    )
-
-    async with client:
-        pref = await client.update_room_notification_preference("r1", NotificationLevel.MUTED)
-
-    assert pref.level is NotificationLevel.MUTED
-    assert pref.effective_level is NotificationLevel.MUTED
-
-
 # --- Push -------------------------------------------------------------
 
 
@@ -1048,3 +1042,366 @@ def test_snake_case_is_acronym_aware():
     # hypothetical acronym field: DM stays whole, boundary before the word after it
     assert _snake_case("startDMReceived") == "start_dm_received"
     assert _snake_case("getDMStats") == "get_dm_stats"
+
+
+# --- Message search -----------------------------------------------------
+
+
+async def test_get_search_status(client):
+    resp = message_search_pb2.GetStatusResponse()
+    resp.state = "MESSAGE_SEARCH_STATE_READY"
+    _mock_method(client, "message_search", "get_status", resp)
+
+    async with client:
+        status = await client.get_search_status()
+
+    assert status.state.value == "MESSAGE_SEARCH_STATE_READY"
+    assert status.retry_after_seconds is None
+
+
+async def test_search_messages(client):
+    resp = message_search_pb2.SearchMessagesResponse()
+    result = resp.results.add()
+    result.message.id = "m1"
+    result.message.body = "hello searchable world"
+    result.relevance_score = 4.2
+    resp.next_cursor = "cur-2"
+    resp.includes.users["u1"].id = "u1"
+    resp.includes.users["u1"].login = "alice"
+    resp.includes.users["u1"].display_name = "Alice"
+    mock = _mock_method(client, "message_search", "search_messages", resp)
+
+    async with client:
+        page = await client.search_messages(
+            "searchable",
+            room_id="r1",
+            order=MessageSearchOrder.RELEVANCE,
+            page_size=20,
+        )
+
+    req = mock.await_args.args[0]
+    assert req.query == "searchable"
+    assert req.room_id == "r1"
+    assert req.order == message_search_pb2.MESSAGE_SEARCH_ORDER_RELEVANCE
+    assert page.results[0].message.id == "m1"
+    assert page.results[0].relevance_score == 4.2
+    assert page.next_cursor == "cur-2"
+    assert page.users_by_id["u1"].login == "alice"
+    assert page.thread_total_count is None
+
+
+async def test_search_messages_thread_grouping(client):
+    resp = message_search_pb2.SearchMessagesResponse()
+    result = resp.results.add()
+    result.message.id = "reply-1"
+    result.thread_context.root_message.id = "root-1"
+    result.thread_context.room.id = "r1"
+    result.thread_context.thread.thread_root_event_id = "root-1"
+    resp.thread_total_count = 7
+    _mock_method(client, "message_search", "search_messages", resp)
+
+    async with client:
+        page = await client.search_messages("deploy", group_by=MessageSearchGroupBy.THREAD)
+
+    assert page.thread_total_count == 7
+    ctx = page.results[0].thread_context
+    assert ctx is not None
+    assert ctx.root_message.id == "root-1"
+    assert ctx.room.id == "r1"
+
+
+# --- Read state ----------------------------------------------------------
+
+
+async def test_get_room_read_state(client):
+    resp = read_state_pb2.GetRoomReadStateResponse()
+    resp.state.room_id = "r1"
+    resp.state.marker.last_read_event_id = "e9"
+    _mock_method(client, "rooms", "get_room_read_state", resp)
+
+    async with client:
+        state = await client.get_room_read_state("r1")
+
+    assert state is not None
+    assert state.room_id == "r1"
+    assert state.marker.last_read_event_id == "e9"
+
+
+async def test_batch_get_thread_read_states(client):
+    resp = read_state_pb2.BatchGetThreadReadStatesResponse()
+    resp.states.add(room_id="r1", thread_root_event_id="root-1")
+    mock = _mock_method(client, "threads", "batch_get_thread_read_states", resp)
+
+    async with client:
+        states = await client.batch_get_thread_read_states([("r1", "root-1")])
+
+    assert mock.await_args.args[0].targets[0].thread_root_event_id == "root-1"
+    assert len(states) == 1
+    assert states[0].room_id == "r1"
+
+
+# --- Messages / threads extras -------------------------------------------
+
+
+async def test_list_reaction_users(client):
+    resp = reactions_pb2.ListReactionUsersResponse()
+    resp.user_ids.extend(["u1", "u2"])
+    resp.page.total_count = 2
+    _mock_method(client, "messages", "list_reaction_users", resp)
+
+    async with client:
+        ids, page = await client.list_reaction_users("r1", "m1", "tada")
+
+    assert ids == ["u1", "u2"]
+    assert page.total_count == 2
+
+
+async def test_set_attachment_description(client):
+    resp = messages_pb2.SetAttachmentDescriptionResponse()
+    resp.message.id = "m1"
+    resp.message.attachments.add(id="a1", description="alt text")
+    _mock_method(client, "messages", "set_attachment_description", resp)
+
+    async with client:
+        msg = await client.set_attachment_description("r1", "m1", "a1", "alt text")
+
+    assert msg.attachments[0].description == "alt text"
+
+
+async def test_list_thread_participants(client):
+    resp = threads_pb2.ListThreadParticipantsResponse()
+    resp.user_ids.append("u3")
+    _mock_method(client, "threads", "list_thread_participants", resp)
+
+    async with client:
+        ids, _page = await client.list_thread_participants("r1", "root-1")
+
+    assert ids == ["u3"]
+
+
+# --- Users ---------------------------------------------------------------
+
+
+async def test_list_users(client):
+    resp = user_service_pb2.ListUsersResponse()
+    resp.users.add(user={"id": "u1", "login": "alice", "display_name": "Alice"})
+    resp.page.total_count = 1
+    _mock_method(client, "user", "list_users", resp)
+
+    async with client:
+        users, page = await client.list_users(search="ali")
+
+    assert users[0].user.login == "alice"
+    assert page.total_count == 1
+
+
+async def test_batch_get_users(client):
+    resp = user_service_pb2.BatchGetUsersResponse()
+    resp.users.add(user={"id": "u1", "login": "alice", "display_name": "Alice"})
+    _mock_method(client, "user", "batch_get_users", resp)
+
+    async with client:
+        users = await client.batch_get_users(["u1"])
+
+    assert len(users) == 1
+
+
+# --- My account ----------------------------------------------------------
+
+
+async def test_get_settings(client):
+    resp = account_pb2.GetSettingsResponse()
+    resp.settings.time_format = "TIME_FORMAT_24_HOUR"
+    _mock_method(client, "account", "get_settings", resp)
+
+    async with client:
+        settings = await client.get_settings()
+
+    assert settings.time_format.value == "TIME_FORMAT_24_HOUR"
+
+
+async def test_list_verified_emails(client):
+    resp = account_pb2.ListVerifiedEmailsResponse()
+    resp.verified_emails.add(email="a@example.com", primary=True)
+    _mock_method(client, "account", "list_verified_emails", resp)
+
+    async with client:
+        emails = await client.list_verified_emails("u1")
+
+    assert emails[0].email == "a@example.com"
+    assert emails[0].primary is True
+
+
+async def test_request_account_deletion(client):
+    resp = account_pb2.RequestAccountDeletionResponse()
+    resp.confirmation_token = "tok-1"
+    _mock_method(client, "account", "request_account_deletion", resp)
+
+    async with client:
+        token = await client.request_account_deletion()
+
+    assert token == "tok-1"
+
+
+# --- Bots ----------------------------------------------------------------
+
+
+async def test_list_bots(client):
+    resp = bots_pb2.ListBotsResponse()
+    resp.bots.add(
+        user={"id": "b1", "login": "mybot", "display_name": "My Bot"},
+        owner_user_id="u1",
+    )
+    resp.page.total_count = 1
+    _mock_method(client, "bots", "list_bots", resp)
+
+    async with client:
+        bots, page = await client.list_bots()
+
+    assert bots[0].owner_user_id == "u1"
+    assert bots[0].user.login == "mybot"
+    assert page.total_count == 1
+
+
+async def test_create_bot_returns_key_once(client):
+    resp = bots_pb2.CreateBotResponse()
+    resp.bot.user.id = "b1"
+    resp.api_key = "cht_BK_secret"
+    resp.api_key_metadata.id = "k1"
+    resp.api_key_metadata.name = "Default key"
+    _mock_method(client, "bots", "create_bot", resp)
+
+    async with client:
+        bot, key, meta = await client.create_bot("mybot", "My Bot")
+
+    assert bot.user.id == "b1"
+    assert key == "cht_BK_secret"
+    assert meta.id == "k1"
+
+
+async def test_create_bot_outbound_webhook_returns_secret_once(client):
+    resp = bots_pb2.CreateBotOutboundWebhookResponse()
+    resp.webhook.id = "w1"
+    resp.webhook.url = "https://example.com/hook"
+    resp.webhook.name = "main"
+    resp.signing_secret = "whsec_x"
+    _mock_method(client, "bots", "create_bot_outbound_webhook", resp)
+
+    async with client:
+        webhook, secret = await client.create_bot_outbound_webhook(
+            "b1", "https://example.com/hook", "main"
+        )
+
+    assert webhook.id == "w1"
+    assert secret == "whsec_x"
+
+
+async def test_update_bot_outbound_webhook_infers_mask(client):
+    resp = bots_pb2.UpdateBotOutboundWebhookResponse()
+    resp.webhook.id = "w1"
+    resp.webhook.enabled = False
+    mock = _mock_method(client, "bots", "update_bot_outbound_webhook", resp)
+
+    async with client:
+        webhook = await client.update_bot_outbound_webhook("b1", "w1", enabled=False)
+
+    req = mock.await_args.args[0]
+    assert list(req.update_mask.paths) == ["enabled"]
+    assert webhook.enabled is False
+
+
+# --- Admin: invite links / OAuth clients ---------------------------------
+
+
+async def test_admin_create_invite_link(client):
+    resp = admin_invitations_pb2.CreateInviteLinkResponse()
+    resp.invite_link.id = "il1"
+    resp.invite_link.link = "https://chat.chatto.run/invite/abc"
+    resp.invite_link.status = "INVITE_LINK_STATUS_ACTIVE"
+    resp.invite_link.max_uses = 5
+    mock = _mock_method(client, "admin_invite_links", "create_invite_link", resp)
+
+    async with client:
+        link = await client.admin_create_invite_link(max_uses=5)
+
+    assert mock.await_args.args[0].max_uses == 5
+    assert link.id == "il1"
+    assert link.status.value == "INVITE_LINK_STATUS_ACTIVE"
+    assert link.max_uses == 5
+
+
+async def test_admin_list_oauth_clients(client):
+    resp = admin_oauth_clients_pb2.ListOAuthClientsResponse()
+    resp.oauth_clients.add(
+        client_id="https://example.com/cimd.json",
+        client_name="Example",
+        source="OAUTH_CLIENT_SOURCE_CIMD",
+        policy="OAUTH_CLIENT_POLICY_DEFAULT",
+    )
+    resp.page.total_count = 1
+    _mock_method(client, "admin_oauth_clients", "list_oauth_clients", resp)
+
+    async with client:
+        clients, page = await client.admin_list_oauth_clients()
+
+    assert clients[0].source.value == "OAUTH_CLIENT_SOURCE_CIMD"
+    assert page.total_count == 1
+
+
+# --- Admin: permission writes ---------------------------------------------
+
+
+async def test_admin_set_role_permission(client):
+    resp = admin_permissions_pb2.SetRolePermissionResponse()
+    resp.decision.decision = "PERMISSION_DECISION_ALLOW"
+    mock = _mock_method(client, "admin_permissions", "set_role_permission", resp)
+
+    async with client:
+        out = await client.admin_set_role_permission(
+            "moderators", "message.delete", PermissionDecision.ALLOW
+        )
+
+    req = mock.await_args.args[0]
+    assert req.decision == admin_permissions_pb2.PERMISSION_DECISION_ALLOW
+    assert out["decision"]["decision"] == "PERMISSION_DECISION_ALLOW"
+
+
+async def test_admin_explain_permissions(client):
+    resp = admin_permissions_pb2.ExplainPermissionsResponse()
+    resp.explanations.add(permission="message.read")
+    _mock_method(client, "admin_permissions", "explain_permissions", resp)
+
+    async with client:
+        rows = await client.admin_explain_permissions("u1")
+
+    assert rows[0]["permission"] == "message.read"
+
+
+# --- Voice / push extras ---------------------------------------------------
+
+
+async def test_list_call_participants(client):
+    resp = voice_calls_pb2.ListCallParticipantsResponse()
+    resp.participants.add(
+        user={"id": "u1", "login": "alice", "display_name": "Alice"}, call_id="c1"
+    )
+    _mock_method(client, "voice_calls", "list_call_participants", resp)
+
+    async with client:
+        parts = await client.list_call_participants("r1")
+
+    assert parts[0].call_id == "c1"
+
+
+async def test_send_test_notification(client):
+    mock = _mock_method(
+        client,
+        "push",
+        "send_test_notification",
+        push_notifications_pb2.SendTestNotificationResponse(),
+    )
+
+    async with client:
+        await client.send_test_notification()
+
+    assert mock.await_count == 1

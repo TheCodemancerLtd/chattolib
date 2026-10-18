@@ -90,9 +90,9 @@ fetch() {
 echo "Fetching proto sources ..."
 # chatto.api.v1
 for f in \
-    account.proto attachments.proto asset_uploads.proto common.proto \
+    account.proto asset_uploads.proto attachments.proto bots.proto common.proto \
     external_identities.proto link_previews.proto member_directory.proto \
-    messages.proto message_types.proto \
+    message_search.proto message_types.proto messages.proto \
     notifications.proto pagination.proto permissions.proto presence.proto \
     push_notifications.proto reactions.proto read_state.proto \
     room_directory.proto rooms.proto room_timeline.proto roles.proto \
@@ -104,14 +104,19 @@ done
 
 # chatto.admin.v1
 for f in \
-    diagnostics.proto event_log.proto members.proto permissions.proto \
+    diagnostics.proto event_log.proto invitations.proto members.proto \
+    oauth_clients.proto permissions.proto \
     roles.proto room_layout.proto server.proto
 do
     fetch "chatto/admin/v1/$f"
 done
 
 # chatto.auth.v1
-fetch chatto/auth/v1/external_identity_auth.proto
+for f in \
+    external_identity_auth.proto push_subscription_cleanup.proto setup.proto
+do
+    fetch "chatto/auth/v1/$f"
+done
 
 # chatto.discovery.v1
 fetch chatto/discovery/v1/server.proto
