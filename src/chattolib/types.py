@@ -89,6 +89,12 @@ class ThreadRootAuthorFilter(StrEnum):
     OTHERS = "THREAD_ROOT_AUTHOR_FILTER_OTHERS"
 
 
+class ThreadOrder(StrEnum):
+    UNSPECIFIED = "THREAD_ORDER_UNSPECIFIED"
+    ACTIVITY = "THREAD_ORDER_ACTIVITY"
+    CREATED = "THREAD_ORDER_CREATED"
+
+
 class MessageSearchOrder(StrEnum):
     UNSPECIFIED = "MESSAGE_SEARCH_ORDER_UNSPECIFIED"
     RELEVANCE = "MESSAGE_SEARCH_ORDER_RELEVANCE"
@@ -552,6 +558,7 @@ class Room:
     universal: bool = False
     slow_mode_seconds: int = 0
     threading_mode: RoomThreadingMode = RoomThreadingMode.UNSPECIFIED
+    thread_slow_mode_seconds: int | None = None
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> Room | None:
@@ -571,6 +578,11 @@ class Room:
                 data.get("threadingMode"),
                 RoomThreadingMode.UNSPECIFIED,
             ),  # type: ignore[arg-type]
+            thread_slow_mode_seconds=(
+                int(data["threadSlowModeSeconds"])
+                if data.get("threadSlowModeSeconds") is not None
+                else None
+            ),
         )
 
 
@@ -973,6 +985,7 @@ class ThreadSummary:
     participant_count: int = 0
     is_following: bool | None = None
     has_unread_replies: bool | None = None
+    slow_mode_next_post_at: datetime | None = None
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> ThreadSummary | None:
@@ -989,6 +1002,7 @@ class ThreadSummary:
             has_unread_replies=(
                 viewer.get("hasUnreadReplies") if "hasUnreadReplies" in viewer else None
             ),
+            slow_mode_next_post_at=parse_datetime(viewer.get("slowModeNextPostAt")),
         )
 
 
@@ -1000,6 +1014,7 @@ class MessageViewerState:
     authority; it is ``None`` when the server has not resolved viewer state."""
 
     can_reply_in_thread: bool | None = None
+    thread_slow_mode_next_post_at: datetime | None = None
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> MessageViewerState:
@@ -1008,6 +1023,7 @@ class MessageViewerState:
             can_reply_in_thread=(
                 data.get("canReplyInThread") if "canReplyInThread" in data else None
             ),
+            thread_slow_mode_next_post_at=parse_datetime(data.get("threadSlowModeNextPostAt")),
         )
 
 
@@ -1123,6 +1139,30 @@ def _snake_case(name: str) -> str:
 
 
 @dataclass
+class ThreadViewerState:
+    """Viewer-specific follow / unread / slow-mode state for one thread, as
+    returned by ``GetThreadEvents``/``GetThreadEventsAround`` (since
+    0.5.0b18). ``slow_mode_next_post_at`` is the earliest time the viewer may
+    reply in the thread (the root message starts its author's thread
+    cooldown); it is ``None`` when thread slow mode is disabled, expired, or
+    bypassed."""
+
+    is_following: bool | None = None
+    has_unread_replies: bool | None = None
+    slow_mode_next_post_at: datetime | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> ThreadViewerState | None:
+        if not data:
+            return None
+        return cls(
+            is_following=data.get("isFollowing") if "isFollowing" in data else None,
+            has_unread_replies=data.get("hasUnreadReplies") if "hasUnreadReplies" in data else None,
+            slow_mode_next_post_at=parse_datetime(data.get("slowModeNextPostAt")),
+        )
+
+
+@dataclass
 class TimelinePage:
     events: list[TimelineEvent] = field(default_factory=list)
     start_cursor: str = ""
@@ -1130,6 +1170,9 @@ class TimelinePage:
     has_older: bool = False
     has_newer: bool = False
     users_by_id: dict[str, User] = field(default_factory=dict)
+    # Thread viewer state, populated only on thread-timeline pages
+    # (GetThreadEvents / GetThreadEventsAround, since 0.5.0b18).
+    thread_viewer_state: ThreadViewerState | None = None
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> TimelinePage:

@@ -141,8 +141,10 @@ from chattolib.types import (
     ServerLogin,
     ServerProfile,
     ServerRuntimeConfig,
+    ThreadOrder,
     ThreadReadState,
     ThreadRootAuthorFilter,
+    ThreadViewerState,
     TimeFormat,
     TimelinePage,
     User,
@@ -679,6 +681,7 @@ class ChattoClient:
         universal: bool | None = None,
         slow_mode_seconds: int | None = None,
         threading_mode: RoomThreadingMode | None = None,
+        thread_slow_mode_seconds: int | None = None,
     ) -> Room:
         req = rooms_pb2.UpdateRoomRequest(room_id=room_id)
         if name is not None:
@@ -691,6 +694,8 @@ class ChattoClient:
             req.slow_mode_seconds = slow_mode_seconds
         if threading_mode is not None:
             req.threading_mode = threading_mode.value
+        if thread_slow_mode_seconds is not None:
+            req.thread_slow_mode_seconds = thread_slow_mode_seconds
         resp = await self._rpc(self._svc.rooms.update_room(req, headers=self._headers()))
         room = Room.parse(pb_to_dict(resp.room))
         assert room is not None
@@ -1156,15 +1161,19 @@ class ChattoClient:
         include_direct_message_threads: bool | None = None,
         unread_only: bool | None = None,
         root_author_filter: ThreadRootAuthorFilter | None = None,
+        order: ThreadOrder | None = None,
     ) -> FollowedThreadsPage:
-        """Followed threads, newest activity first.
+        """Followed threads, newest activity first by default.
 
         ``unread_only`` returns only threads with unread replies (older
         servers ignore it); ``include_direct_message_threads`` also lists
         followed direct-message threads; ``root_author_filter`` (since
         0.5.0b16) filters by the author of the thread *root* —
         ``VIEWER`` for threads you started, ``OTHERS`` for threads started
-        by someone else (older servers ignore it).
+        by someone else (older servers ignore it); ``order`` (since
+        0.5.0b18) sorts the feed — ``ACTIVITY`` (default) by newest
+        activity, ``CREATED`` by newest root-message creation with unknown
+        dates last (older servers ignore it and use activity order).
         """
         req = threads_pb2.ListFollowedThreadsRequest()
         page = _page_pb(limit, offset)
@@ -1178,6 +1187,8 @@ class ChattoClient:
             req.root_author_filter = threads_pb2.ThreadRootAuthorFilter.Value(
                 root_author_filter.value
             )
+        if order is not None:
+            req.order = threads_pb2.ThreadOrder.Value(order.value)
         resp = await self._rpc(
             self._svc.threads.list_followed_threads(req, headers=self._headers())
         )
@@ -1212,7 +1223,10 @@ class ChattoClient:
         elif after is not None:
             req.after = after
         resp = await self._rpc(self._svc.threads.get_thread_events(req, headers=self._headers()))
-        return TimelinePage.parse(pb_to_dict(resp.page))
+        data = pb_to_dict(resp)
+        page = TimelinePage.parse(data.get("page"))
+        page.thread_viewer_state = ThreadViewerState.parse(data.get("viewerState"))
+        return page
 
     async def get_thread_events_around(
         self,
@@ -1232,7 +1246,10 @@ class ChattoClient:
         resp = await self._rpc(
             self._svc.threads.get_thread_events_around(req, headers=self._headers())
         )
-        return TimelinePage.parse(pb_to_dict(resp.page)), resp.target_index
+        data = pb_to_dict(resp)
+        page = TimelinePage.parse(data.get("page"))
+        page.thread_viewer_state = ThreadViewerState.parse(data.get("viewerState"))
+        return page, resp.target_index
 
     async def mark_thread_as_read(
         self,

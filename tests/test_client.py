@@ -60,6 +60,7 @@ from chattolib.types import (
     PermissionDecision,
     PresenceStatus,
     RoomKind,
+    ThreadOrder,
     ThreadRootAuthorFilter,
     TimeFormat,
 )
@@ -595,6 +596,7 @@ async def test_list_followed_threads(client):
         await client.list_followed_threads(
             root_author_filter=ThreadRootAuthorFilter.OTHERS,
         )
+        await client.list_followed_threads(order=ThreadOrder.CREATED)
 
     assert page.page.total_count == 1
     assert page.threads[0].thread is not None
@@ -612,8 +614,118 @@ async def test_list_followed_threads(client):
     assert calls[2].root_author_filter == threads_pb2.ThreadRootAuthorFilter.Value(
         "THREAD_ROOT_AUTHOR_FILTER_OTHERS"
     )
+    assert calls[3].order == threads_pb2.ThreadOrder.Value("THREAD_ORDER_CREATED")
     assert calls[1].page.limit == 5
     assert calls[1].page.offset == 5
+
+
+async def test_update_room_thread_slow_mode(client):
+    resp = rooms_pb2.UpdateRoomResponse()
+    resp.room.id = "r1"
+    resp.room.name = "general"
+    resp.room.slow_mode_seconds = 30
+    resp.room.thread_slow_mode_seconds = 10
+    mocked = _mock_method(client, "rooms", "update_room", resp)
+
+    async with client:
+        room = await client.update_room("r1", thread_slow_mode_seconds=10)
+        await client.update_room("r1")
+
+    assert room.thread_slow_mode_seconds == 10
+    assert room.slow_mode_seconds == 30
+    calls = [c.args[0] for c in mocked.call_args_list]
+    assert calls[0].HasField("thread_slow_mode_seconds")
+    assert calls[0].thread_slow_mode_seconds == 10
+    assert not calls[1].HasField("thread_slow_mode_seconds")
+
+
+async def test_get_thread_events_viewer_state(client):
+    resp = room_timeline_pb2.GetThreadEventsResponse()
+    ev = resp.page.events.add()
+    ev.id = "e2"
+    ev.actor_id = "u1"
+    ev.message_posted.message.id = "e2"
+    ev.message_posted.message.room_id = "r1"
+    ev.message_posted.message.actor_id = "u1"
+    ev.message_posted.message.body = "reply"
+    ev.message_posted.message.thread_root_event_id = "e1"
+    ev.message_posted.message.viewer_state.can_reply_in_thread = True
+    ev.message_posted.message.viewer_state.thread_slow_mode_next_post_at.FromJsonString(
+        "2026-01-03T00:00:00Z"
+    )
+    resp.page.end_cursor = "c2"
+    resp.viewer_state.is_following = True
+    resp.viewer_state.has_unread_replies = True
+    resp.viewer_state.slow_mode_next_post_at.FromJsonString("2026-01-02T12:00:00Z")
+    _mock_method(client, "threads", "get_thread_events", resp)
+
+    async with client:
+        page = await client.get_thread_events("r1", "e1")
+
+    assert page.end_cursor == "c2"
+    assert page.thread_viewer_state is not None
+    assert page.thread_viewer_state.is_following is True
+    assert page.thread_viewer_state.has_unread_replies is True
+    assert page.thread_viewer_state.slow_mode_next_post_at == dt.datetime(
+        2026, 1, 2, 12, 0, tzinfo=dt.UTC
+    )
+    msg = page.events[0].message
+    assert msg is not None
+    assert msg.viewer_state is not None
+    assert msg.viewer_state.can_reply_in_thread is True
+    assert msg.viewer_state.thread_slow_mode_next_post_at == dt.datetime(
+        2026, 1, 3, 0, 0, tzinfo=dt.UTC
+    )
+
+
+async def test_get_thread_events_around_viewer_state(client):
+    resp = room_timeline_pb2.GetThreadEventsAroundResponse()
+    ev = resp.page.events.add()
+    ev.id = "e2"
+    ev.message_posted.message.id = "e2"
+    ev.message_posted.message.room_id = "r1"
+    ev.message_posted.message.actor_id = "u1"
+    resp.target_index = 0
+    resp.viewer_state.is_following = False
+    _mock_method(client, "threads", "get_thread_events_around", resp)
+
+    async with client:
+        page, idx = await client.get_thread_events_around("r1", "e1", "e2")
+
+    assert idx == 0
+    assert page.thread_viewer_state is not None
+    assert page.thread_viewer_state.is_following is False
+    assert page.thread_viewer_state.slow_mode_next_post_at is None
+
+
+async def test_thread_summary_slow_mode_next_post_at():
+    from chattolib.types import ThreadSummary
+
+    ts = ThreadSummary.parse(
+        {
+            "threadRootEventId": "e1",
+            "viewerState": {
+                "isFollowing": True,
+                "slowModeNextPostAt": "2026-01-02T00:00:00Z",
+            },
+        }
+    )
+    assert ts is not None
+    assert ts.slow_mode_next_post_at == dt.datetime(2026, 1, 2, tzinfo=dt.UTC)
+    ts2 = ThreadSummary.parse({"threadRootEventId": "e1"})
+    assert ts2 is not None
+    assert ts2.slow_mode_next_post_at is None
+
+
+async def test_room_thread_slow_mode_absent_vs_zero():
+    from chattolib.types import Room
+
+    absent = Room.parse({"id": "r1"})
+    assert absent is not None
+    assert absent.thread_slow_mode_seconds is None
+    zero = Room.parse({"id": "r1", "threadSlowModeSeconds": 0})
+    assert zero is not None
+    assert zero.thread_slow_mode_seconds == 0
 
 
 async def test_follow_and_unfollow_thread(client):
