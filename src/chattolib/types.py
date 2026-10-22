@@ -623,6 +623,8 @@ class RoomWithViewerState:
     viewer_state: RoomViewerState
     member_user_ids: list[str] = field(default_factory=list)
     has_message_history: bool | None = None
+    last_message_at: datetime | None = None
+    last_root_message_at: datetime | None = None
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> RoomWithViewerState | None:
@@ -635,6 +637,8 @@ class RoomWithViewerState:
             has_message_history=(
                 data.get("hasMessageHistory") if "hasMessageHistory" in data else None
             ),
+            last_message_at=parse_datetime(data.get("lastMessageAt")),
+            last_root_message_at=parse_datetime(data.get("lastRootMessageAt")),
         )
 
 

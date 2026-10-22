@@ -203,6 +203,34 @@ async def test_list_rooms_dm_keeps_deleted_participants(client):
     assert rooms[0].member_user_ids == ["u1", "u-deleted"]
 
 
+async def test_list_rooms_dm_activity_timestamps(client):
+    # Since Chatto 0.5.0-beta.19, RoomWithViewerState carries
+    # last_message_at (latest ordinary DM message incl. thread replies) and
+    # last_root_message_at (root messages only). Absent for channels /
+    # message-less DMs / servers predating the feature.
+    resp = room_directory_pb2.ListRoomsResponse()
+    entry = resp.rooms.add()
+    entry.room.id = "r-dm"
+    entry.room.kind = "ROOM_KIND_DM"
+    entry.viewer_state.is_member = True
+    entry.last_message_at.FromDatetime(dt.datetime(2026, 10, 20, 12, 0, tzinfo=dt.UTC))
+    entry.last_root_message_at.FromDatetime(dt.datetime(2026, 10, 19, 8, 30, tzinfo=dt.UTC))
+    channel = resp.rooms.add()
+    channel.room.id = "r-ch"
+    channel.room.kind = "ROOM_KIND_CHANNEL"
+    _mock_method(client, "room_directory", "list_rooms", resp)
+
+    async with client:
+        rooms = await client.list_rooms()
+
+    dm = next(r for r in rooms if r.room and r.room.id == "r-dm")
+    assert dm.last_message_at == dt.datetime(2026, 10, 20, 12, 0, tzinfo=dt.UTC)
+    assert dm.last_root_message_at == dt.datetime(2026, 10, 19, 8, 30, tzinfo=dt.UTC)
+    ch = next(r for r in rooms if r.room and r.room.id == "r-ch")
+    assert ch.last_message_at is None
+    assert ch.last_root_message_at is None
+
+
 # --- Messages ----------------------------------------------------------
 
 
