@@ -65,6 +65,7 @@ from chattolib._pb.chatto.api.v1 import (
     read_state_pb2,
     roles_pb2,
     room_directory_pb2,
+    room_invitations_pb2,
     room_timeline_pb2,
     rooms_pb2,
     server_state_pb2,
@@ -131,6 +132,7 @@ from chattolib.types import (
     Room,
     RoomDirectoryScope,
     RoomGroup,
+    RoomInvitation,
     RoomReadState,
     RoomSuspension,
     RoomThreadingMode,
@@ -647,6 +649,104 @@ class ChattoClient:
             for r in (RoomWithViewerState.parse(row) for row in data.get("rooms") or [])
             if r is not None
         ]
+
+    # --- Room invitations (since 0.5.0b20) ------------------------------
+
+    async def create_room_invitation(self, room_id: str, recipient_id: str) -> RoomInvitation:
+        """Invite ``recipient_id`` to ``room_id``. Requires room membership and
+        ``room.invite``. A duplicate from the same sender returns the existing
+        pending invitation; a pending invitation from a *different* sender
+        raises ``INVALID_ARGUMENT``."""
+        resp = await self._rpc(
+            self._svc.room_invitations.create_room_invitation(
+                room_invitations_pb2.CreateRoomInvitationRequest(
+                    room_id=room_id, recipient_id=recipient_id
+                ),
+                headers=self._headers(),
+            )
+        )
+        invitation = RoomInvitation.parse(pb_to_dict(resp.invitation))
+        assert invitation is not None
+        return invitation
+
+    async def get_room_invitation(self, invitation_id: str) -> RoomInvitation | None:
+        """Fetch one invitation by ID. ``NOT_FOUND`` for absent or
+        inaccessible invitations (raised as :class:`ChattoConnectError`)."""
+        resp = await self._rpc(
+            self._svc.room_invitations.get_room_invitation(
+                room_invitations_pb2.GetRoomInvitationRequest(invitation_id=invitation_id),
+                headers=self._headers(),
+            )
+        )
+        return RoomInvitation.parse(pb_to_dict(resp.invitation))
+
+    async def batch_get_room_invitations(self, invitation_ids: list[str]) -> list[RoomInvitation]:
+        """Fetch up to 100 invitations; absent/inaccessible IDs are omitted."""
+        resp = await self._rpc(
+            self._svc.room_invitations.batch_get_room_invitations(
+                room_invitations_pb2.BatchGetRoomInvitationsRequest(invitation_ids=invitation_ids),
+                headers=self._headers(),
+            )
+        )
+        data = pb_to_dict(resp)
+        return [
+            i
+            for i in (RoomInvitation.parse(row) for row in data.get("invitations") or [])
+            if i is not None
+        ]
+
+    async def list_room_invitations(
+        self,
+        *,
+        sent: bool = False,
+        pending_only: bool = False,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> tuple[list[RoomInvitation], Page]:
+        """List the caller's received (default) or sent invitations, newest
+        first. Default page size 50, maximum 100. ``pending_only`` restricts to
+        unexpired pending invitations."""
+        req = room_invitations_pb2.ListRoomInvitationsRequest(sent=sent, pending_only=pending_only)
+        page = _page_pb(limit, offset)
+        if page is not None:
+            req.page.CopyFrom(page)
+        resp = await self._rpc(
+            self._svc.room_invitations.list_room_invitations(req, headers=self._headers())
+        )
+        data = pb_to_dict(resp)
+        invitations = [
+            i
+            for i in (RoomInvitation.parse(row) for row in data.get("invitations") or [])
+            if i is not None
+        ]
+        return invitations, Page.parse(data.get("page"))
+
+    async def accept_room_invitation(self, invitation_id: str) -> RoomInvitation:
+        """Accept an invitation (recipient-only). Rechecks the sender's
+        authority at accept time and bypasses only ``room.join``; membership is
+        granted by acceptance."""
+        resp = await self._rpc(
+            self._svc.room_invitations.accept_room_invitation(
+                room_invitations_pb2.AcceptRoomInvitationRequest(invitation_id=invitation_id),
+                headers=self._headers(),
+            )
+        )
+        invitation = RoomInvitation.parse(pb_to_dict(resp.invitation))
+        assert invitation is not None
+        return invitation
+
+    async def decline_room_invitation(self, invitation_id: str) -> RoomInvitation:
+        """Decline an invitation (recipient-only). Does not change membership
+        or notification preferences."""
+        resp = await self._rpc(
+            self._svc.room_invitations.decline_room_invitation(
+                room_invitations_pb2.DeclineRoomInvitationRequest(invitation_id=invitation_id),
+                headers=self._headers(),
+            )
+        )
+        invitation = RoomInvitation.parse(pb_to_dict(resp.invitation))
+        assert invitation is not None
+        return invitation
 
     # --- Room lifecycle & membership -----------------------------------
 

@@ -67,6 +67,9 @@ from chattolib._pb.chatto.api.v1.roles_connect import RoleServiceClient
 from chattolib._pb.chatto.api.v1.room_directory_connect import (
     RoomDirectoryServiceClient,
 )
+from chattolib._pb.chatto.api.v1.room_invitations_connect import (
+    RoomInvitationServiceClient,
+)
 from chattolib._pb.chatto.api.v1.rooms_connect import RoomServiceClient
 from chattolib._pb.chatto.api.v1.server_state_connect import ServerServiceClient
 from chattolib._pb.chatto.api.v1.threads_connect import ThreadServiceClient
@@ -98,6 +101,7 @@ class ServiceClients:
     account: MyAccountServiceClient
     roles: RoleServiceClient
     room_directory: RoomDirectoryServiceClient
+    room_invitations: RoomInvitationServiceClient
     rooms: RoomServiceClient
     messages: MessageServiceClient
     threads: ThreadServiceClient
@@ -149,6 +153,7 @@ def build_service_clients(base_url: str) -> ServiceClients:
         account=make(MyAccountServiceClient),
         roles=make(RoleServiceClient),
         room_directory=make(RoomDirectoryServiceClient),
+        room_invitations=make(RoomInvitationServiceClient),
         rooms=make(RoomServiceClient),
         messages=make(MessageServiceClient),
         threads=make(ThreadServiceClient),

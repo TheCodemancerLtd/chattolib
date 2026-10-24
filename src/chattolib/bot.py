@@ -93,6 +93,7 @@ __all__ = [
     "BotPresencePreferenceEvent",
     "BotReactionEvent",
     "BotRoomEvent",
+    "BotRoomInvitationEvent",
     "BotTypingEvent",
     "BotUserEvent",
 ]
@@ -115,6 +116,11 @@ _ROOM_EVENT_KINDS = frozenset(
 # Oneof ``event`` cases that map onto a :class:`BotUserEvent`.
 _USER_EVENT_KINDS = frozenset(
     {"user_account_created", "user_profile_changed", "user_account_deleted"}
+)
+# Oneof ``event`` cases that map onto a :class:`BotRoomInvitationEvent`
+# (invitation lifecycle, since 0.5.0b20; delivered only to sender+recipient).
+_INVITATION_EVENT_KINDS = frozenset(
+    {"room_invitation_created", "room_invitation_accepted", "room_invitation_declined"}
 )
 
 
@@ -224,6 +230,22 @@ class BotUserEvent(BotEvent):
 
     user: User | None = None
     removed: bool = False
+
+
+@dataclass
+class BotRoomInvitationEvent(BotEvent):
+    """A room invitation was created, accepted, or declined (since 0.5.0b20).
+
+    Delivered only to the invitation's sender and recipient. ``detail`` is
+    ``"created"``, ``"accepted"``, or ``"declined"``. The payload is a thin
+    hint (IDs only); hydrate the full invitation via
+    ``await event.bot.client.get_room_invitation(event.invitation_id)`` when
+    the recipient is the bot itself.
+    """
+
+    room_id: str = ""
+    invitation_id: str = ""
+    detail: str = ""
 
 
 # ---------------------------------------------------------------------------
@@ -607,6 +629,17 @@ class Bot:
             await self._on_room_event(frame)
         elif kind in _USER_EVENT_KINDS:
             await self._on_user_event(frame)
+        elif kind in _INVITATION_EVENT_KINDS:
+            payload = frame.payload
+            await self._dispatch(
+                BotRoomInvitationEvent(
+                    bot=self,
+                    kind="room_invitation",
+                    room_id=getattr(payload, "room_id", ""),
+                    invitation_id=getattr(payload, "invitation_id", ""),
+                    detail=frame.kind.removeprefix("room_invitation_"),
+                )
+            )
 
     async def _on_message_posted(self, frame: RealtimeEvent) -> None:
         # Protocol-4 events are thin hints; hydrate the full message so the

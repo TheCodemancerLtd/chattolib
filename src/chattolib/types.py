@@ -75,6 +75,14 @@ class RoomDirectoryScope(StrEnum):
     DMS = "ROOM_DIRECTORY_SCOPE_DMS"
 
 
+class RoomInvitationStatus(StrEnum):
+    UNSPECIFIED = "ROOM_INVITATION_STATUS_UNSPECIFIED"
+    PENDING = "ROOM_INVITATION_STATUS_PENDING"
+    ACCEPTED = "ROOM_INVITATION_STATUS_ACCEPTED"
+    DECLINED = "ROOM_INVITATION_STATUS_DECLINED"
+    EXPIRED = "ROOM_INVITATION_STATUS_EXPIRED"
+
+
 class NotificationLevel(StrEnum):
     UNSPECIFIED = "NOTIFICATION_LEVEL_UNSPECIFIED"
     DEFAULT = "NOTIFICATION_LEVEL_DEFAULT"
@@ -604,9 +612,48 @@ class RoomSummary:
 
 
 @dataclass
+class RoomInvitation:
+    """An invitation to join a room (since 0.5.0b20), visible only to its
+    sender and recipient. Membership is granted only after the recipient
+    accepts; expiry does not extend when the invitation is read."""
+
+    id: str
+    room_id: str = ""
+    sender_id: str = ""
+    recipient_id: str = ""
+    created_at: datetime | None = None
+    expires_at: datetime | None = None
+    status: RoomInvitationStatus = RoomInvitationStatus.UNSPECIFIED
+    can_accept: bool = False
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> RoomInvitation | None:
+        if not data:
+            return None
+        return cls(
+            id=data.get("id", ""),
+            room_id=data.get("roomId", ""),
+            sender_id=data.get("senderId", ""),
+            recipient_id=data.get("recipientId", ""),
+            created_at=parse_datetime(data.get("createdAt")),
+            expires_at=parse_datetime(data.get("expiresAt")),
+            status=_parse_enum(
+                RoomInvitationStatus, data.get("status"), RoomInvitationStatus.UNSPECIFIED
+            ),  # type: ignore[arg-type]
+            can_accept=bool(data.get("canAccept", False)),
+        )
+
+
+@dataclass
 class RoomViewerState:
     is_member: bool = False
     has_unread: bool = False
+    # Since 0.5.0b20: the viewer's pending invitation for this room (does not
+    # grant access to room content), and whether current permissions/room state
+    # allow joining without an invitation (absent on servers that do not
+    # report this decision).
+    invitation: RoomInvitation | None = None
+    can_rejoin: bool | None = None
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> RoomViewerState:
@@ -614,6 +661,8 @@ class RoomViewerState:
         return cls(
             is_member=bool(data.get("isMember", False)),
             has_unread=bool(data.get("hasUnread", False)),
+            invitation=RoomInvitation.parse(data.get("invitation")),
+            can_rejoin=data.get("canRejoin") if "canRejoin" in data else None,
         )
 
 
@@ -1255,14 +1304,19 @@ class NotificationSignal:
     ``reply_received``, ``role_mention_received``, ``here_mention_received``,
     ``all_mention_received``, ``followed_thread_activity``,
     ``followed_room_activity``, ``reaction_received``,
-    ``room_message_received``). ``message`` is the referenced
-    :class:`NotificationMessageReference`.
+    ``room_message_received``, ``room_invitation_received``). ``message`` is
+    the referenced :class:`NotificationMessageReference`; for
+    ``room_invitation_received`` (since 0.5.0b20) the destination is the room
+    instead — ``room`` carries the :class:`RoomSummary` and ``invitation_id``
+    the stable invitation identifier.
     """
 
     kind: str
     message: NotificationMessageReference | None
     role_names: list[str] = field(default_factory=list)
     emoji: str = ""
+    room: RoomSummary | None = None
+    invitation_id: str = ""
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> NotificationSignal | None:
@@ -1270,6 +1324,8 @@ class NotificationSignal:
             return None
         kind = ""
         message: NotificationMessageReference | None = None
+        room: RoomSummary | None = None
+        invitation_id = ""
         for candidate in (
             "directMessageReceived",
             "directMentionReceived",
@@ -1281,18 +1337,25 @@ class NotificationSignal:
             "followedRoomActivity",
             "reactionReceived",
             "roomMessageReceived",
+            "roomInvitationReceived",
         ):
             payload = data.get(candidate)
             if payload is None:
                 continue
             kind = _snake_case(candidate)
-            message = NotificationMessageReference.parse(payload.get("message"))
+            if candidate == "roomInvitationReceived":
+                room = RoomSummary.parse(payload.get("room"))
+                invitation_id = payload.get("invitationId", "")
+            else:
+                message = NotificationMessageReference.parse(payload.get("message"))
             break
         return cls(
             kind=kind,
             message=message,
             role_names=list(data.get("roleNames") or []),
             emoji=data.get("emoji", ""),
+            room=room,
+            invitation_id=invitation_id,
         )
 
 

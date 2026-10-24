@@ -43,6 +43,7 @@ from chattolib._pb.chatto.api.v1 import (
     read_state_pb2,
     roles_pb2,
     room_directory_pb2,
+    room_invitations_pb2,
     room_timeline_pb2,
     rooms_pb2,
     threads_pb2,
@@ -59,6 +60,7 @@ from chattolib.types import (
     MessageSearchOrder,
     PermissionDecision,
     PresenceStatus,
+    RoomInvitationStatus,
     RoomKind,
     ThreadOrder,
     ThreadRootAuthorFilter,
@@ -1545,3 +1547,104 @@ async def test_send_test_notification(client):
         await client.send_test_notification()
 
     assert mock.await_count == 1
+
+
+# --- Room invitations (0.5.0b20) -----------------------------------------
+
+
+def _invitation_pb(inv, **kwargs):
+    inv.id = kwargs.get("id", "inv1")
+    inv.room_id = kwargs.get("room_id", "r1")
+    inv.sender_id = kwargs.get("sender_id", "u1")
+    inv.recipient_id = kwargs.get("recipient_id", "u2")
+    inv.status = kwargs.get("status", room_invitations_pb2.ROOM_INVITATION_STATUS_PENDING)
+    inv.can_accept = kwargs.get("can_accept", True)
+
+
+async def test_create_room_invitation(client):
+    resp = room_invitations_pb2.CreateRoomInvitationResponse()
+    _invitation_pb(resp.invitation)
+    mock = _mock_method(client, "room_invitations", "create_room_invitation", resp)
+
+    async with client:
+        inv = await client.create_room_invitation("r1", "u2")
+
+    assert inv.id == "inv1"
+    assert inv.status is RoomInvitationStatus.PENDING
+    assert inv.can_accept is True
+    req = mock.await_args.args[0]
+    assert req.room_id == "r1" and req.recipient_id == "u2"
+
+
+async def test_get_room_invitation(client):
+    resp = room_invitations_pb2.GetRoomInvitationResponse()
+    _invitation_pb(resp.invitation, status=room_invitations_pb2.ROOM_INVITATION_STATUS_ACCEPTED)
+    _mock_method(client, "room_invitations", "get_room_invitation", resp)
+
+    async with client:
+        inv = await client.get_room_invitation("inv1")
+
+    assert inv is not None
+    assert inv.status is RoomInvitationStatus.ACCEPTED
+
+
+async def test_batch_get_room_invitations(client):
+    resp = room_invitations_pb2.BatchGetRoomInvitationsResponse()
+    _invitation_pb(resp.invitations.add(), id="inv1")
+    _invitation_pb(resp.invitations.add(), id="inv2")
+    _mock_method(client, "room_invitations", "batch_get_room_invitations", resp)
+
+    async with client:
+        invs = await client.batch_get_room_invitations(["inv1", "inv2", "missing"])
+
+    assert [i.id for i in invs] == ["inv1", "inv2"]
+
+
+async def test_list_room_invitations(client):
+    resp = room_invitations_pb2.ListRoomInvitationsResponse()
+    _invitation_pb(resp.invitations.add(), id="inv1")
+    resp.page.total_count = 1
+    mock = _mock_method(client, "room_invitations", "list_room_invitations", resp)
+
+    async with client:
+        invs, page = await client.list_room_invitations(sent=True, pending_only=True, limit=25)
+
+    assert invs[0].id == "inv1"
+    assert page.total_count == 1
+    req = mock.await_args.args[0]
+    assert req.sent is True and req.pending_only is True and req.page.limit == 25
+
+
+async def test_accept_and_decline_room_invitation(client):
+    acc = room_invitations_pb2.AcceptRoomInvitationResponse()
+    _invitation_pb(acc.invitation, status=room_invitations_pb2.ROOM_INVITATION_STATUS_ACCEPTED)
+    _mock_method(client, "room_invitations", "accept_room_invitation", acc)
+    dec = room_invitations_pb2.DeclineRoomInvitationResponse()
+    _invitation_pb(dec.invitation, status=room_invitations_pb2.ROOM_INVITATION_STATUS_DECLINED)
+    _mock_method(client, "room_invitations", "decline_room_invitation", dec)
+
+    async with client:
+        a = await client.accept_room_invitation("inv1")
+        d = await client.decline_room_invitation("inv1")
+
+    assert a.status is RoomInvitationStatus.ACCEPTED
+    assert d.status is RoomInvitationStatus.DECLINED
+
+
+async def test_room_viewer_state_invitation_fields(client):
+    """RoomViewerState carries the pending invitation + can_rejoin decision."""
+    resp = room_directory_pb2.GetRoomResponse()
+    resp.room.room.id = "r1"
+    resp.room.viewer_state.is_member = False
+    resp.room.viewer_state.can_rejoin = False
+    _invitation_pb(resp.room.viewer_state.invitation, can_accept=False)
+    _mock_method(client, "room_directory", "get_room", resp)
+
+    async with client:
+        r = await client.get_room("r1")
+
+    assert r is not None
+    assert r.viewer_state.can_rejoin is False
+    assert r.viewer_state.invitation is not None
+    assert r.viewer_state.invitation.id == "inv1"
+    assert r.viewer_state.invitation.status is RoomInvitationStatus.PENDING

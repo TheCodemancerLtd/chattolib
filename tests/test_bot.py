@@ -19,6 +19,7 @@ from chattolib.bot import (
     BotPresencePreferenceEvent,
     BotReactionEvent,
     BotRoomEvent,
+    BotRoomInvitationEvent,
     BotTypingEvent,
     BotUserEvent,
 )
@@ -266,6 +267,41 @@ async def test_dispatch_user_event():
     )
     assert len(seen) == 1
     assert seen[0].removed is True
+
+
+async def test_dispatch_room_invitation_events():
+    """0.5.0b20: the three room_invitation_* realtime hints dispatch as
+    ``room_invitation`` events with the created/accepted/declined detail."""
+    bot = _bot()
+    seen: list[BotRoomInvitationEvent] = []
+
+    async def on_invitation(event: BotRoomInvitationEvent) -> None:
+        seen.append(event)
+
+    bot.on("room_invitation", on_invitation)
+
+    await bot._handle_live(
+        _live(
+            "room_invitation_created",
+            events_pb2.RoomInvitationCreatedEvent(room_id="r1", invitation_id="inv1"),
+        )
+    )
+    await bot._handle_live(
+        _live(
+            "room_invitation_accepted",
+            events_pb2.RoomInvitationAcceptedEvent(room_id="r1", invitation_id="inv1"),
+        )
+    )
+    await bot._handle_live(
+        _live(
+            "room_invitation_declined",
+            events_pb2.RoomInvitationDeclinedEvent(room_id="r1", invitation_id="inv1"),
+        )
+    )
+    assert [e.detail for e in seen] == ["created", "accepted", "declined"]
+    assert all(e.kind == "room_invitation" for e in seen)
+    assert seen[0].room_id == "r1"
+    assert seen[0].invitation_id == "inv1"
 
 
 async def test_wildcard_handler_receives_all():

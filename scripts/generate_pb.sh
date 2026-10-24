@@ -95,7 +95,7 @@ for f in \
     message_search.proto message_types.proto messages.proto \
     notifications.proto pagination.proto permissions.proto presence.proto \
     push_notifications.proto reactions.proto read_state.proto \
-    room_directory.proto rooms.proto room_timeline.proto roles.proto \
+    room_directory.proto room_invitations.proto rooms.proto room_timeline.proto roles.proto \
     server.proto server_state.proto threads.proto user_service.proto \
     users.proto user_status.proto viewer.proto voice_calls.proto
 do
