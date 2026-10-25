@@ -39,6 +39,47 @@ def _parse_enum(cls: type[Enum], raw: Any, default: Enum) -> Enum:
     return default
 
 
+def coerce_presence(value: Any) -> PresenceStatus:
+    """Coerce any wire shape of a presence status to a :class:`PresenceStatus`.
+
+    The realtime channel delivers ``PresenceChangedEvent.status`` as a plain
+    ``int`` (the protobuf runtime has no native enum wrappers), a protobuf
+    enum wrapper carries the full name via its own ``.name``, and parsed
+    payloads already hold a :class:`PresenceStatus`. All three arrive at this
+    one function:
+
+    - ``1`` / proto wrapper ``ONLINE`` → ``PresenceStatus.ONLINE``
+    - ``PresenceStatus.ONLINE`` → ``PresenceStatus.ONLINE`` (unchanged)
+    - anything unrecognised (out-of-range int, ``None``) → ``UNSPECIFIED``
+
+    Note that a :class:`PresenceStatus` member's own ``.name`` is the *short*
+    form (``"ONLINE"``), which does NOT match the proto value
+    (``"PRESENCE_STATUS_ONLINE"``) — that mismatch is why an isinstance check
+    must run before any ``.name`` read.
+    """
+    if isinstance(value, PresenceStatus):
+        return value
+    if value is None:
+        return PresenceStatus.UNSPECIFIED
+    if isinstance(value, int) and not isinstance(value, bool):
+        from chattolib._pb.chatto.api.v1 import presence_pb2
+
+        try:
+            name = presence_pb2.PresenceStatus.Name(value)
+        except ValueError:
+            return PresenceStatus.UNSPECIFIED
+        return PresenceStatus(name)
+    # A protobuf enum wrapper exposes the full name via ``.name``; the
+    # isinstance check above already routed StrEnum members elsewhere.
+    name = getattr(value, "name", None)
+    if isinstance(name, str):
+        try:
+            return PresenceStatus(name)
+        except ValueError:
+            return PresenceStatus.UNSPECIFIED
+    return PresenceStatus.UNSPECIFIED
+
+
 class PresenceStatus(StrEnum):
     UNSPECIFIED = "PRESENCE_STATUS_UNSPECIFIED"
     ONLINE = "PRESENCE_STATUS_ONLINE"

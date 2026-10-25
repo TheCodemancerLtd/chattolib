@@ -113,6 +113,7 @@ from chattolib.types import (
     VideoProcessingStatus,
     VideoVariant,
     ViewerUser,
+    coerce_presence,
 )
 
 __all__ = [
@@ -128,6 +129,7 @@ __all__ = [
     "RealtimeEvent",
     "RealtimeSnapshot",
     "stream_events",
+    "coerce_presence",
     "ActiveCall",
     "ActiveCallParticipant",
     "AdminMember",

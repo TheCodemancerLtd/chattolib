@@ -10,6 +10,9 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock
 
+import pytest
+
+from chattolib import coerce_presence
 from chattolib._pb.chatto.api.v1 import messages_pb2, presence_pb2, rooms_pb2
 from chattolib._pb.chatto.realtime.v1 import events_pb2
 from chattolib.bot import (
@@ -198,6 +201,53 @@ async def test_dispatch_presence_event():
     assert len(seen) == 1
     assert seen[0].user_id == "u1"
     assert seen[0].status is PresenceStatus.ONLINE
+
+
+class _NameCarrier:
+    """Stands in for a protobuf enum wrapper that exposes ``.name``.
+
+    The installed protobuf runtime delivers enum fields as plain ints, but
+    other runtimes (pure-python fallback, newer releases) hand out enum
+    wrapper objects whose ``.name`` is the full proto value name.
+    """
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        # The wire shape of PresenceChangedEvent.status in this runtime: an int.
+        (1, PresenceStatus.ONLINE),
+        (4, PresenceStatus.OFFLINE),
+        (0, PresenceStatus.UNSPECIFIED),
+        # Out-of-range and wrong-typed values fall back, never raise.
+        (99, PresenceStatus.UNSPECIFIED),
+        (None, PresenceStatus.UNSPECIFIED),
+        ("garbage", PresenceStatus.UNSPECIFIED),
+        (True, PresenceStatus.UNSPECIFIED),  # bool is an int, not a wire value
+        # An already-coerced member passes through unchanged.
+        (PresenceStatus.ONLINE, PresenceStatus.ONLINE),
+        (PresenceStatus.DO_NOT_DISTURB, PresenceStatus.DO_NOT_DISTURB),
+        # A protobuf enum wrapper's .name is the FULL value name.
+        (_NameCarrier("PRESENCE_STATUS_ONLINE"), PresenceStatus.ONLINE),
+        (_NameCarrier("PRESENCE_STATUS_OFFLINE"), PresenceStatus.OFFLINE),
+        # A short tail (ONLINE) is a StrEnum member's .name, not a proto value
+        # name — accepting it here would silently mis-map; it falls back.
+        (_NameCarrier("ONLINE"), PresenceStatus.UNSPECIFIED),
+    ],
+)
+def test_coerce_presence_wire_shapes(raw, expected):
+    assert coerce_presence(raw) is expected
+
+
+def test_coerce_presence_proto_wrapper_via_module():
+    """``presence_pb2.PresenceStatus.Name(1)`` is the public int→name path the
+    int branch takes."""
+    assert (
+        coerce_presence(presence_pb2.PresenceStatus.PRESENCE_STATUS_ONLINE) is PresenceStatus.ONLINE
+    )
 
 
 async def test_dispatch_presence_preference_event():
