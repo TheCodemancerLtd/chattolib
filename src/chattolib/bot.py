@@ -52,7 +52,6 @@ from dataclasses import dataclass
 from typing import Any
 
 from chattolib import _pb  # noqa: F401 — installs the generated pb import path
-from chattolib._pb.chatto.api.v1 import presence_pb2
 from chattolib.client import ChattoClient
 from chattolib.exceptions import ChattoError
 from chattolib.realtime import (
@@ -75,13 +74,9 @@ from chattolib.types import (
 
 def _presence(value: Any) -> PresenceStatus:
     """Coerce a protobuf presence value (int or enum) to a PresenceStatus."""
-    name = value.name if hasattr(value, "name") else presence_pb2.PresenceStatus.Name(int(value))
-    # The protobuf name is the *value* of our StrEnum (e.g. "PRESENCE_STATUS_ONLINE"),
-    # so look it up by value, not by member name.
-    for member in PresenceStatus:
-        if member.value == name:
-            return member
-    return PresenceStatus.UNSPECIFIED
+    from chattolib.types import coerce_presence
+
+    return coerce_presence(value)
 
 
 __all__ = [
