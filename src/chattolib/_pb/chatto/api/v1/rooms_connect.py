@@ -2,13 +2,49 @@
 
 # source: chatto/api/v1/rooms.proto
 
-import chatto.api.v1.read_state_pb2 as chatto_api_v1_read_state_pb2
 import chatto.api.v1.rooms_pb2 as chatto_api_v1_rooms_pb2
+import chatto.api.v1.read_state_pb2 as chatto_api_v1_read_state_pb2
 import chatto.api.v1.member_directory_pb2 as chatto_api_v1_member_directory_pb2
 import chatto.api.v1.room_timeline_pb2 as chatto_api_v1_room_timeline_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
 class RoomServiceClient(ConnectClient):
+    async def get_notice(self, request: chatto_api_v1_rooms_pb2.GetNoticeRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.GetNoticeResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetNotice",
+                service_name="chatto.api.v1.RoomService",
+                input=chatto_api_v1_rooms_pb2.GetNoticeRequest,
+                output=chatto_api_v1_rooms_pb2.GetNoticeResponse,
+            ),
+            headers=headers,
+        )
+
+    async def publish_notice(self, request: chatto_api_v1_rooms_pb2.PublishNoticeRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.PublishNoticeResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="PublishNotice",
+                service_name="chatto.api.v1.RoomService",
+                input=chatto_api_v1_rooms_pb2.PublishNoticeRequest,
+                output=chatto_api_v1_rooms_pb2.PublishNoticeResponse,
+            ),
+            headers=headers,
+        )
+
+    async def clear_notice(self, request: chatto_api_v1_rooms_pb2.ClearNoticeRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.ClearNoticeResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ClearNotice",
+                service_name="chatto.api.v1.RoomService",
+                input=chatto_api_v1_rooms_pb2.ClearNoticeRequest,
+                output=chatto_api_v1_rooms_pb2.ClearNoticeResponse,
+            ),
+            headers=headers,
+        )
+
     async def get_room_read_state(self, request: chatto_api_v1_read_state_pb2.GetRoomReadStateRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_read_state_pb2.GetRoomReadStateResponse:
         return await self.execute_unary(
             request=request,
@@ -322,6 +358,42 @@ class RoomServiceClient(ConnectClient):
         )
 
 class RoomServiceClientSync(ConnectClientSync):
+
+    def get_notice(self, request: chatto_api_v1_rooms_pb2.GetNoticeRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.GetNoticeResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetNotice",
+                service_name="chatto.api.v1.RoomService",
+                input=chatto_api_v1_rooms_pb2.GetNoticeRequest,
+                output=chatto_api_v1_rooms_pb2.GetNoticeResponse,
+            ),
+            headers=headers,
+        )
+
+    def publish_notice(self, request: chatto_api_v1_rooms_pb2.PublishNoticeRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.PublishNoticeResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="PublishNotice",
+                service_name="chatto.api.v1.RoomService",
+                input=chatto_api_v1_rooms_pb2.PublishNoticeRequest,
+                output=chatto_api_v1_rooms_pb2.PublishNoticeResponse,
+            ),
+            headers=headers,
+        )
+
+    def clear_notice(self, request: chatto_api_v1_rooms_pb2.ClearNoticeRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_rooms_pb2.ClearNoticeResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ClearNotice",
+                service_name="chatto.api.v1.RoomService",
+                input=chatto_api_v1_rooms_pb2.ClearNoticeRequest,
+                output=chatto_api_v1_rooms_pb2.ClearNoticeResponse,
+            ),
+            headers=headers,
+        )
 
     def get_room_read_state(self, request: chatto_api_v1_read_state_pb2.GetRoomReadStateRequest, *, headers: dict[str, str] | None = None) -> chatto_api_v1_read_state_pb2.GetRoomReadStateResponse:
         return self.execute_unary(

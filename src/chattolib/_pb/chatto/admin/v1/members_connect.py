@@ -102,6 +102,18 @@ class AdminUserServiceClient(ConnectClient):
             headers=headers,
         )
 
+    async def set_user_deactivated(self, request: chatto_admin_v1_members_pb2.SetUserDeactivatedRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.SetUserDeactivatedResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="SetUserDeactivated",
+                service_name="chatto.admin.v1.AdminUserService",
+                input=chatto_admin_v1_members_pb2.SetUserDeactivatedRequest,
+                output=chatto_admin_v1_members_pb2.SetUserDeactivatedResponse,
+            ),
+            headers=headers,
+        )
+
 class AdminUserServiceClientSync(ConnectClientSync):
 
     def list_members(self, request: chatto_admin_v1_members_pb2.ListMembersRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.ListMembersResponse:
@@ -196,6 +208,18 @@ class AdminUserServiceClientSync(ConnectClientSync):
                 service_name="chatto.admin.v1.AdminUserService",
                 input=chatto_admin_v1_members_pb2.DeleteUserRequest,
                 output=chatto_admin_v1_members_pb2.DeleteUserResponse,
+            ),
+            headers=headers,
+        )
+
+    def set_user_deactivated(self, request: chatto_admin_v1_members_pb2.SetUserDeactivatedRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.SetUserDeactivatedResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="SetUserDeactivated",
+                service_name="chatto.admin.v1.AdminUserService",
+                input=chatto_admin_v1_members_pb2.SetUserDeactivatedRequest,
+                output=chatto_admin_v1_members_pb2.SetUserDeactivatedResponse,
             ),
             headers=headers,
         )

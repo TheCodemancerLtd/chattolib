@@ -89,6 +89,7 @@ from chattolib._transport import (
 )
 from chattolib.exceptions import ChattoAuthError, ChattoError
 from chattolib.types import (
+    AccountCreationPolicy,
     ActiveCall,
     ActiveCallParticipant,
     AdminMember,
@@ -106,7 +107,7 @@ from chattolib.types import (
     FollowedThread,
     FollowedThreadsPage,
     ImageTransformOptions,
-    InviteLink,
+    InvitationCode,
     LinkedExternalIdentity,
     LinkPreview,
     Message,
@@ -133,6 +134,7 @@ from chattolib.types import (
     RoomDirectoryScope,
     RoomGroup,
     RoomInvitation,
+    RoomNotice,
     RoomReadState,
     RoomSuspension,
     RoomThreadingMode,
@@ -140,6 +142,7 @@ from chattolib.types import (
     SearchResultsPage,
     SearchStatus,
     ServerConfig,
+    ServerFeature,
     ServerLogin,
     ServerProfile,
     ServerRuntimeConfig,
@@ -340,6 +343,32 @@ class ChattoClient:
             )
         )
         return NeighborhoodServersPage.parse(pb_to_dict(resp))
+
+    async def list_features(
+        self, *, locale: str | None = None, introduced_after_version: str | None = None
+    ) -> list[ServerFeature]:
+        """Public feature catalog of the server software (since 0.5.0b27).
+
+        Does not require auth. Advisory upgrade guidance, not capability
+        negotiation — accept previously unknown feature IDs. Older servers
+        return UNIMPLEMENTED; catch that if you need to support them.
+        ``introduced_after_version`` must be a full Semantic Version
+        (including any prerelease stage) or INVALID_ARGUMENT is raised.
+        """
+        req = discovery_server_pb2.ListFeaturesRequest()
+        if locale is not None:
+            req.locale = locale
+        if introduced_after_version is not None:
+            req.introduced_after_version = introduced_after_version
+        resp = await self._rpc(
+            self._svc.server_discovery.list_features(req, headers=self._headers())
+        )
+        data = pb_to_dict(resp)
+        return [
+            f
+            for f in (ServerFeature.parse(row) for row in data.get("features") or [])
+            if f is not None
+        ]
 
     async def get_motd(self) -> str | None:
         resp = await self._rpc(
@@ -782,6 +811,7 @@ class ChattoClient:
         slow_mode_seconds: int | None = None,
         threading_mode: RoomThreadingMode | None = None,
         thread_slow_mode_seconds: int | None = None,
+        show_membership_events: bool | None = None,
     ) -> Room:
         req = rooms_pb2.UpdateRoomRequest(room_id=room_id)
         if name is not None:
@@ -796,10 +826,47 @@ class ChattoClient:
             req.threading_mode = threading_mode.value
         if thread_slow_mode_seconds is not None:
             req.thread_slow_mode_seconds = thread_slow_mode_seconds
+        if show_membership_events is not None:
+            req.show_membership_events = show_membership_events
         resp = await self._rpc(self._svc.rooms.update_room(req, headers=self._headers()))
         room = Room.parse(pb_to_dict(resp.room))
         assert room is not None
         return room
+
+    async def get_notice(self, room_id: str) -> RoomNotice:
+        """Read the current channel notice (since 0.5.0b27). Requires current
+        room membership (including archived rooms). A room without a notice
+        returns an empty body; ``version`` is still present for CAS."""
+        resp = await self._rpc(
+            self._svc.rooms.get_notice(
+                rooms_pb2.GetNoticeRequest(room_id=room_id), headers=self._headers()
+            )
+        )
+        return RoomNotice.parse(pb_to_dict(resp.notice))
+
+    async def publish_notice(
+        self, room_id: str, body: str, *, expected_version: str = "", republish: bool = False
+    ) -> RoomNotice:
+        """Publish or replace a channel notice (since 0.5.0b27). Send the
+        current ``expected_version`` for concurrency control. Replacements
+        preserve member dismissals unless ``republish=True`` announces the
+        replacement to members who dismissed the previous notice."""
+        req = rooms_pb2.PublishNoticeRequest(
+            room_id=room_id, body=body, expected_version=expected_version, republish=republish
+        )
+        resp = await self._rpc(self._svc.rooms.publish_notice(req, headers=self._headers()))
+        return RoomNotice.parse(pb_to_dict(resp.notice))
+
+    async def clear_notice(self, room_id: str, *, expected_version: str = "") -> RoomNotice:
+        """Clear the current notice without removing its concurrency version
+        (since 0.5.0b27)."""
+        resp = await self._rpc(
+            self._svc.rooms.clear_notice(
+                rooms_pb2.ClearNoticeRequest(room_id=room_id, expected_version=expected_version),
+                headers=self._headers(),
+            )
+        )
+        return RoomNotice.parse(pb_to_dict(resp.notice))
 
     async def archive_room(self, room_id: str) -> Room:
         resp = await self._rpc(
@@ -1128,6 +1195,7 @@ class ChattoClient:
         in_reply_to: str = "",
         also_send_to_channel: bool = False,
         link_preview_token: str = "",
+        idempotency_key: str | None = None,
     ) -> Message:
         req = messages_pb2.CreateMessageRequest(
             room_id=room_id,
@@ -1137,6 +1205,11 @@ class ChattoClient:
             also_send_to_channel=also_send_to_channel,
             link_preview_token=link_preview_token,
         )
+        if idempotency_key is not None:
+            # Since 0.5.0b27: caller-generated UUID. For 30 minutes after first
+            # acceptance an exact retry (same room + arguments) returns the same
+            # message ID; changed arguments are rejected.
+            req.idempotency_key = idempotency_key
         if attachment_asset_ids:
             req.attachment_asset_ids.extend(attachment_asset_ids)
         resp = await self._rpc(self._svc.messages.create_message(req, headers=self._headers()))
@@ -1782,6 +1855,7 @@ class ChattoClient:
         description: str | None = None,
         motd: str | None = None,
         welcome_message: str | None = None,
+        registration_admission: AccountCreationPolicy | None = None,
     ) -> tuple[ServerConfig, ServerProfile]:
         req = admin_server_pb2.UpdateServerConfigRequest()
         if server_name is not None:
@@ -1792,6 +1866,24 @@ class ChattoClient:
             req.motd = motd
         if welcome_message is not None:
             req.welcome_message = welcome_message
+        if registration_admission is not None:
+            # Since 0.5.0b27: partial account-creation settings. Server-side
+            # mask inference does not see nested message fields, so once
+            # ``registration`` participates we send an explicit mask covering
+            # every provided field.
+            req.registration.admission = registration_admission.value
+            paths = [
+                name
+                for name, value in (
+                    ("server_name", server_name),
+                    ("description", description),
+                    ("motd", motd),
+                    ("welcome_message", welcome_message),
+                )
+                if value is not None
+            ]
+            paths.append("registration.admission")
+            req.update_mask.paths.extend(paths)
         resp = await self._rpc(
             self._svc.admin_server.update_server_config(req, headers=self._headers())
         )
@@ -2233,6 +2325,24 @@ class ChattoClient:
                 headers=self._headers(),
             )
         )
+
+    async def admin_set_user_deactivated(self, user_id: str, deactivated: bool) -> AdminMember:
+        """Deactivate or reactivate a human account (since 0.5.0b27, requires
+        ``user.manage-accounts``). Cannot target your own account or an owner
+        account. Deactivation immediately invalidates existing sessions and
+        prevents sign-in; reactivation permits new sign-ins but old sessions
+        remain invalid. Repeating the current state succeeds unchanged."""
+        resp = await self._rpc(
+            self._svc.admin_users.set_user_deactivated(
+                admin_members_pb2.SetUserDeactivatedRequest(
+                    user_id=user_id, deactivated=deactivated
+                ),
+                headers=self._headers(),
+            )
+        )
+        member = AdminMember.parse(pb_to_dict(resp.member))
+        assert member is not None
+        return member
 
     # --- Admin: roles --------------------------------------------------
 
@@ -3141,14 +3251,23 @@ class ChattoClient:
         return PendingExternalIdentity.parse(pb_to_dict(resp.pending))
 
     async def create_external_identity_account(
-        self, token: str, login: str, display_name: str = ""
+        self, token: str, login: str, display_name: str = "", *, invitation_code: str = ""
     ) -> dict[str, Any]:
-        """Create a passwordless account from a pending provider identity."""
+        """Create a passwordless account from a pending provider identity.
+
+        Since 0.5.0b27: ``login`` is ignored when the pending flow reports
+        ``choose_username`` as provider-managed, and ``invitation_code`` is
+        required on invite-only servers when the flow has no valid invitation
+        (a supplied code replaces the flow's invitation for this attempt; an
+        invalid code fails without fallback and is consumed only on success).
+        """
         req = external_identity_auth_pb2.CreateExternalIdentityAccountRequest(
             token=token, login=login
         )
         if display_name:
             req.display_name = display_name
+        if invitation_code:
+            req.invitation_code = invitation_code
         resp = await self._rpc(
             self._svc.external_identity_auth.create_external_identity_account(
                 req, headers=self._headers()
@@ -3252,62 +3371,65 @@ class ChattoClient:
         )
         return pb_to_dict(resp)
 
-    # --- Admin: invite links ------------------------------------------------
+    # --- Admin: registration codes ---------------------------------------
 
-    async def admin_list_invite_links(
+    async def admin_list_invitation_codes(
         self, *, limit: int | None = None, offset: int | None = None
-    ) -> tuple[list[InviteLink], Page]:
-        req = admin_invitations_pb2.ListInviteLinksRequest()
+    ) -> tuple[list[InvitationCode], Page]:
+        req = admin_invitations_pb2.ListInvitationCodesRequest()
         page = _page_pb(limit, offset)
         if page is not None:
             req.page.CopyFrom(page)
         resp = await self._rpc(
-            self._svc.admin_invite_links.list_invite_links(req, headers=self._headers())
+            self._svc.admin_invitation_codes.list_invitation_codes(req, headers=self._headers())
         )
         data = pb_to_dict(resp)
         return (
             [
-                link
-                for link in (InviteLink.parse(row) for row in data.get("inviteLinks") or [])
-                if link is not None
+                code
+                for code in (InvitationCode.parse(row) for row in data.get("invitationCodes") or [])
+                if code is not None
             ],
             Page.parse(data.get("page")),
         )
 
-    async def admin_get_invite_link(self, link_id: str) -> InviteLink | None:
+    async def admin_get_invitation_code(self, code_id: str) -> InvitationCode | None:
         resp = await self._rpc(
-            self._svc.admin_invite_links.get_invite_link(
-                admin_invitations_pb2.GetInviteLinkRequest(id=link_id),
+            self._svc.admin_invitation_codes.get_invitation_code(
+                admin_invitations_pb2.GetInvitationCodeRequest(id=code_id),
                 headers=self._headers(),
             )
         )
-        return InviteLink.parse(pb_to_dict(resp.invite_link))
+        return InvitationCode.parse(pb_to_dict(resp.invitation_code))
 
-    async def admin_create_invite_link(
-        self, *, max_uses: int | None = None, expires_at: datetime | None = None
-    ) -> InviteLink:
-        req = admin_invitations_pb2.CreateInviteLinkRequest()
-        if max_uses is not None:
-            req.max_uses = max_uses
+    async def admin_create_invitation_code(
+        self, *, expires_at: datetime | None = None, note: str = ""
+    ) -> InvitationCode:
+        """Create a single-use registration code. Not idempotent: retrying
+        creates another code. Every code is single-use even when expiry is
+        omitted. ``note`` is an optional manager-only note (max 250 chars)."""
+        req = admin_invitations_pb2.CreateInvitationCodeRequest()
         if expires_at is not None:
             req.expires_at.CopyFrom(_timestamp_pb(expires_at))
+        if note:
+            req.note = note
         resp = await self._rpc(
-            self._svc.admin_invite_links.create_invite_link(req, headers=self._headers())
+            self._svc.admin_invitation_codes.create_invitation_code(req, headers=self._headers())
         )
-        link = InviteLink.parse(pb_to_dict(resp.invite_link))
-        assert link is not None
-        return link
+        code = InvitationCode.parse(pb_to_dict(resp.invitation_code))
+        assert code is not None
+        return code
 
-    async def admin_revoke_invite_link(self, link_id: str) -> InviteLink:
+    async def admin_revoke_invitation_code(self, code_id: str) -> InvitationCode:
         resp = await self._rpc(
-            self._svc.admin_invite_links.revoke_invite_link(
-                admin_invitations_pb2.RevokeInviteLinkRequest(id=link_id),
+            self._svc.admin_invitation_codes.revoke_invitation_code(
+                admin_invitations_pb2.RevokeInvitationCodeRequest(id=code_id),
                 headers=self._headers(),
             )
         )
-        link = InviteLink.parse(pb_to_dict(resp.invite_link))
-        assert link is not None
-        return link
+        code = InvitationCode.parse(pb_to_dict(resp.invitation_code))
+        assert code is not None
+        return code
 
     # --- Admin: OAuth clients -------------------------------------------------
 

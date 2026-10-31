@@ -172,12 +172,51 @@ class MessageSearchState(StrEnum):
     UNAVAILABLE = "MESSAGE_SEARCH_STATE_UNAVAILABLE"
 
 
-class InviteLinkStatus(StrEnum):
-    UNSPECIFIED = "INVITE_LINK_STATUS_UNSPECIFIED"
-    ACTIVE = "INVITE_LINK_STATUS_ACTIVE"
-    EXPIRED = "INVITE_LINK_STATUS_EXPIRED"
-    EXHAUSTED = "INVITE_LINK_STATUS_EXHAUSTED"
-    REVOKED = "INVITE_LINK_STATUS_REVOKED"
+class InvitationCodeStatus(StrEnum):
+    UNSPECIFIED = "INVITATION_CODE_STATUS_UNSPECIFIED"
+    ACTIVE = "INVITATION_CODE_STATUS_ACTIVE"
+    EXPIRED = "INVITATION_CODE_STATUS_EXPIRED"
+    USED = "INVITATION_CODE_STATUS_USED"
+    REVOKED = "INVITATION_CODE_STATUS_REVOKED"
+
+
+class AccountCreationPolicy(StrEnum):
+    UNSPECIFIED = "ACCOUNT_CREATION_POLICY_UNSPECIFIED"
+    OPEN = "ACCOUNT_CREATION_POLICY_OPEN"
+    INVITE_ONLY = "ACCOUNT_CREATION_POLICY_INVITE_ONLY"
+
+
+class DisconnectEligibility(StrEnum):
+    UNSPECIFIED = "DISCONNECT_ELIGIBILITY_UNSPECIFIED"
+    ALLOWED = "DISCONNECT_ELIGIBILITY_ALLOWED"
+    LAST_ENABLED_SIGN_IN_METHOD = "DISCONNECT_ELIGIBILITY_LAST_ENABLED_SIGN_IN_METHOD"
+    DISABLED_BY_OPERATOR = "DISCONNECT_ELIGIBILITY_DISABLED_BY_OPERATOR"
+
+
+class UsernameChoiceAvailability(StrEnum):
+    UNSPECIFIED = "USERNAME_CHOICE_AVAILABILITY_UNSPECIFIED"
+    ALLOWED = "USERNAME_CHOICE_AVAILABILITY_ALLOWED"
+    PROVIDER_MANAGED = "USERNAME_CHOICE_AVAILABILITY_PROVIDER_MANAGED"
+
+
+class UsernameChangeState(StrEnum):
+    UNSPECIFIED = "STATE_UNSPECIFIED"
+    ALLOWED = "STATE_ALLOWED"
+    PROVIDER_MANAGED = "STATE_PROVIDER_MANAGED"
+
+
+class PasswordChangeAvailability(StrEnum):
+    UNSPECIFIED = "PASSWORD_CHANGE_AVAILABILITY_UNSPECIFIED"
+    ALLOWED = "PASSWORD_CHANGE_AVAILABILITY_ALLOWED"
+    DIRECT_LOGIN_DISABLED = "PASSWORD_CHANGE_AVAILABILITY_DIRECT_LOGIN_DISABLED"
+    UNSUPPORTED_ACCOUNT = "PASSWORD_CHANGE_AVAILABILITY_UNSUPPORTED_ACCOUNT"
+
+
+class AccountDeletionAvailability(StrEnum):
+    UNSPECIFIED = "ACCOUNT_DELETION_AVAILABILITY_UNSPECIFIED"
+    ALLOWED = "ACCOUNT_DELETION_AVAILABILITY_ALLOWED"
+    PERMISSION_DENIED = "ACCOUNT_DELETION_AVAILABILITY_PERMISSION_DENIED"
+    UNSUPPORTED_ACCOUNT = "ACCOUNT_DELETION_AVAILABILITY_UNSUPPORTED_ACCOUNT"
 
 
 class OauthClientSource(StrEnum):
@@ -320,6 +359,9 @@ class User:
     bot: BotInfo | None = None
     bio: str | None = None
     timezone: str | None = None
+    # Since 0.5.0b27: True while the account is deactivated (cannot sign in or
+    # use the server); its data is retained and access can be restored.
+    deactivated: bool = False
 
     @property
     def is_bot(self) -> bool:
@@ -343,6 +385,7 @@ class User:
             bot=BotInfo.parse(data.get("bot")),
             bio=data.get("bio"),
             timezone=data.get("timezone"),
+            deactivated=bool(data.get("deactivated", False)),
         )
 
 
@@ -394,6 +437,10 @@ class ViewerUser:
     viewer_can_delete_account: bool = False
     last_login_change: datetime | None = None
     has_password: bool = False
+    # Since 0.5.0b27: self-service account action snapshots (absent on older
+    # servers; ``viewer_can_delete_account`` above is deprecated in favor of
+    # ``actions.delete_account``).
+    actions: AccountActions | None = None
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> ViewerUser | None:
@@ -406,6 +453,7 @@ class ViewerUser:
             viewer_can_delete_account=bool(data.get("viewerCanDeleteAccount", False)),
             last_login_change=parse_datetime(data.get("lastLoginChange")),
             has_password=bool(data.get("hasPassword", False)),
+            actions=AccountActions.parse(data.get("actions")),
         )
 
 
@@ -536,6 +584,9 @@ class ServerLogin:
     direct_registration_enabled: bool = False
     providers: list[ProviderMetadata] = field(default_factory=list)
     authorize_url: str = ""
+    # Since 0.5.0b26: admission policy for direct registration and provider
+    # auto-provisioning (UNSPECIFIED on older servers means treat as open).
+    account_creation_policy: AccountCreationPolicy = AccountCreationPolicy.UNSPECIFIED
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> ServerLogin:
@@ -544,6 +595,11 @@ class ServerLogin:
             direct_registration_enabled=bool(data.get("directRegistrationEnabled", False)),
             providers=[ProviderMetadata.parse(p) for p in data.get("providers") or []],
             authorize_url=data.get("authorizeUrl", ""),
+            account_creation_policy=_parse_enum(  # type: ignore[arg-type]
+                AccountCreationPolicy,
+                data.get("accountCreationPolicy"),
+                AccountCreationPolicy.UNSPECIFIED,
+            ),
         )
 
 
@@ -608,6 +664,12 @@ class Room:
     slow_mode_seconds: int = 0
     threading_mode: RoomThreadingMode = RoomThreadingMode.UNSPECIFIED
     thread_slow_mode_seconds: int | None = None
+    # Since 0.5.0b27: when the room was created (absent on older servers),
+    # and whether clients show join/leave activity (absent on older servers
+    # means True; membership state and event delivery are unaffected either
+    # way).
+    created_at: datetime | None = None
+    show_membership_events: bool | None = None
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> Room | None:
@@ -632,6 +694,37 @@ class Room:
                 if data.get("threadSlowModeSeconds") is not None
                 else None
             ),
+            created_at=parse_datetime(data.get("createdAt")),
+            show_membership_events=(
+                data["showMembershipEvents"] if "showMembershipEvents" in data else None
+            ),
+        )
+
+
+@dataclass
+class RoomNotice:
+    """The current member-only notice in a channel room (since 0.5.0b27).
+
+    ``version`` is an opaque concurrency token that every mutation must send
+    back (empty before the first publish). ``publication_id`` is an opaque
+    dismissal revision: corrections preserve it, publish/republish replace it,
+    and it is empty when nothing is published. ``published_at`` is absent when
+    the notice is cleared or unavailable on an older server.
+    """
+
+    body: str = ""
+    version: str = ""
+    publication_id: str = ""
+    published_at: datetime | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> RoomNotice:
+        data = data or {}
+        return cls(
+            body=data.get("body", ""),
+            version=data.get("version", ""),
+            publication_id=data.get("publicationId", ""),
+            published_at=parse_datetime(data.get("publishedAt")),
         )
 
 
@@ -1694,6 +1787,11 @@ class LinkedExternalIdentity:
     provider_type: str = ""
     provider_label: str = ""
     subject_hash: str = ""
+    # Since 0.5.0b27: disconnect eligibility evaluated by
+    # ListExternalIdentities. Only ALLOWED enables the action; UNSPECIFIED
+    # means not evaluated (older servers) — unknown future states remain
+    # disabled client-side.
+    disconnect_eligibility: DisconnectEligibility = DisconnectEligibility.UNSPECIFIED
 
     @classmethod
     def parse(cls, data: dict[str, Any]) -> LinkedExternalIdentity:
@@ -1702,10 +1800,33 @@ class LinkedExternalIdentity:
             provider_type=data.get("providerType", ""),
             provider_label=data.get("providerLabel", ""),
             subject_hash=data.get("subjectHash", ""),
+            disconnect_eligibility=_parse_enum(  # type: ignore[arg-type]
+                DisconnectEligibility,
+                data.get("disconnectEligibility"),
+                DisconnectEligibility.UNSPECIFIED,
+            ),
         )
 
 
 # --- Admin: server / members ---------------------------------------------
+
+
+@dataclass
+class RegistrationSettings:
+    """Account-creation admission settings (since 0.5.0b27). OPEN permits
+    signup without an invitation; INVITE_ONLY requires a valid single-use
+    registration code (see ``admin_create_invitation_code``)."""
+
+    admission: AccountCreationPolicy = AccountCreationPolicy.UNSPECIFIED
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> RegistrationSettings:
+        data = data or {}
+        return cls(
+            admission=_parse_enum(  # type: ignore[arg-type]
+                AccountCreationPolicy, data.get("admission"), AccountCreationPolicy.UNSPECIFIED
+            ),
+        )
 
 
 @dataclass
@@ -1714,6 +1835,8 @@ class ServerConfig:
     description: str = ""
     motd: str = ""
     welcome_message: str = ""
+    # Since 0.5.0b27: settings for new self-service accounts.
+    registration: RegistrationSettings = field(default_factory=RegistrationSettings)
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> ServerConfig:
@@ -1723,6 +1846,90 @@ class ServerConfig:
             description=data.get("description", ""),
             motd=data.get("motd", ""),
             welcome_message=data.get("welcomeMessage", ""),
+            registration=RegistrationSettings.parse(data.get("registration")),
+        )
+
+
+@dataclass
+class UsernameChangeAvailability:
+    """Self-service username-change decision (since 0.5.0b27). ``state``
+    (the nested ``UsernameChangeAvailability.State`` enum) gates the action;
+    ``available_at`` is an independent earliest attempt time — when absent
+    there is no time restriction. Commands still recheck policy."""
+
+    state: UsernameChangeState = UsernameChangeState.UNSPECIFIED
+    available_at: datetime | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> UsernameChangeAvailability | None:
+        if not data:
+            return None
+        return cls(
+            state=_parse_enum(  # type: ignore[arg-type]
+                UsernameChangeState, data.get("state"), UsernameChangeState.UNSPECIFIED
+            ),
+            available_at=parse_datetime(data.get("availableAt")),
+        )
+
+
+@dataclass
+class AccountActions:
+    """Self-service account action snapshots carried by the viewer since
+    0.5.0b27. Absent sub-fields mean the server did not report that action;
+    only ALLOWED enables it client-side — the mutation RPCs always recheck."""
+
+    change_username: UsernameChangeAvailability | None = None
+    change_password: PasswordChangeAvailability | None = None
+    delete_account: AccountDeletionAvailability | None = None
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> AccountActions | None:
+        if not data:
+            return None
+        return cls(
+            change_username=UsernameChangeAvailability.parse(data.get("changeUsername")),
+            change_password=(
+                _parse_enum(  # type: ignore[arg-type]
+                    PasswordChangeAvailability,
+                    data["changePassword"],
+                    PasswordChangeAvailability.UNSPECIFIED,
+                )
+                if data.get("changePassword") is not None
+                else None
+            ),
+            delete_account=(
+                _parse_enum(  # type: ignore[arg-type]
+                    AccountDeletionAvailability,
+                    data["deleteAccount"],
+                    AccountDeletionAvailability.UNSPECIFIED,
+                )
+                if data.get("deleteAccount") is not None
+                else None
+            ),
+        )
+
+
+@dataclass
+class ServerFeature:
+    """An advisory product feature reported by the public feature catalog
+    (``ServerDiscoveryService.ListFeatures``, since 0.5.0b27). ``id`` is a
+    stable feature identifier — clients must accept unknown IDs. This is
+    upgrade guidance, not permission, configuration, or API negotiation."""
+
+    id: str = ""
+    name: str = ""
+    description: str = ""
+    introduced_version: str = ""
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> ServerFeature | None:
+        if not data:
+            return None
+        return cls(
+            id=data.get("id", ""),
+            name=data.get("name", ""),
+            description=data.get("description", ""),
+            introduced_version=data.get("introducedVersion", ""),
         )
 
 
@@ -1736,6 +1943,11 @@ class AdminMember:
     primary_verified_email: str | None = None
     viewer_can_delete_account: bool = False
     last_login_change: datetime | None = None
+    # Since 0.5.0b27: deactivated accounts retain their data but cannot use
+    # the server; ``viewer_can_change_deactivation`` is absent on servers that
+    # do not support account deactivation.
+    deactivated: bool = False
+    viewer_can_change_deactivation: bool | None = None
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> AdminMember | None:
@@ -1750,6 +1962,12 @@ class AdminMember:
             primary_verified_email=data.get("primaryVerifiedEmail"),
             viewer_can_delete_account=bool(data.get("viewerCanDeleteAccount", False)),
             last_login_change=parse_datetime(data.get("lastLoginChange")),
+            deactivated=bool(data.get("deactivated", False)),
+            viewer_can_change_deactivation=(
+                data["viewerCanChangeDeactivation"]
+                if "viewerCanChangeDeactivation" in data
+                else None
+            ),
         )
 
 
@@ -1963,6 +2181,11 @@ class PendingExternalIdentity:
     display_name_hint: str = ""
     bound_user_id: str = ""
     redirect_path: str = ""
+    # Since 0.5.0b27: whether the user can choose a username during creation
+    # (None when the server does not report it), and whether a create flow
+    # requires an invitation code.
+    choose_username: UsernameChoiceAvailability | None = None
+    invitation_required: bool = False
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> PendingExternalIdentity | None:
@@ -1980,6 +2203,16 @@ class PendingExternalIdentity:
             display_name_hint=data.get("displayNameHint", ""),
             bound_user_id=data.get("boundUserId", ""),
             redirect_path=data.get("redirectPath", ""),
+            choose_username=(
+                _parse_enum(  # type: ignore[arg-type]
+                    UsernameChoiceAvailability,
+                    data["chooseUsername"],
+                    UsernameChoiceAvailability.UNSPECIFIED,
+                )
+                if data.get("chooseUsername") is not None
+                else None
+            ),
+            invitation_required=bool(data.get("invitationRequired", False)),
         )
 
 
@@ -2135,33 +2368,36 @@ class BotOutboundWebhook:
 
 
 @dataclass
-class InviteLink:
+class InvitationCode:
+    """A single-use registration code on an invite-only server (since 0.5.0b27,
+    chatto #3085 replaced invite links). ``code`` is the recoverable bearer
+    capability — it is only ever returned to callers with ``user.invite`` and
+    must never be logged."""
+
     id: str = ""
-    link: str = ""
+    code: str = ""
     created_by: str = ""
     created_at: datetime | None = None
-    max_uses: int | None = None
     expires_at: datetime | None = None
-    use_count: int = 0
-    status: InviteLinkStatus = InviteLinkStatus.UNSPECIFIED
+    status: InvitationCodeStatus = InvitationCodeStatus.UNSPECIFIED
     revoked_at: datetime | None = None
+    note: str = ""
 
     @classmethod
-    def parse(cls, data: dict[str, Any] | None) -> InviteLink | None:
+    def parse(cls, data: dict[str, Any] | None) -> InvitationCode | None:
         if not data:
             return None
         return cls(
             id=data.get("id", ""),
-            link=data.get("link", ""),
+            code=data.get("code", ""),
             created_by=data.get("createdBy", ""),
             created_at=parse_datetime(data.get("createdAt")),
-            max_uses=int(data["maxUses"]) if "maxUses" in data else None,
             expires_at=parse_datetime(data.get("expiresAt")),
-            use_count=int(data.get("useCount", 0)),
             status=_parse_enum(  # type: ignore[arg-type]
-                InviteLinkStatus, data.get("status"), InviteLinkStatus.UNSPECIFIED
+                InvitationCodeStatus, data.get("status"), InvitationCodeStatus.UNSPECIFIED
             ),
             revoked_at=parse_datetime(data.get("revokedAt")),
+            note=data.get("note", ""),
         )
 
 

@@ -34,7 +34,9 @@ from chattolib._pb.chatto.admin.v1.diagnostics_connect import (
     AdminDiagnosticsServiceClient,
 )
 from chattolib._pb.chatto.admin.v1.event_log_connect import AdminEventLogServiceClient
-from chattolib._pb.chatto.admin.v1.invitations_connect import AdminInviteLinkServiceClient
+from chattolib._pb.chatto.admin.v1.invitations_connect import (
+    AdminInvitationCodeServiceClient,
+)
 from chattolib._pb.chatto.admin.v1.members_connect import AdminUserServiceClient
 from chattolib._pb.chatto.admin.v1.oauth_clients_connect import (
     AdminOAuthClientServiceClient,
@@ -125,7 +127,7 @@ class ServiceClients:
     admin_event_log: AdminEventLogServiceClient
     admin_diagnostics: AdminDiagnosticsServiceClient
     admin_permissions: AdminPermissionServiceClient
-    admin_invite_links: AdminInviteLinkServiceClient
+    admin_invitation_codes: AdminInvitationCodeServiceClient
     admin_oauth_clients: AdminOAuthClientServiceClient
 
     async def close(self) -> None:
@@ -177,7 +179,7 @@ def build_service_clients(base_url: str) -> ServiceClients:
         admin_event_log=make(AdminEventLogServiceClient),
         admin_diagnostics=make(AdminDiagnosticsServiceClient),
         admin_permissions=make(AdminPermissionServiceClient),
-        admin_invite_links=make(AdminInviteLinkServiceClient),
+        admin_invitation_codes=make(AdminInvitationCodeServiceClient),
         admin_oauth_clients=make(AdminOAuthClientServiceClient),
     )
 
