@@ -27,39 +27,39 @@ from chatto.api.v1 import pagination_pb2 as chatto_dot_api_dot_v1_dot_pagination
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n!chatto/admin/v1/invitations.proto\x12\x0f\x63hatto.admin.v1\x1a\x1b\x62uf/validate/validate.proto\x1a\x1e\x63hatto/api/v1/pagination.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb4\x02\n\nInviteLink\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04link\x18\x02 \x01(\t\x12\x12\n\ncreated_by\x18\x03 \x01(\t\x12.\n\ncreated_at\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x15\n\x08max_uses\x18\x05 \x01(\rH\x00\x88\x01\x01\x12.\n\nexpires_at\x18\x06 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x11\n\tuse_count\x18\x07 \x01(\r\x12\x31\n\x06status\x18\x08 \x01(\x0e\x32!.chatto.admin.v1.InviteLinkStatus\x12.\n\nrevoked_at\x18\t \x01(\x0b\x32\x1a.google.protobuf.TimestampB\x0b\n\t_max_uses\"B\n\x16ListInviteLinksRequest\x12(\n\x04page\x18\x01 \x01(\x0b\x32\x1a.chatto.api.v1.PageRequest\"s\n\x17ListInviteLinksResponse\x12\x31\n\x0cinvite_links\x18\x01 \x03(\x0b\x32\x1b.chatto.admin.v1.InviteLink\x12%\n\x04page\x18\x02 \x01(\x0b\x32\x17.chatto.api.v1.PageInfo\"+\n\x14GetInviteLinkRequest\x12\x13\n\x02id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"I\n\x15GetInviteLinkResponse\x12\x30\n\x0binvite_link\x18\x01 \x01(\x0b\x32\x1b.chatto.admin.v1.InviteLink\"v\n\x17\x43reateInviteLinkRequest\x12\x1e\n\x08max_uses\x18\x01 \x01(\rB\x07\xbaH\x04*\x02(\x01H\x00\x88\x01\x01\x12.\n\nexpires_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.TimestampB\x0b\n\t_max_uses\"L\n\x18\x43reateInviteLinkResponse\x12\x30\n\x0binvite_link\x18\x01 \x01(\x0b\x32\x1b.chatto.admin.v1.InviteLink\".\n\x17RevokeInviteLinkRequest\x12\x13\n\x02id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"L\n\x18RevokeInviteLinkResponse\x12\x30\n\x0binvite_link\x18\x01 \x01(\x0b\x32\x1b.chatto.admin.v1.InviteLink*\xb7\x01\n\x10InviteLinkStatus\x12\"\n\x1eINVITE_LINK_STATUS_UNSPECIFIED\x10\x00\x12\x1d\n\x19INVITE_LINK_STATUS_ACTIVE\x10\x01\x12\x1e\n\x1aINVITE_LINK_STATUS_EXPIRED\x10\x02\x12 \n\x1cINVITE_LINK_STATUS_EXHAUSTED\x10\x03\x12\x1e\n\x1aINVITE_LINK_STATUS_REVOKED\x10\x04\x32\xb0\x03\n\x16\x41\x64minInviteLinkService\x12\x64\n\x0fListInviteLinks\x12\'.chatto.admin.v1.ListInviteLinksRequest\x1a(.chatto.admin.v1.ListInviteLinksResponse\x12^\n\rGetInviteLink\x12%.chatto.admin.v1.GetInviteLinkRequest\x1a&.chatto.admin.v1.GetInviteLinkResponse\x12g\n\x10\x43reateInviteLink\x12(.chatto.admin.v1.CreateInviteLinkRequest\x1a).chatto.admin.v1.CreateInviteLinkResponse\x12g\n\x10RevokeInviteLink\x12(.chatto.admin.v1.RevokeInviteLinkRequest\x1a).chatto.admin.v1.RevokeInviteLinkResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n!chatto/admin/v1/invitations.proto\x12\x0f\x63hatto.admin.v1\x1a\x1b\x62uf/validate/validate.proto\x1a\x1e\x63hatto/api/v1/pagination.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x93\x02\n\x0eInvitationCode\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04\x63ode\x18\x02 \x01(\t\x12\x12\n\ncreated_by\x18\x03 \x01(\t\x12.\n\ncreated_at\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12.\n\nexpires_at\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x35\n\x06status\x18\x06 \x01(\x0e\x32%.chatto.admin.v1.InvitationCodeStatus\x12.\n\nrevoked_at\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0c\n\x04note\x18\x08 \x01(\t\"F\n\x1aListInvitationCodesRequest\x12(\n\x04page\x18\x01 \x01(\x0b\x32\x1a.chatto.api.v1.PageRequest\"\x7f\n\x1bListInvitationCodesResponse\x12\x39\n\x10invitation_codes\x18\x01 \x03(\x0b\x32\x1f.chatto.admin.v1.InvitationCode\x12%\n\x04page\x18\x02 \x01(\x0b\x32\x17.chatto.api.v1.PageInfo\"/\n\x18GetInvitationCodeRequest\x12\x13\n\x02id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"U\n\x19GetInvitationCodeResponse\x12\x38\n\x0finvitation_code\x18\x01 \x01(\x0b\x32\x1f.chatto.admin.v1.InvitationCode\"e\n\x1b\x43reateInvitationCodeRequest\x12.\n\nexpires_at\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x16\n\x04note\x18\x02 \x01(\tB\x08\xbaH\x05r\x03\x18\xfa\x01\"X\n\x1c\x43reateInvitationCodeResponse\x12\x38\n\x0finvitation_code\x18\x01 \x01(\x0b\x32\x1f.chatto.admin.v1.InvitationCode\"2\n\x1bRevokeInvitationCodeRequest\x12\x13\n\x02id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"X\n\x1cRevokeInvitationCodeResponse\x12\x38\n\x0finvitation_code\x18\x01 \x01(\x0b\x32\x1f.chatto.admin.v1.InvitationCode*\xca\x01\n\x14InvitationCodeStatus\x12&\n\"INVITATION_CODE_STATUS_UNSPECIFIED\x10\x00\x12!\n\x1dINVITATION_CODE_STATUS_ACTIVE\x10\x01\x12\"\n\x1eINVITATION_CODE_STATUS_EXPIRED\x10\x02\x12\x1f\n\x1bINVITATION_CODE_STATUS_USED\x10\x03\x12\"\n\x1eINVITATION_CODE_STATUS_REVOKED\x10\x04\x32\xe4\x03\n\x1a\x41\x64minInvitationCodeService\x12p\n\x13ListInvitationCodes\x12+.chatto.admin.v1.ListInvitationCodesRequest\x1a,.chatto.admin.v1.ListInvitationCodesResponse\x12j\n\x11GetInvitationCode\x12).chatto.admin.v1.GetInvitationCodeRequest\x1a*.chatto.admin.v1.GetInvitationCodeResponse\x12s\n\x14\x43reateInvitationCode\x12,.chatto.admin.v1.CreateInvitationCodeRequest\x1a-.chatto.admin.v1.CreateInvitationCodeResponse\x12s\n\x14RevokeInvitationCode\x12,.chatto.admin.v1.RevokeInvitationCodeRequest\x1a-.chatto.admin.v1.RevokeInvitationCodeResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'chatto.admin.v1.invitations_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_GETINVITELINKREQUEST'].fields_by_name['id']._loaded_options = None
-  _globals['_GETINVITELINKREQUEST'].fields_by_name['id']._serialized_options = b'\272H\004r\002\020\001'
-  _globals['_CREATEINVITELINKREQUEST'].fields_by_name['max_uses']._loaded_options = None
-  _globals['_CREATEINVITELINKREQUEST'].fields_by_name['max_uses']._serialized_options = b'\272H\004*\002(\001'
-  _globals['_REVOKEINVITELINKREQUEST'].fields_by_name['id']._loaded_options = None
-  _globals['_REVOKEINVITELINKREQUEST'].fields_by_name['id']._serialized_options = b'\272H\004r\002\020\001'
-  _globals['_INVITELINKSTATUS']._serialized_start=1089
-  _globals['_INVITELINKSTATUS']._serialized_end=1272
-  _globals['_INVITELINK']._serialized_start=149
-  _globals['_INVITELINK']._serialized_end=457
-  _globals['_LISTINVITELINKSREQUEST']._serialized_start=459
-  _globals['_LISTINVITELINKSREQUEST']._serialized_end=525
-  _globals['_LISTINVITELINKSRESPONSE']._serialized_start=527
-  _globals['_LISTINVITELINKSRESPONSE']._serialized_end=642
-  _globals['_GETINVITELINKREQUEST']._serialized_start=644
-  _globals['_GETINVITELINKREQUEST']._serialized_end=687
-  _globals['_GETINVITELINKRESPONSE']._serialized_start=689
-  _globals['_GETINVITELINKRESPONSE']._serialized_end=762
-  _globals['_CREATEINVITELINKREQUEST']._serialized_start=764
-  _globals['_CREATEINVITELINKREQUEST']._serialized_end=882
-  _globals['_CREATEINVITELINKRESPONSE']._serialized_start=884
-  _globals['_CREATEINVITELINKRESPONSE']._serialized_end=960
-  _globals['_REVOKEINVITELINKREQUEST']._serialized_start=962
-  _globals['_REVOKEINVITELINKREQUEST']._serialized_end=1008
-  _globals['_REVOKEINVITELINKRESPONSE']._serialized_start=1010
-  _globals['_REVOKEINVITELINKRESPONSE']._serialized_end=1086
-  _globals['_ADMININVITELINKSERVICE']._serialized_start=1275
-  _globals['_ADMININVITELINKSERVICE']._serialized_end=1707
+  _globals['_GETINVITATIONCODEREQUEST'].fields_by_name['id']._loaded_options = None
+  _globals['_GETINVITATIONCODEREQUEST'].fields_by_name['id']._serialized_options = b'\272H\004r\002\020\001'
+  _globals['_CREATEINVITATIONCODEREQUEST'].fields_by_name['note']._loaded_options = None
+  _globals['_CREATEINVITATIONCODEREQUEST'].fields_by_name['note']._serialized_options = b'\272H\005r\003\030\372\001'
+  _globals['_REVOKEINVITATIONCODEREQUEST'].fields_by_name['id']._loaded_options = None
+  _globals['_REVOKEINVITATIONCODEREQUEST'].fields_by_name['id']._serialized_options = b'\272H\004r\002\020\001'
+  _globals['_INVITATIONCODESTATUS']._serialized_start=1099
+  _globals['_INVITATIONCODESTATUS']._serialized_end=1301
+  _globals['_INVITATIONCODE']._serialized_start=149
+  _globals['_INVITATIONCODE']._serialized_end=424
+  _globals['_LISTINVITATIONCODESREQUEST']._serialized_start=426
+  _globals['_LISTINVITATIONCODESREQUEST']._serialized_end=496
+  _globals['_LISTINVITATIONCODESRESPONSE']._serialized_start=498
+  _globals['_LISTINVITATIONCODESRESPONSE']._serialized_end=625
+  _globals['_GETINVITATIONCODEREQUEST']._serialized_start=627
+  _globals['_GETINVITATIONCODEREQUEST']._serialized_end=674
+  _globals['_GETINVITATIONCODERESPONSE']._serialized_start=676
+  _globals['_GETINVITATIONCODERESPONSE']._serialized_end=761
+  _globals['_CREATEINVITATIONCODEREQUEST']._serialized_start=763
+  _globals['_CREATEINVITATIONCODEREQUEST']._serialized_end=864
+  _globals['_CREATEINVITATIONCODERESPONSE']._serialized_start=866
+  _globals['_CREATEINVITATIONCODERESPONSE']._serialized_end=954
+  _globals['_REVOKEINVITATIONCODEREQUEST']._serialized_start=956
+  _globals['_REVOKEINVITATIONCODEREQUEST']._serialized_end=1006
+  _globals['_REVOKEINVITATIONCODERESPONSE']._serialized_start=1008
+  _globals['_REVOKEINVITATIONCODERESPONSE']._serialized_end=1096
+  _globals['_ADMININVITATIONCODESERVICE']._serialized_start=1304
+  _globals['_ADMININVITATIONCODESERVICE']._serialized_end=1788
 # @@protoc_insertion_point(module_scope)

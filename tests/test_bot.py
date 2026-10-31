@@ -354,6 +354,57 @@ async def test_dispatch_room_invitation_events():
     assert seen[0].invitation_id == "inv1"
 
 
+async def test_dispatch_room_notice_and_visibility_events():
+    """0.5.0b27: room_notice_changed and room_membership_events_visibility_changed
+    dispatch as room events with the raw realtime kind as detail."""
+    bot = _bot()
+    seen: list[BotRoomEvent] = []
+
+    async def on_room(event: BotRoomEvent) -> None:
+        seen.append(event)
+
+    bot.on("room", on_room)
+
+    await bot._handle_live(
+        _live("room_notice_changed", events_pb2.RoomNoticeChangedEvent(room_id="r1"))
+    )
+    await bot._handle_live(
+        _live(
+            "room_membership_events_visibility_changed",
+            events_pb2.RoomMembershipEventsVisibilityChangedEvent(
+                room_id="r1", show_membership_events=False
+            ),
+        )
+    )
+    assert [e.detail for e in seen] == [
+        "room_notice_changed",
+        "room_membership_events_visibility_changed",
+    ]
+    assert all(e.room is not None and e.room.id == "r1" for e in seen)
+
+
+async def test_dispatch_user_deactivation_event():
+    """0.5.0b27: user_account_deactivation_changed dispatches as a user event
+    with removed=False (deactivation is reversible)."""
+    bot = _bot()
+    seen: list[BotUserEvent] = []
+
+    async def on_user(event: BotUserEvent) -> None:
+        seen.append(event)
+
+    bot.on("user", on_user)
+
+    await bot._handle_live(
+        _live(
+            "user_account_deactivation_changed",
+            events_pb2.UserAccountDeactivationChangedEvent(user_id="u1", deactivated=True),
+        )
+    )
+    assert len(seen) == 1
+    assert seen[0].user is not None and seen[0].user.id == "u1"
+    assert seen[0].removed is False
+
+
 async def test_wildcard_handler_receives_all():
     bot = _bot()
     seen: list[str] = []

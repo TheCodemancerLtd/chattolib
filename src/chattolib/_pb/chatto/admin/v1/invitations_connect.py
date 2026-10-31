@@ -5,101 +5,101 @@
 import chatto.admin.v1.invitations_pb2 as chatto_admin_v1_invitations_pb2
 from chattolib._connect import ConnectClient, ConnectClientSync, MethodInfo
 
-class AdminInviteLinkServiceClient(ConnectClient):
-    async def list_invite_links(self, request: chatto_admin_v1_invitations_pb2.ListInviteLinksRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_invitations_pb2.ListInviteLinksResponse:
+class AdminInvitationCodeServiceClient(ConnectClient):
+    async def list_invitation_codes(self, request: chatto_admin_v1_invitations_pb2.ListInvitationCodesRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_invitations_pb2.ListInvitationCodesResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="ListInviteLinks",
-                service_name="chatto.admin.v1.AdminInviteLinkService",
-                input=chatto_admin_v1_invitations_pb2.ListInviteLinksRequest,
-                output=chatto_admin_v1_invitations_pb2.ListInviteLinksResponse,
+                name="ListInvitationCodes",
+                service_name="chatto.admin.v1.AdminInvitationCodeService",
+                input=chatto_admin_v1_invitations_pb2.ListInvitationCodesRequest,
+                output=chatto_admin_v1_invitations_pb2.ListInvitationCodesResponse,
             ),
             headers=headers,
         )
 
-    async def get_invite_link(self, request: chatto_admin_v1_invitations_pb2.GetInviteLinkRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_invitations_pb2.GetInviteLinkResponse:
+    async def get_invitation_code(self, request: chatto_admin_v1_invitations_pb2.GetInvitationCodeRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_invitations_pb2.GetInvitationCodeResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="GetInviteLink",
-                service_name="chatto.admin.v1.AdminInviteLinkService",
-                input=chatto_admin_v1_invitations_pb2.GetInviteLinkRequest,
-                output=chatto_admin_v1_invitations_pb2.GetInviteLinkResponse,
+                name="GetInvitationCode",
+                service_name="chatto.admin.v1.AdminInvitationCodeService",
+                input=chatto_admin_v1_invitations_pb2.GetInvitationCodeRequest,
+                output=chatto_admin_v1_invitations_pb2.GetInvitationCodeResponse,
             ),
             headers=headers,
         )
 
-    async def create_invite_link(self, request: chatto_admin_v1_invitations_pb2.CreateInviteLinkRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_invitations_pb2.CreateInviteLinkResponse:
+    async def create_invitation_code(self, request: chatto_admin_v1_invitations_pb2.CreateInvitationCodeRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_invitations_pb2.CreateInvitationCodeResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="CreateInviteLink",
-                service_name="chatto.admin.v1.AdminInviteLinkService",
-                input=chatto_admin_v1_invitations_pb2.CreateInviteLinkRequest,
-                output=chatto_admin_v1_invitations_pb2.CreateInviteLinkResponse,
+                name="CreateInvitationCode",
+                service_name="chatto.admin.v1.AdminInvitationCodeService",
+                input=chatto_admin_v1_invitations_pb2.CreateInvitationCodeRequest,
+                output=chatto_admin_v1_invitations_pb2.CreateInvitationCodeResponse,
             ),
             headers=headers,
         )
 
-    async def revoke_invite_link(self, request: chatto_admin_v1_invitations_pb2.RevokeInviteLinkRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_invitations_pb2.RevokeInviteLinkResponse:
+    async def revoke_invitation_code(self, request: chatto_admin_v1_invitations_pb2.RevokeInvitationCodeRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_invitations_pb2.RevokeInvitationCodeResponse:
         return await self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="RevokeInviteLink",
-                service_name="chatto.admin.v1.AdminInviteLinkService",
-                input=chatto_admin_v1_invitations_pb2.RevokeInviteLinkRequest,
-                output=chatto_admin_v1_invitations_pb2.RevokeInviteLinkResponse,
+                name="RevokeInvitationCode",
+                service_name="chatto.admin.v1.AdminInvitationCodeService",
+                input=chatto_admin_v1_invitations_pb2.RevokeInvitationCodeRequest,
+                output=chatto_admin_v1_invitations_pb2.RevokeInvitationCodeResponse,
             ),
             headers=headers,
         )
 
-class AdminInviteLinkServiceClientSync(ConnectClientSync):
+class AdminInvitationCodeServiceClientSync(ConnectClientSync):
 
-    def list_invite_links(self, request: chatto_admin_v1_invitations_pb2.ListInviteLinksRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_invitations_pb2.ListInviteLinksResponse:
+    def list_invitation_codes(self, request: chatto_admin_v1_invitations_pb2.ListInvitationCodesRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_invitations_pb2.ListInvitationCodesResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="ListInviteLinks",
-                service_name="chatto.admin.v1.AdminInviteLinkService",
-                input=chatto_admin_v1_invitations_pb2.ListInviteLinksRequest,
-                output=chatto_admin_v1_invitations_pb2.ListInviteLinksResponse,
+                name="ListInvitationCodes",
+                service_name="chatto.admin.v1.AdminInvitationCodeService",
+                input=chatto_admin_v1_invitations_pb2.ListInvitationCodesRequest,
+                output=chatto_admin_v1_invitations_pb2.ListInvitationCodesResponse,
             ),
             headers=headers,
         )
 
-    def get_invite_link(self, request: chatto_admin_v1_invitations_pb2.GetInviteLinkRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_invitations_pb2.GetInviteLinkResponse:
+    def get_invitation_code(self, request: chatto_admin_v1_invitations_pb2.GetInvitationCodeRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_invitations_pb2.GetInvitationCodeResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="GetInviteLink",
-                service_name="chatto.admin.v1.AdminInviteLinkService",
-                input=chatto_admin_v1_invitations_pb2.GetInviteLinkRequest,
-                output=chatto_admin_v1_invitations_pb2.GetInviteLinkResponse,
+                name="GetInvitationCode",
+                service_name="chatto.admin.v1.AdminInvitationCodeService",
+                input=chatto_admin_v1_invitations_pb2.GetInvitationCodeRequest,
+                output=chatto_admin_v1_invitations_pb2.GetInvitationCodeResponse,
             ),
             headers=headers,
         )
 
-    def create_invite_link(self, request: chatto_admin_v1_invitations_pb2.CreateInviteLinkRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_invitations_pb2.CreateInviteLinkResponse:
+    def create_invitation_code(self, request: chatto_admin_v1_invitations_pb2.CreateInvitationCodeRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_invitations_pb2.CreateInvitationCodeResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="CreateInviteLink",
-                service_name="chatto.admin.v1.AdminInviteLinkService",
-                input=chatto_admin_v1_invitations_pb2.CreateInviteLinkRequest,
-                output=chatto_admin_v1_invitations_pb2.CreateInviteLinkResponse,
+                name="CreateInvitationCode",
+                service_name="chatto.admin.v1.AdminInvitationCodeService",
+                input=chatto_admin_v1_invitations_pb2.CreateInvitationCodeRequest,
+                output=chatto_admin_v1_invitations_pb2.CreateInvitationCodeResponse,
             ),
             headers=headers,
         )
 
-    def revoke_invite_link(self, request: chatto_admin_v1_invitations_pb2.RevokeInviteLinkRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_invitations_pb2.RevokeInviteLinkResponse:
+    def revoke_invitation_code(self, request: chatto_admin_v1_invitations_pb2.RevokeInvitationCodeRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_invitations_pb2.RevokeInvitationCodeResponse:
         return self.execute_unary(
             request=request,
             method=MethodInfo(
-                name="RevokeInviteLink",
-                service_name="chatto.admin.v1.AdminInviteLinkService",
-                input=chatto_admin_v1_invitations_pb2.RevokeInviteLinkRequest,
-                output=chatto_admin_v1_invitations_pb2.RevokeInviteLinkResponse,
+                name="RevokeInvitationCode",
+                service_name="chatto.admin.v1.AdminInvitationCodeService",
+                input=chatto_admin_v1_invitations_pb2.RevokeInvitationCodeRequest,
+                output=chatto_admin_v1_invitations_pb2.RevokeInvitationCodeResponse,
             ),
             headers=headers,
         )

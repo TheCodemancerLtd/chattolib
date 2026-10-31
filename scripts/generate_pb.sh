@@ -90,7 +90,7 @@ fetch() {
 echo "Fetching proto sources ..."
 # chatto.api.v1
 for f in \
-    account.proto asset_uploads.proto attachments.proto bots.proto common.proto \
+    account.proto account_actions.proto asset_uploads.proto attachments.proto bots.proto common.proto \
     external_identities.proto link_previews.proto member_directory.proto \
     message_search.proto message_types.proto messages.proto \
     notifications.proto pagination.proto permissions.proto presence.proto \

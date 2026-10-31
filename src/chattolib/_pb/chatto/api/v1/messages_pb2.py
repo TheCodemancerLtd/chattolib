@@ -29,7 +29,7 @@ from chatto.api.v1 import message_types_pb2 as chatto_dot_api_dot_v1_dot_message
 from chatto.api.v1 import reactions_pb2 as chatto_dot_api_dot_v1_dot_reactions__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1c\x63hatto/api/v1/messages.proto\x12\rchatto.api.v1\x1a google/protobuf/field_mask.proto\x1a\x1b\x62uf/validate/validate.proto\x1a!chatto/api/v1/link_previews.proto\x1a!chatto/api/v1/message_types.proto\x1a\x1d\x63hatto/api/v1/reactions.proto\"_\n!MessageAttachmentDescriptionInput\x12\x1b\n\x08\x61sset_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01(\x0f\x12\x1d\n\x0b\x64\x65scription\x18\x02 \x01(\tB\x08\xbaH\x05r\x03\x18\xe8\x07\"\x98\x03\n\x14\x43reateMessageRequest\x12\x18\n\x07room_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x0c\n\x04\x62ody\x18\x02 \x01(\t\x12.\n\x14\x61ttachment_asset_ids\x18\x03 \x03(\tB\x10\xbaH\r\x92\x01\n\x10\n\"\x06r\x04\x10\x01(\x0f\x12\x1c\n\x14thread_root_event_id\x18\x04 \x01(\t\x12\x13\n\x0bin_reply_to\x18\x05 \x01(\t\x12\x1c\n\x14\x61lso_send_to_channel\x18\x06 \x01(\x08\x12\x1a\n\x12link_preview_token\x18\n \x01(\t\x12\x15\n\rcreate_thread\x18\x0b \x01(\x08\x12[\n\x17\x61ttachment_descriptions\x18\x0c \x03(\x0b\x32\x30.chatto.api.v1.MessageAttachmentDescriptionInputB\x08\xbaH\x05\x92\x01\x02\x10\nJ\x04\x08\x08\x10\tJ\x04\x08\t\x10\nJ\x04\x08\x07\x10\x08R\x0clink_previewR\x0b\x61ttachmentsR\x1amention_confirmation_token\"l\n\x15\x43reateMessageResponse\x12\'\n\x07message\x18\x01 \x01(\x0b\x32\x16.chatto.api.v1.MessageJ\x04\x08\x02\x10\x03J\x04\x08\x03\x10\x04R\x14mention_confirmationR\x08includes\"\xde\x01\n\x14UpdateMessageRequest\x12\x18\n\x07room_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x19\n\x08\x65vent_id\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x1b\n\x04\x62ody\x18\x03 \x01(\tB\x08\xbaH\x05r\x03\x18\x90NH\x00\x88\x01\x01\x12!\n\x14\x61lso_send_to_channel\x18\x04 \x01(\x08H\x01\x88\x01\x01\x12/\n\x0bupdate_mask\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.FieldMaskB\x07\n\x05_bodyB\x17\n\x15_also_send_to_channel\"_\n\x15UpdateMessageResponse\x12\'\n\x07message\x18\x02 \x01(\x0b\x32\x16.chatto.api.v1.MessageJ\x04\x08\x01\x10\x02J\x04\x08\x03\x10\x04R\x07updatedR\x08includes\"K\n\x14\x44\x65leteMessageRequest\x12\x18\n\x07room_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x19\n\x08\x65vent_id\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"&\n\x15\x44\x65leteMessageResponseJ\x04\x08\x01\x10\x02R\x07\x64\x65leted\"n\n\x17\x44\x65leteAttachmentRequest\x12\x18\n\x07room_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x19\n\x08\x65vent_id\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x1e\n\rattachment_id\x18\x03 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\")\n\x18\x44\x65leteAttachmentResponseJ\x04\x08\x01\x10\x02R\x07\x64\x65leted\"\x95\x01\n\x1fSetAttachmentDescriptionRequest\x12\x18\n\x07room_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x19\n\x08\x65vent_id\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x1e\n\rattachment_id\x18\x03 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x1d\n\x0b\x64\x65scription\x18\x04 \x01(\tB\x08\xbaH\x05r\x03\x18\xe8\x07\"K\n SetAttachmentDescriptionResponse\x12\'\n\x07message\x18\x01 \x01(\x0b\x32\x16.chatto.api.v1.Message\"e\n\x18\x44\x65leteLinkPreviewRequest\x12\x18\n\x07room_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x19\n\x08\x65vent_id\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x14\n\x03url\x18\x03 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"*\n\x19\x44\x65leteLinkPreviewResponseJ\x04\x08\x01\x10\x02R\x07\x64\x65leted\"Y\n\x11GetMessageRequest\x12\x18\n\x07room_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x19\n\x08\x65vent_id\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01J\x04\x08\x03\x10\x04R\tthumbnail\"M\n\x12GetMessageResponse\x12\'\n\x07message\x18\x01 \x01(\x0b\x32\x16.chatto.api.v1.MessageJ\x04\x08\x02\x10\x03R\x08includes\"i\n\x17\x42\x61tchGetMessagesRequest\x12\x18\n\x07room_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12#\n\tevent_ids\x18\x02 \x03(\tB\x10\xbaH\r\x92\x01\n\x08\x01\x10\x64\"\x04r\x02\x10\x01J\x04\x08\x03\x10\x04R\tthumbnail\"T\n\x18\x42\x61tchGetMessagesResponse\x12(\n\x08messages\x18\x01 \x03(\x0b\x32\x16.chatto.api.v1.MessageJ\x04\x08\x02\x10\x03R\x08includes2\xa8\t\n\x0eMessageService\x12\x66\n\x11ListReactionUsers\x12\'.chatto.api.v1.ListReactionUsersRequest\x1a(.chatto.api.v1.ListReactionUsersResponse\x12\x63\n\x10\x46\x65tchLinkPreview\x12&.chatto.api.v1.FetchLinkPreviewRequest\x1a\'.chatto.api.v1.FetchLinkPreviewResponse\x12Z\n\rCreateMessage\x12#.chatto.api.v1.CreateMessageRequest\x1a$.chatto.api.v1.CreateMessageResponse\x12Z\n\rUpdateMessage\x12#.chatto.api.v1.UpdateMessageRequest\x1a$.chatto.api.v1.UpdateMessageResponse\x12Z\n\rDeleteMessage\x12#.chatto.api.v1.DeleteMessageRequest\x1a$.chatto.api.v1.DeleteMessageResponse\x12\x63\n\x10\x44\x65leteAttachment\x12&.chatto.api.v1.DeleteAttachmentRequest\x1a\'.chatto.api.v1.DeleteAttachmentResponse\x12{\n\x18SetAttachmentDescription\x12..chatto.api.v1.SetAttachmentDescriptionRequest\x1a/.chatto.api.v1.SetAttachmentDescriptionResponse\x12\x66\n\x11\x44\x65leteLinkPreview\x12\'.chatto.api.v1.DeleteLinkPreviewRequest\x1a(.chatto.api.v1.DeleteLinkPreviewResponse\x12Q\n\nGetMessage\x12 .chatto.api.v1.GetMessageRequest\x1a!.chatto.api.v1.GetMessageResponse\x12\x63\n\x10\x42\x61tchGetMessages\x12&.chatto.api.v1.BatchGetMessagesRequest\x1a\'.chatto.api.v1.BatchGetMessagesResponse\x12T\n\x0b\x41\x64\x64Reaction\x12!.chatto.api.v1.AddReactionRequest\x1a\".chatto.api.v1.AddReactionResponse\x12]\n\x0eRemoveReaction\x12$.chatto.api.v1.RemoveReactionRequest\x1a%.chatto.api.v1.RemoveReactionResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1c\x63hatto/api/v1/messages.proto\x12\rchatto.api.v1\x1a google/protobuf/field_mask.proto\x1a\x1b\x62uf/validate/validate.proto\x1a!chatto/api/v1/link_previews.proto\x1a!chatto/api/v1/message_types.proto\x1a\x1d\x63hatto/api/v1/reactions.proto\"_\n!MessageAttachmentDescriptionInput\x12\x1b\n\x08\x61sset_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01(\x0f\x12\x1d\n\x0b\x64\x65scription\x18\x02 \x01(\tB\x08\xbaH\x05r\x03\x18\xe8\x07\"\xd7\x03\n\x14\x43reateMessageRequest\x12\x18\n\x07room_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x0c\n\x04\x62ody\x18\x02 \x01(\t\x12.\n\x14\x61ttachment_asset_ids\x18\x03 \x03(\tB\x10\xbaH\r\x92\x01\n\x10\n\"\x06r\x04\x10\x01(\x0f\x12\x1c\n\x14thread_root_event_id\x18\x04 \x01(\t\x12\x13\n\x0bin_reply_to\x18\x05 \x01(\t\x12\x1c\n\x14\x61lso_send_to_channel\x18\x06 \x01(\x08\x12\x1a\n\x12link_preview_token\x18\n \x01(\t\x12\x15\n\rcreate_thread\x18\x0b \x01(\x08\x12[\n\x17\x61ttachment_descriptions\x18\x0c \x03(\x0b\x32\x30.chatto.api.v1.MessageAttachmentDescriptionInputB\x08\xbaH\x05\x92\x01\x02\x10\n\x12)\n\x0fidempotency_key\x18\r \x01(\tB\x0b\xbaH\x08r\x06\x98\x01$\xb0\x01\x01H\x00\x88\x01\x01\x42\x12\n\x10_idempotency_keyJ\x04\x08\x08\x10\tJ\x04\x08\t\x10\nJ\x04\x08\x07\x10\x08R\x0clink_previewR\x0b\x61ttachmentsR\x1amention_confirmation_token\"l\n\x15\x43reateMessageResponse\x12\'\n\x07message\x18\x01 \x01(\x0b\x32\x16.chatto.api.v1.MessageJ\x04\x08\x02\x10\x03J\x04\x08\x03\x10\x04R\x14mention_confirmationR\x08includes\"\xde\x01\n\x14UpdateMessageRequest\x12\x18\n\x07room_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x19\n\x08\x65vent_id\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x1b\n\x04\x62ody\x18\x03 \x01(\tB\x08\xbaH\x05r\x03\x18\x90NH\x00\x88\x01\x01\x12!\n\x14\x61lso_send_to_channel\x18\x04 \x01(\x08H\x01\x88\x01\x01\x12/\n\x0bupdate_mask\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.FieldMaskB\x07\n\x05_bodyB\x17\n\x15_also_send_to_channel\"_\n\x15UpdateMessageResponse\x12\'\n\x07message\x18\x02 \x01(\x0b\x32\x16.chatto.api.v1.MessageJ\x04\x08\x01\x10\x02J\x04\x08\x03\x10\x04R\x07updatedR\x08includes\"K\n\x14\x44\x65leteMessageRequest\x12\x18\n\x07room_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x19\n\x08\x65vent_id\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"&\n\x15\x44\x65leteMessageResponseJ\x04\x08\x01\x10\x02R\x07\x64\x65leted\"n\n\x17\x44\x65leteAttachmentRequest\x12\x18\n\x07room_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x19\n\x08\x65vent_id\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x1e\n\rattachment_id\x18\x03 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\")\n\x18\x44\x65leteAttachmentResponseJ\x04\x08\x01\x10\x02R\x07\x64\x65leted\"\x95\x01\n\x1fSetAttachmentDescriptionRequest\x12\x18\n\x07room_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x19\n\x08\x65vent_id\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x1e\n\rattachment_id\x18\x03 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x1d\n\x0b\x64\x65scription\x18\x04 \x01(\tB\x08\xbaH\x05r\x03\x18\xe8\x07\"K\n SetAttachmentDescriptionResponse\x12\'\n\x07message\x18\x01 \x01(\x0b\x32\x16.chatto.api.v1.Message\"e\n\x18\x44\x65leteLinkPreviewRequest\x12\x18\n\x07room_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x19\n\x08\x65vent_id\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x14\n\x03url\x18\x03 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"*\n\x19\x44\x65leteLinkPreviewResponseJ\x04\x08\x01\x10\x02R\x07\x64\x65leted\"Y\n\x11GetMessageRequest\x12\x18\n\x07room_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x19\n\x08\x65vent_id\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x10\x01J\x04\x08\x03\x10\x04R\tthumbnail\"M\n\x12GetMessageResponse\x12\'\n\x07message\x18\x01 \x01(\x0b\x32\x16.chatto.api.v1.MessageJ\x04\x08\x02\x10\x03R\x08includes\"i\n\x17\x42\x61tchGetMessagesRequest\x12\x18\n\x07room_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12#\n\tevent_ids\x18\x02 \x03(\tB\x10\xbaH\r\x92\x01\n\x08\x01\x10\x64\"\x04r\x02\x10\x01J\x04\x08\x03\x10\x04R\tthumbnail\"T\n\x18\x42\x61tchGetMessagesResponse\x12(\n\x08messages\x18\x01 \x03(\x0b\x32\x16.chatto.api.v1.MessageJ\x04\x08\x02\x10\x03R\x08includes2\xa8\t\n\x0eMessageService\x12\x66\n\x11ListReactionUsers\x12\'.chatto.api.v1.ListReactionUsersRequest\x1a(.chatto.api.v1.ListReactionUsersResponse\x12\x63\n\x10\x46\x65tchLinkPreview\x12&.chatto.api.v1.FetchLinkPreviewRequest\x1a\'.chatto.api.v1.FetchLinkPreviewResponse\x12Z\n\rCreateMessage\x12#.chatto.api.v1.CreateMessageRequest\x1a$.chatto.api.v1.CreateMessageResponse\x12Z\n\rUpdateMessage\x12#.chatto.api.v1.UpdateMessageRequest\x1a$.chatto.api.v1.UpdateMessageResponse\x12Z\n\rDeleteMessage\x12#.chatto.api.v1.DeleteMessageRequest\x1a$.chatto.api.v1.DeleteMessageResponse\x12\x63\n\x10\x44\x65leteAttachment\x12&.chatto.api.v1.DeleteAttachmentRequest\x1a\'.chatto.api.v1.DeleteAttachmentResponse\x12{\n\x18SetAttachmentDescription\x12..chatto.api.v1.SetAttachmentDescriptionRequest\x1a/.chatto.api.v1.SetAttachmentDescriptionResponse\x12\x66\n\x11\x44\x65leteLinkPreview\x12\'.chatto.api.v1.DeleteLinkPreviewRequest\x1a(.chatto.api.v1.DeleteLinkPreviewResponse\x12Q\n\nGetMessage\x12 .chatto.api.v1.GetMessageRequest\x1a!.chatto.api.v1.GetMessageResponse\x12\x63\n\x10\x42\x61tchGetMessages\x12&.chatto.api.v1.BatchGetMessagesRequest\x1a\'.chatto.api.v1.BatchGetMessagesResponse\x12T\n\x0b\x41\x64\x64Reaction\x12!.chatto.api.v1.AddReactionRequest\x1a\".chatto.api.v1.AddReactionResponse\x12]\n\x0eRemoveReaction\x12$.chatto.api.v1.RemoveReactionRequest\x1a%.chatto.api.v1.RemoveReactionResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -46,6 +46,8 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_CREATEMESSAGEREQUEST'].fields_by_name['attachment_asset_ids']._serialized_options = b'\272H\r\222\001\n\020\n\"\006r\004\020\001(\017'
   _globals['_CREATEMESSAGEREQUEST'].fields_by_name['attachment_descriptions']._loaded_options = None
   _globals['_CREATEMESSAGEREQUEST'].fields_by_name['attachment_descriptions']._serialized_options = b'\272H\005\222\001\002\020\n'
+  _globals['_CREATEMESSAGEREQUEST'].fields_by_name['idempotency_key']._loaded_options = None
+  _globals['_CREATEMESSAGEREQUEST'].fields_by_name['idempotency_key']._serialized_options = b'\272H\010r\006\230\001$\260\001\001'
   _globals['_UPDATEMESSAGEREQUEST'].fields_by_name['room_id']._loaded_options = None
   _globals['_UPDATEMESSAGEREQUEST'].fields_by_name['room_id']._serialized_options = b'\272H\004r\002\020\001'
   _globals['_UPDATEMESSAGEREQUEST'].fields_by_name['event_id']._loaded_options = None
@@ -87,37 +89,37 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_MESSAGEATTACHMENTDESCRIPTIONINPUT']._serialized_start=211
   _globals['_MESSAGEATTACHMENTDESCRIPTIONINPUT']._serialized_end=306
   _globals['_CREATEMESSAGEREQUEST']._serialized_start=309
-  _globals['_CREATEMESSAGEREQUEST']._serialized_end=717
-  _globals['_CREATEMESSAGERESPONSE']._serialized_start=719
-  _globals['_CREATEMESSAGERESPONSE']._serialized_end=827
-  _globals['_UPDATEMESSAGEREQUEST']._serialized_start=830
-  _globals['_UPDATEMESSAGEREQUEST']._serialized_end=1052
-  _globals['_UPDATEMESSAGERESPONSE']._serialized_start=1054
-  _globals['_UPDATEMESSAGERESPONSE']._serialized_end=1149
-  _globals['_DELETEMESSAGEREQUEST']._serialized_start=1151
-  _globals['_DELETEMESSAGEREQUEST']._serialized_end=1226
-  _globals['_DELETEMESSAGERESPONSE']._serialized_start=1228
-  _globals['_DELETEMESSAGERESPONSE']._serialized_end=1266
-  _globals['_DELETEATTACHMENTREQUEST']._serialized_start=1268
-  _globals['_DELETEATTACHMENTREQUEST']._serialized_end=1378
-  _globals['_DELETEATTACHMENTRESPONSE']._serialized_start=1380
-  _globals['_DELETEATTACHMENTRESPONSE']._serialized_end=1421
-  _globals['_SETATTACHMENTDESCRIPTIONREQUEST']._serialized_start=1424
-  _globals['_SETATTACHMENTDESCRIPTIONREQUEST']._serialized_end=1573
-  _globals['_SETATTACHMENTDESCRIPTIONRESPONSE']._serialized_start=1575
-  _globals['_SETATTACHMENTDESCRIPTIONRESPONSE']._serialized_end=1650
-  _globals['_DELETELINKPREVIEWREQUEST']._serialized_start=1652
-  _globals['_DELETELINKPREVIEWREQUEST']._serialized_end=1753
-  _globals['_DELETELINKPREVIEWRESPONSE']._serialized_start=1755
-  _globals['_DELETELINKPREVIEWRESPONSE']._serialized_end=1797
-  _globals['_GETMESSAGEREQUEST']._serialized_start=1799
-  _globals['_GETMESSAGEREQUEST']._serialized_end=1888
-  _globals['_GETMESSAGERESPONSE']._serialized_start=1890
-  _globals['_GETMESSAGERESPONSE']._serialized_end=1967
-  _globals['_BATCHGETMESSAGESREQUEST']._serialized_start=1969
-  _globals['_BATCHGETMESSAGESREQUEST']._serialized_end=2074
-  _globals['_BATCHGETMESSAGESRESPONSE']._serialized_start=2076
-  _globals['_BATCHGETMESSAGESRESPONSE']._serialized_end=2160
-  _globals['_MESSAGESERVICE']._serialized_start=2163
-  _globals['_MESSAGESERVICE']._serialized_end=3355
+  _globals['_CREATEMESSAGEREQUEST']._serialized_end=780
+  _globals['_CREATEMESSAGERESPONSE']._serialized_start=782
+  _globals['_CREATEMESSAGERESPONSE']._serialized_end=890
+  _globals['_UPDATEMESSAGEREQUEST']._serialized_start=893
+  _globals['_UPDATEMESSAGEREQUEST']._serialized_end=1115
+  _globals['_UPDATEMESSAGERESPONSE']._serialized_start=1117
+  _globals['_UPDATEMESSAGERESPONSE']._serialized_end=1212
+  _globals['_DELETEMESSAGEREQUEST']._serialized_start=1214
+  _globals['_DELETEMESSAGEREQUEST']._serialized_end=1289
+  _globals['_DELETEMESSAGERESPONSE']._serialized_start=1291
+  _globals['_DELETEMESSAGERESPONSE']._serialized_end=1329
+  _globals['_DELETEATTACHMENTREQUEST']._serialized_start=1331
+  _globals['_DELETEATTACHMENTREQUEST']._serialized_end=1441
+  _globals['_DELETEATTACHMENTRESPONSE']._serialized_start=1443
+  _globals['_DELETEATTACHMENTRESPONSE']._serialized_end=1484
+  _globals['_SETATTACHMENTDESCRIPTIONREQUEST']._serialized_start=1487
+  _globals['_SETATTACHMENTDESCRIPTIONREQUEST']._serialized_end=1636
+  _globals['_SETATTACHMENTDESCRIPTIONRESPONSE']._serialized_start=1638
+  _globals['_SETATTACHMENTDESCRIPTIONRESPONSE']._serialized_end=1713
+  _globals['_DELETELINKPREVIEWREQUEST']._serialized_start=1715
+  _globals['_DELETELINKPREVIEWREQUEST']._serialized_end=1816
+  _globals['_DELETELINKPREVIEWRESPONSE']._serialized_start=1818
+  _globals['_DELETELINKPREVIEWRESPONSE']._serialized_end=1860
+  _globals['_GETMESSAGEREQUEST']._serialized_start=1862
+  _globals['_GETMESSAGEREQUEST']._serialized_end=1951
+  _globals['_GETMESSAGERESPONSE']._serialized_start=1953
+  _globals['_GETMESSAGERESPONSE']._serialized_end=2030
+  _globals['_BATCHGETMESSAGESREQUEST']._serialized_start=2032
+  _globals['_BATCHGETMESSAGESREQUEST']._serialized_end=2137
+  _globals['_BATCHGETMESSAGESRESPONSE']._serialized_start=2139
+  _globals['_BATCHGETMESSAGESRESPONSE']._serialized_end=2223
+  _globals['_MESSAGESERVICE']._serialized_start=2226
+  _globals['_MESSAGESERVICE']._serialized_end=3418
 # @@protoc_insertion_point(module_scope)

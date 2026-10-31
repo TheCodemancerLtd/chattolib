@@ -18,6 +18,18 @@ class ServerDiscoveryServiceClient(ConnectClient):
             headers=headers,
         )
 
+    async def list_features(self, request: chatto_discovery_v1_server_pb2.ListFeaturesRequest, *, headers: dict[str, str] | None = None) -> chatto_discovery_v1_server_pb2.ListFeaturesResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListFeatures",
+                service_name="chatto.discovery.v1.ServerDiscoveryService",
+                input=chatto_discovery_v1_server_pb2.ListFeaturesRequest,
+                output=chatto_discovery_v1_server_pb2.ListFeaturesResponse,
+            ),
+            headers=headers,
+        )
+
     async def list_neighbors(self, request: chatto_discovery_v1_server_pb2.ListNeighborsRequest, *, headers: dict[str, str] | None = None) -> chatto_discovery_v1_server_pb2.ListNeighborsResponse:
         return await self.execute_unary(
             request=request,
@@ -52,6 +64,18 @@ class ServerDiscoveryServiceClientSync(ConnectClientSync):
                 service_name="chatto.discovery.v1.ServerDiscoveryService",
                 input=chatto_discovery_v1_server_pb2.GetServerRequest,
                 output=chatto_discovery_v1_server_pb2.GetServerResponse,
+            ),
+            headers=headers,
+        )
+
+    def list_features(self, request: chatto_discovery_v1_server_pb2.ListFeaturesRequest, *, headers: dict[str, str] | None = None) -> chatto_discovery_v1_server_pb2.ListFeaturesResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="ListFeatures",
+                service_name="chatto.discovery.v1.ServerDiscoveryService",
+                input=chatto_discovery_v1_server_pb2.ListFeaturesRequest,
+                output=chatto_discovery_v1_server_pb2.ListFeaturesResponse,
             ),
             headers=headers,
         )

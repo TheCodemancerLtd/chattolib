@@ -26,7 +26,7 @@ from buf.validate import validate_pb2 as buf_dot_validate_dot_validate__pb2
 from chatto.api.v1 import common_pb2 as chatto_dot_api_dot_v1_dot_common__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\'chatto/api/v1/external_identities.proto\x12\rchatto.api.v1\x1a\x1b\x62uf/validate/validate.proto\x1a\x1a\x63hatto/api/v1/common.proto\"\xb7\x01\n\x18\x45xternalIdentityProvider\x12\x10\n\x08link_url\x18\x05 \x01(\t\x12\x0e\n\x06linked\x18\x06 \x01(\x08\x12$\n\x1clinked_identity_subject_hash\x18\x07 \x01(\t\x12\x31\n\x08provider\x18\x08 \x01(\x0b\x32\x1f.chatto.api.v1.ProviderMetadataJ\x04\x08\x01\x10\x05R\x02idR\x04typeR\x05labelR\tlogin_url\"r\n\x16LinkedExternalIdentity\x12\x13\n\x0bprovider_id\x18\x01 \x01(\t\x12\x15\n\rprovider_type\x18\x02 \x01(\t\x12\x16\n\x0eprovider_label\x18\x03 \x01(\t\x12\x14\n\x0csubject_hash\x18\x04 \x01(\t\"\x1f\n\x1dListExternalIdentitiesRequest\"\x9e\x01\n\x1eListExternalIdentitiesResponse\x12:\n\tproviders\x18\x01 \x03(\x0b\x32\'.chatto.api.v1.ExternalIdentityProvider\x12@\n\x11linked_identities\x18\x02 \x03(\x0b\x32%.chatto.api.v1.LinkedExternalIdentity\"q\n StartExternalIdentityLinkRequest\x12\x1c\n\x0bprovider_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x15\n\rredirect_path\x18\x02 \x01(\t\x12\x18\n\x10\x63urrent_password\x18\x03 \x01(\t\"6\n!StartExternalIdentityLinkResponse\x12\x11\n\tstart_url\x18\x01 \x01(\t\"\\\n!DisconnectExternalIdentityRequest\x12\x1d\n\x0csubject_hash\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x18\n\x10\x63urrent_password\x18\x02 \x01(\t\"8\n\"DisconnectExternalIdentityResponseJ\x04\x08\x01\x10\x02R\x0c\x64isconnectedb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\'chatto/api/v1/external_identities.proto\x12\rchatto.api.v1\x1a\x1b\x62uf/validate/validate.proto\x1a\x1a\x63hatto/api/v1/common.proto\"\xb7\x01\n\x18\x45xternalIdentityProvider\x12\x10\n\x08link_url\x18\x05 \x01(\t\x12\x0e\n\x06linked\x18\x06 \x01(\x08\x12$\n\x1clinked_identity_subject_hash\x18\x07 \x01(\t\x12\x31\n\x08provider\x18\x08 \x01(\x0b\x32\x1f.chatto.api.v1.ProviderMetadataJ\x04\x08\x01\x10\x05R\x02idR\x04typeR\x05labelR\tlogin_url\"\xb8\x01\n\x16LinkedExternalIdentity\x12\x13\n\x0bprovider_id\x18\x01 \x01(\t\x12\x15\n\rprovider_type\x18\x02 \x01(\t\x12\x16\n\x0eprovider_label\x18\x03 \x01(\t\x12\x14\n\x0csubject_hash\x18\x04 \x01(\t\x12\x44\n\x16\x64isconnect_eligibility\x18\x05 \x01(\x0e\x32$.chatto.api.v1.DisconnectEligibility\"\x1f\n\x1dListExternalIdentitiesRequest\"\x9e\x01\n\x1eListExternalIdentitiesResponse\x12:\n\tproviders\x18\x01 \x03(\x0b\x32\'.chatto.api.v1.ExternalIdentityProvider\x12@\n\x11linked_identities\x18\x02 \x03(\x0b\x32%.chatto.api.v1.LinkedExternalIdentity\"q\n StartExternalIdentityLinkRequest\x12\x1c\n\x0bprovider_id\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x15\n\rredirect_path\x18\x02 \x01(\t\x12\x18\n\x10\x63urrent_password\x18\x03 \x01(\t\"6\n!StartExternalIdentityLinkResponse\x12\x11\n\tstart_url\x18\x01 \x01(\t\"\\\n!DisconnectExternalIdentityRequest\x12\x1d\n\x0csubject_hash\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x18\n\x10\x63urrent_password\x18\x02 \x01(\t\"8\n\"DisconnectExternalIdentityResponseJ\x04\x08\x01\x10\x02R\x0c\x64isconnected*\xcc\x01\n\x15\x44isconnectEligibility\x12&\n\"DISCONNECT_ELIGIBILITY_UNSPECIFIED\x10\x00\x12\"\n\x1e\x44ISCONNECT_ELIGIBILITY_ALLOWED\x10\x01\x12\x36\n2DISCONNECT_ELIGIBILITY_LAST_ENABLED_SIGN_IN_METHOD\x10\x02\x12/\n+DISCONNECT_ELIGIBILITY_DISABLED_BY_OPERATOR\x10\x03\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -37,20 +37,22 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_STARTEXTERNALIDENTITYLINKREQUEST'].fields_by_name['provider_id']._serialized_options = b'\272H\004r\002\020\001'
   _globals['_DISCONNECTEXTERNALIDENTITYREQUEST'].fields_by_name['subject_hash']._loaded_options = None
   _globals['_DISCONNECTEXTERNALIDENTITYREQUEST'].fields_by_name['subject_hash']._serialized_options = b'\272H\004r\002\020\001'
+  _globals['_DISCONNECTELIGIBILITY']._serialized_start=1006
+  _globals['_DISCONNECTELIGIBILITY']._serialized_end=1210
   _globals['_EXTERNALIDENTITYPROVIDER']._serialized_start=116
   _globals['_EXTERNALIDENTITYPROVIDER']._serialized_end=299
-  _globals['_LINKEDEXTERNALIDENTITY']._serialized_start=301
-  _globals['_LINKEDEXTERNALIDENTITY']._serialized_end=415
-  _globals['_LISTEXTERNALIDENTITIESREQUEST']._serialized_start=417
-  _globals['_LISTEXTERNALIDENTITIESREQUEST']._serialized_end=448
-  _globals['_LISTEXTERNALIDENTITIESRESPONSE']._serialized_start=451
-  _globals['_LISTEXTERNALIDENTITIESRESPONSE']._serialized_end=609
-  _globals['_STARTEXTERNALIDENTITYLINKREQUEST']._serialized_start=611
-  _globals['_STARTEXTERNALIDENTITYLINKREQUEST']._serialized_end=724
-  _globals['_STARTEXTERNALIDENTITYLINKRESPONSE']._serialized_start=726
-  _globals['_STARTEXTERNALIDENTITYLINKRESPONSE']._serialized_end=780
-  _globals['_DISCONNECTEXTERNALIDENTITYREQUEST']._serialized_start=782
-  _globals['_DISCONNECTEXTERNALIDENTITYREQUEST']._serialized_end=874
-  _globals['_DISCONNECTEXTERNALIDENTITYRESPONSE']._serialized_start=876
-  _globals['_DISCONNECTEXTERNALIDENTITYRESPONSE']._serialized_end=932
+  _globals['_LINKEDEXTERNALIDENTITY']._serialized_start=302
+  _globals['_LINKEDEXTERNALIDENTITY']._serialized_end=486
+  _globals['_LISTEXTERNALIDENTITIESREQUEST']._serialized_start=488
+  _globals['_LISTEXTERNALIDENTITIESREQUEST']._serialized_end=519
+  _globals['_LISTEXTERNALIDENTITIESRESPONSE']._serialized_start=522
+  _globals['_LISTEXTERNALIDENTITIESRESPONSE']._serialized_end=680
+  _globals['_STARTEXTERNALIDENTITYLINKREQUEST']._serialized_start=682
+  _globals['_STARTEXTERNALIDENTITYLINKREQUEST']._serialized_end=795
+  _globals['_STARTEXTERNALIDENTITYLINKRESPONSE']._serialized_start=797
+  _globals['_STARTEXTERNALIDENTITYLINKRESPONSE']._serialized_end=851
+  _globals['_DISCONNECTEXTERNALIDENTITYREQUEST']._serialized_start=853
+  _globals['_DISCONNECTEXTERNALIDENTITYREQUEST']._serialized_end=945
+  _globals['_DISCONNECTEXTERNALIDENTITYRESPONSE']._serialized_start=947
+  _globals['_DISCONNECTEXTERNALIDENTITYRESPONSE']._serialized_end=1003
 # @@protoc_insertion_point(module_scope)

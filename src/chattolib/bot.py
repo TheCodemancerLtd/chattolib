@@ -104,13 +104,25 @@ _ROOM_EVENT_KINDS = frozenset(
         "room_universal_changed",
         "room_slow_mode_changed",
         "room_threading_mode_changed",
+        # Since 0.5.0b27: notice publish/correct/clear and join-leave display
+        # toggles are room-scoped hints (hydrate via get_notice / get_room).
+        "room_notice_changed",
+        "room_membership_events_visibility_changed",
         "user_joined_room",
         "user_left_room",
     }
 )
 # Oneof ``event`` cases that map onto a :class:`BotUserEvent`.
+# Since 0.5.0b27 ``user_account_deactivation_changed`` is included: a
+# reversible access change (the account can still be read; ``removed`` stays
+# False — hydrate ``User.deactivated`` via the user RPCs when it matters).
 _USER_EVENT_KINDS = frozenset(
-    {"user_account_created", "user_profile_changed", "user_account_deleted"}
+    {
+        "user_account_created",
+        "user_profile_changed",
+        "user_account_deleted",
+        "user_account_deactivation_changed",
+    }
 )
 # Oneof ``event`` cases that map onto a :class:`BotRoomInvitationEvent`
 # (invitation lifecycle, since 0.5.0b20; delivered only to sender+recipient).

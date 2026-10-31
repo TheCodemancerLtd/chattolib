@@ -21,6 +21,9 @@ from chattolib._pb.chatto.admin.v1 import (
     invitations_pb2 as admin_invitations_pb2,
 )
 from chattolib._pb.chatto.admin.v1 import (
+    members_pb2 as admin_members_pb2,
+)
+from chattolib._pb.chatto.admin.v1 import (
     oauth_clients_pb2 as admin_oauth_clients_pb2,
 )
 from chattolib._pb.chatto.admin.v1 import (
@@ -54,6 +57,7 @@ from chattolib._pb.chatto.api.v1 import (
 from chattolib._pb.chatto.discovery.v1 import server_pb2 as discovery_server_pb2
 from chattolib.client import ChattoClient
 from chattolib.types import (
+    AccountCreationPolicy,
     ImageFitMode,
     ImageTransformOptions,
     MessageSearchGroupBy,
@@ -1452,24 +1456,171 @@ async def test_update_bot_outbound_webhook_infers_mask(client):
     assert webhook.enabled is False
 
 
-# --- Admin: invite links / OAuth clients ---------------------------------
+# --- Admin: registration codes / OAuth clients ----------------------------
 
 
-async def test_admin_create_invite_link(client):
-    resp = admin_invitations_pb2.CreateInviteLinkResponse()
-    resp.invite_link.id = "il1"
-    resp.invite_link.link = "https://chat.chatto.run/invite/abc"
-    resp.invite_link.status = "INVITE_LINK_STATUS_ACTIVE"
-    resp.invite_link.max_uses = 5
-    mock = _mock_method(client, "admin_invite_links", "create_invite_link", resp)
+async def test_admin_create_invitation_code(client):
+    resp = admin_invitations_pb2.CreateInvitationCodeResponse()
+    resp.invitation_code.id = "ic1"
+    resp.invitation_code.code = "REG-CODE-123"
+    resp.invitation_code.status = "INVITATION_CODE_STATUS_ACTIVE"
+    resp.invitation_code.note = "for alice"
+    mock = _mock_method(client, "admin_invitation_codes", "create_invitation_code", resp)
 
     async with client:
-        link = await client.admin_create_invite_link(max_uses=5)
+        code = await client.admin_create_invitation_code(note="for alice")
 
-    assert mock.await_args.args[0].max_uses == 5
-    assert link.id == "il1"
-    assert link.status.value == "INVITE_LINK_STATUS_ACTIVE"
-    assert link.max_uses == 5
+    assert mock.await_args.args[0].note == "for alice"
+    assert code.id == "ic1"
+    assert code.code == "REG-CODE-123"
+    assert code.status.value == "INVITATION_CODE_STATUS_ACTIVE"
+    assert code.note == "for alice"
+
+
+async def test_admin_list_invitation_codes(client):
+    resp = admin_invitations_pb2.ListInvitationCodesResponse()
+    resp.invitation_codes.add(
+        id="ic1",
+        code="c",
+        status="INVITATION_CODE_STATUS_USED",
+    )
+    resp.page.total_count = 1
+    _mock_method(client, "admin_invitation_codes", "list_invitation_codes", resp)
+
+    async with client:
+        codes, page = await client.admin_list_invitation_codes()
+
+    assert codes[0].status.value == "INVITATION_CODE_STATUS_USED"
+    assert page.total_count == 1
+
+
+async def test_admin_set_user_deactivated(client):
+    resp = admin_members_pb2.SetUserDeactivatedResponse()
+    resp.member.user.id = "u1"
+    resp.member.deactivated = True
+    resp.member.viewer_can_change_deactivation = True
+    mock = _mock_method(client, "admin_users", "set_user_deactivated", resp)
+
+    async with client:
+        member = await client.admin_set_user_deactivated("u1", True)
+
+    req = mock.await_args.args[0]
+    assert req.user_id == "u1" and req.deactivated is True
+    assert member.deactivated is True
+    assert member.viewer_can_change_deactivation is True
+
+
+async def test_post_message_idempotency_key(client):
+    resp = messages_pb2.CreateMessageResponse()
+    resp.message.id = "e1"
+    resp.message.room_id = "r1"
+    mock = _mock_method(client, "messages", "create_message", resp)
+
+    async with client:
+        await client.post_message(
+            "r1", "hi", idempotency_key="2b1f8f4c-3e0a-4a3f-9e1d-6f3f2a7b9c11"
+        )
+
+    req = mock.await_args.args[0]
+    assert req.idempotency_key == "2b1f8f4c-3e0a-4a3f-9e1d-6f3f2a7b9c11"
+
+
+async def test_post_message_without_idempotency_key(client):
+    resp = messages_pb2.CreateMessageResponse()
+    resp.message.id = "e1"
+    resp.message.room_id = "r1"
+    mock = _mock_method(client, "messages", "create_message", resp)
+
+    async with client:
+        await client.post_message("r1", "hi")
+
+    req = mock.await_args.args[0]
+    assert not req.HasField("idempotency_key")
+
+
+async def test_room_notice_wrappers(client):
+    resp = rooms_pb2.GetNoticeResponse()
+    resp.notice.body = "welcome"
+    resp.notice.version = "v1"
+    resp.notice.publication_id = "p1"
+    _mock_method(client, "rooms", "get_notice", resp)
+
+    async with client:
+        notice = await client.get_notice("r1")
+
+    assert notice.body == "welcome"
+    assert notice.version == "v1"
+    assert notice.publication_id == "p1"
+
+    pub = rooms_pb2.PublishNoticeResponse()
+    pub.notice.body = "updated"
+    pub.notice.version = "v2"
+    mock = _mock_method(client, "rooms", "publish_notice", pub)
+    async with client:
+        notice = await client.publish_notice("r1", "updated", expected_version="v1", republish=True)
+
+    req = mock.await_args.args[0]
+    assert req.expected_version == "v1" and req.republish is True
+    assert notice.version == "v2"
+
+    cleared = rooms_pb2.ClearNoticeResponse()
+    cleared.notice.version = "v2"
+    mock = _mock_method(client, "rooms", "clear_notice", cleared)
+    async with client:
+        notice = await client.clear_notice("r1", expected_version="v2")
+
+    assert mock.await_args.args[0].expected_version == "v2"
+    assert notice.body == ""
+
+
+async def test_list_features(client):
+    resp = discovery_server_pb2.ListFeaturesResponse()
+    resp.features.add(
+        id="room-notices",
+        name="Room notices",
+        description="Pinned room-level notices.",
+        introduced_version="0.5.0-beta.27",
+    )
+    mock = _mock_method(client, "server_discovery", "list_features", resp)
+
+    async with client:
+        features = await client.list_features(locale="en", introduced_after_version="0.5.0-beta.26")
+
+    req = mock.await_args.args[0]
+    assert req.locale == "en"
+    assert req.introduced_after_version == "0.5.0-beta.26"
+    assert features[0].id == "room-notices"
+    assert features[0].introduced_version == "0.5.0-beta.27"
+
+
+async def test_update_room_show_membership_events(client):
+    resp = rooms_pb2.UpdateRoomResponse()
+    resp.room.id = "r1"
+    resp.room.show_membership_events = False
+    mock = _mock_method(client, "rooms", "update_room", resp)
+
+    async with client:
+        room = await client.update_room("r1", show_membership_events=False)
+
+    req = mock.await_args.args[0]
+    assert req.show_membership_events is False
+    assert room.show_membership_events is False
+
+
+async def test_admin_update_server_config_registration_mask(client):
+    resp = admin_server_pb2.UpdateServerConfigResponse()
+    resp.config.server_name = "S"
+    resp.config.registration.admission = "ACCOUNT_CREATION_POLICY_INVITE_ONLY"
+    mock = _mock_method(client, "admin_server", "update_server_config", resp)
+
+    async with client:
+        config, _profile = await client.admin_update_server_config(
+            registration_admission=AccountCreationPolicy.INVITE_ONLY
+        )
+
+    req = mock.await_args.args[0]
+    assert list(req.update_mask.paths) == ["registration.admission"]
+    assert config.registration.admission.value == "ACCOUNT_CREATION_POLICY_INVITE_ONLY"
 
 
 async def test_admin_list_oauth_clients(client):
