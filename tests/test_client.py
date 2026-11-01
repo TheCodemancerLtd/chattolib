@@ -37,6 +37,7 @@ from chattolib._pb.chatto.api.v1 import (
     asset_uploads_pb2,
     attachments_pb2,
     bots_pb2,
+    link_previews_pb2,
     message_search_pb2,
     messages_pb2,
     notifications_pb2,
@@ -1475,6 +1476,44 @@ async def test_admin_create_invitation_code(client):
     assert code.code == "REG-CODE-123"
     assert code.status.value == "INVITATION_CODE_STATUS_ACTIVE"
     assert code.note == "for alice"
+    # 0.5.0b28: expires_at was removed from CreateInvitationCodeRequest —
+    # the server fixes expiry at seven days after creation.
+    assert not hasattr(mock.await_args.args[0], "expires_at")
+
+
+# --- Link previews -------------------------------------------------------
+
+
+async def test_fetch_link_preview(client):
+    resp = link_previews_pb2.FetchLinkPreviewResponse()
+    resp.preview.url = "https://example.com"
+    resp.preview.site_name = "Example"
+    resp.preview_token = "tok-123"
+    mock = _mock_method(client, "messages", "fetch_link_preview", resp)
+
+    async with client:
+        preview, token = await client.fetch_link_preview("https://example.com")
+
+    req = mock.await_args.args[0]
+    assert req.url == "https://example.com"
+    assert req.omit_preview_token is False
+    assert preview.url == "https://example.com"
+    assert token == "tok-123"
+
+
+async def test_fetch_link_preview_omit_token(client):
+    resp = link_previews_pb2.FetchLinkPreviewResponse()
+    resp.preview.url = "https://example.com"
+    mock = _mock_method(client, "messages", "fetch_link_preview", resp)
+
+    async with client:
+        preview, token = await client.fetch_link_preview(
+            "https://example.com", omit_preview_token=True
+        )
+
+    assert mock.await_args.args[0].omit_preview_token is True
+    assert preview.url == "https://example.com"
+    assert token == ""
 
 
 async def test_admin_list_invitation_codes(client):

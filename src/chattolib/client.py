@@ -1176,10 +1176,18 @@ class ChattoClient:
 
     # --- Messages -------------------------------------------------------
 
-    async def fetch_link_preview(self, url: str) -> tuple[LinkPreview | None, str]:
+    async def fetch_link_preview(
+        self, url: str, *, omit_preview_token: bool = False
+    ) -> tuple[LinkPreview | None, str]:
+        """Fetch (and cache) metadata for a URL. ``omit_preview_token=True``
+        is a display-only read: the server skips creating the short-lived
+        composer token (returned as ``""``). Older servers may ignore the
+        flag and still return a token."""
         resp = await self._rpc(
             self._svc.messages.fetch_link_preview(
-                link_previews_pb2.FetchLinkPreviewRequest(url=url),
+                link_previews_pb2.FetchLinkPreviewRequest(
+                    url=url, omit_preview_token=omit_preview_token
+                ),
                 headers=self._headers(),
             )
         )
@@ -3402,15 +3410,13 @@ class ChattoClient:
         )
         return InvitationCode.parse(pb_to_dict(resp.invitation_code))
 
-    async def admin_create_invitation_code(
-        self, *, expires_at: datetime | None = None, note: str = ""
-    ) -> InvitationCode:
+    async def admin_create_invitation_code(self, *, note: str = "") -> InvitationCode:
         """Create a single-use registration code. Not idempotent: retrying
-        creates another code. Every code is single-use even when expiry is
-        omitted. ``note`` is an optional manager-only note (max 250 chars)."""
+        creates another code. The server fixes expiry at seven days after
+        creation (the client-sent ``expires_at`` was removed in 0.5.0b28).
+        ``note`` is an optional note visible to the creator and invitation
+        managers (max 250 chars)."""
         req = admin_invitations_pb2.CreateInvitationCodeRequest()
-        if expires_at is not None:
-            req.expires_at.CopyFrom(_timestamp_pb(expires_at))
         if note:
             req.note = note
         resp = await self._rpc(
