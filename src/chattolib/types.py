@@ -2370,9 +2370,10 @@ class BotOutboundWebhook:
 @dataclass
 class InvitationCode:
     """A single-use registration code on an invite-only server (since 0.5.0b27,
-    chatto #3085 replaced invite links). ``code`` is the recoverable bearer
-    capability — it is only ever returned to callers with ``user.invite`` and
-    must never be logged."""
+    chatto #3085 replaced invite links; since 0.5.0b28 expiry is server-fixed at
+    seven days and codes are visible to their creator with ``user.invite`` or to
+    invitation managers via ``user.manage-invites``). ``code`` is the recoverable
+    bearer capability and must never be logged."""
 
     id: str = ""
     code: str = ""
