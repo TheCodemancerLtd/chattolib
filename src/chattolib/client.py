@@ -2717,7 +2717,11 @@ class ChattoClient:
         limit: int | None = None,
         offset: int | None = None,
     ) -> tuple[list[str], Page]:
-        """Distinct authors of non-retracted replies in a thread."""
+        """Root author + distinct authors of non-retracted replies in a thread.
+
+        Since Chatto 0.5.0-rc.2 the root author is always included (even
+        without replies, unless erased); each author appears exactly once.
+        """
         req = threads_pb2.ListThreadParticipantsRequest(
             room_id=room_id, thread_root_event_id=thread_root_event_id
         )
