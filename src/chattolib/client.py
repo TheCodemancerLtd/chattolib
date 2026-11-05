@@ -153,6 +153,7 @@ from chattolib.types import (
     TimeFormat,
     TimelinePage,
     User,
+    UserRoleAssignments,
     UserSettings,
     VerifiedEmail,
     ViewerUser,
@@ -2268,6 +2269,22 @@ class ChattoClient:
             for m in (AdminMember.parse(row) for row in data.get("members") or [])
             if m is not None
         ]
+
+    async def admin_get_user_role_assignments(self, user_id: str) -> UserRoleAssignments | None:
+        """Explicit role assignments + current assignment limits for one human
+        user (since 0.5.0rc4, requires ``role.assign``; privileged mode active
+        for human sessions — ``admin.view-users`` is NOT required). Returns
+        ``None`` shape only defensively; the RPC raises ``NOT_FOUND`` for an
+        unknown/deleted user and ``FAILED_PRECONDITION`` for a bot account.
+        The implicit ``everyone`` role is omitted; lists are advisory —
+        re-read after any assignment/revocation or permission change."""
+        resp = await self._rpc(
+            self._svc.admin_users.get_user_role_assignments(
+                admin_members_pb2.GetUserRoleAssignmentsRequest(user_id=user_id),
+                headers=self._headers(),
+            )
+        )
+        return UserRoleAssignments.parse(pb_to_dict(resp.assignments))
 
     async def admin_assign_role(self, user_id: str, role_name: str) -> AdminMember | None:
         resp = await self._rpc(
