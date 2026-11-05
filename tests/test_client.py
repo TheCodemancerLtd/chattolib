@@ -1549,6 +1549,26 @@ async def test_admin_set_user_deactivated(client):
     assert member.viewer_can_change_deactivation is True
 
 
+async def test_admin_get_user_role_assignments(client):
+    resp = admin_members_pb2.GetUserRoleAssignmentsResponse()
+    resp.assignments.user_id = "u1"
+    resp.assignments.role_names.extend(["moderator", "bot.manage"])
+    resp.assignments.assignable_role_names.append("moderator")
+    resp.assignments.revocable_role_names.extend(["moderator", "everyone-safe"])
+    mock = _mock_method(client, "admin_users", "get_user_role_assignments", resp)
+
+    async with client:
+        assignments = await client.admin_get_user_role_assignments("u1")
+
+    req = mock.await_args.args[0]
+    assert req.user_id == "u1"
+    assert assignments is not None
+    assert assignments.user_id == "u1"
+    assert assignments.role_names == ["moderator", "bot.manage"]
+    assert assignments.assignable_role_names == ["moderator"]
+    assert assignments.revocable_role_names == ["moderator", "everyone-safe"]
+
+
 async def test_post_message_idempotency_key(client):
     resp = messages_pb2.CreateMessageResponse()
     resp.message.id = "e1"

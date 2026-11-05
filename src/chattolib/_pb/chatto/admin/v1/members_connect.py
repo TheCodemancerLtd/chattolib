@@ -42,6 +42,18 @@ class AdminUserServiceClient(ConnectClient):
             headers=headers,
         )
 
+    async def get_user_role_assignments(self, request: chatto_admin_v1_members_pb2.GetUserRoleAssignmentsRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.GetUserRoleAssignmentsResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetUserRoleAssignments",
+                service_name="chatto.admin.v1.AdminUserService",
+                input=chatto_admin_v1_members_pb2.GetUserRoleAssignmentsRequest,
+                output=chatto_admin_v1_members_pb2.GetUserRoleAssignmentsResponse,
+            ),
+            headers=headers,
+        )
+
     async def assign_role(self, request: chatto_admin_v1_members_pb2.AssignRoleRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.AssignRoleResponse:
         return await self.execute_unary(
             request=request,
@@ -148,6 +160,18 @@ class AdminUserServiceClientSync(ConnectClientSync):
                 service_name="chatto.admin.v1.AdminUserService",
                 input=chatto_admin_v1_members_pb2.BatchGetMembersRequest,
                 output=chatto_admin_v1_members_pb2.BatchGetMembersResponse,
+            ),
+            headers=headers,
+        )
+
+    def get_user_role_assignments(self, request: chatto_admin_v1_members_pb2.GetUserRoleAssignmentsRequest, *, headers: dict[str, str] | None = None) -> chatto_admin_v1_members_pb2.GetUserRoleAssignmentsResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="GetUserRoleAssignments",
+                service_name="chatto.admin.v1.AdminUserService",
+                input=chatto_admin_v1_members_pb2.GetUserRoleAssignmentsRequest,
+                output=chatto_admin_v1_members_pb2.GetUserRoleAssignmentsResponse,
             ),
             headers=headers,
         )

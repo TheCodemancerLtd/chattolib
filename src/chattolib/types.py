@@ -1971,6 +1971,40 @@ class AdminMember:
         )
 
 
+# --- Admin: user role assignments (since 0.5.0rc4) ----------------------
+
+
+@dataclass
+class UserRoleAssignments:
+    """Explicit role assignments + current assignment limits for one human
+    user (``AdminUserService.GetUserRoleAssignments``, since Chatto
+    0.5.0-rc.4). The implicit ``everyone`` role is omitted from all lists
+    and list order is not significant. Limits are advisory — commands check
+    current authority again; re-read after any assignment/revocation or
+    permission change."""
+
+    user_id: str
+    # Roles explicitly assigned to the target.
+    role_names: list[str] = field(default_factory=list)
+    # Roles within the caller's current grant authority.
+    assignable_role_names: list[str] = field(default_factory=list)
+    # Roles within the caller's current revoke authority for this target
+    # (includes self-protection / configured-owner restrictions; a listed
+    # role need not currently be assigned).
+    revocable_role_names: list[str] = field(default_factory=list)
+
+    @classmethod
+    def parse(cls, data: dict[str, Any] | None) -> UserRoleAssignments | None:
+        if not data:
+            return None
+        return cls(
+            user_id=data.get("userId", ""),
+            role_names=list(data.get("roleNames") or []),
+            assignable_role_names=list(data.get("assignableRoleNames") or []),
+            revocable_role_names=list(data.get("revocableRoleNames") or []),
+        )
+
+
 # --- Admin: room layout --------------------------------------------------
 
 
