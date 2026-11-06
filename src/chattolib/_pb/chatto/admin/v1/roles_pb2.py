@@ -29,7 +29,7 @@ from chatto.api.v1 import users_pb2 as chatto_dot_api_dot_v1_dot_users__pb2
 from chatto.api.v1 import pagination_pb2 as chatto_dot_api_dot_v1_dot_pagination__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1b\x63hatto/admin/v1/roles.proto\x12\x0f\x63hatto.admin.v1\x1a google/protobuf/field_mask.proto\x1a\x1b\x62uf/validate/validate.proto\x1a\x19\x63hatto/api/v1/roles.proto\x1a\x19\x63hatto/api/v1/users.proto\x1a\x1e\x63hatto/api/v1/pagination.proto\"_\n\tAdminRole\x12!\n\x04role\x18\x01 \x01(\x0b\x32\x13.chatto.api.v1.Role\x12\x13\n\x0bpermissions\x18\x02 \x03(\t\x12\x1a\n\x12permission_denials\x18\x03 \x03(\t\"\x12\n\x10ListRolesRequest\"\x80\x01\n\x11ListRolesResponse\x12)\n\x05roles\x18\x01 \x03(\x0b\x32\x1a.chatto.admin.v1.AdminRole\x12\x1f\n\x17viewer_can_manage_roles\x18\x02 \x01(\x08\x12\x1f\n\x17viewer_can_assign_roles\x18\x03 \x01(\x08\"\'\n\x0eGetRoleRequest\x12\x15\n\x04name\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"\x8a\x01\n\x0fGetRoleResponse\x12(\n\x04role\x18\x01 \x01(\x0b\x32\x1a.chatto.admin.v1.AdminRole\x12\x1f\n\x17viewer_can_manage_roles\x18\x03 \x01(\x08\x12\x1f\n\x17viewer_can_assign_roles\x18\x04 \x01(\x08J\x04\x08\x02\x10\x03R\x05users\"e\n\"AdminRoleServiceListMembersRequest\x12\x15\n\x04name\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12(\n\x04page\x18\x02 \x01(\x0b\x32\x1a.chatto.api.v1.PageRequest\"r\n#AdminRoleServiceListMembersResponse\x12$\n\x07members\x18\x01 \x03(\x0b\x32\x13.chatto.api.v1.User\x12%\n\x04page\x18\x02 \x01(\x0b\x32\x17.chatto.api.v1.PageInfo\"z\n\x11\x43reateRoleRequest\x12\x15\n\x04name\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x1d\n\x0c\x64isplay_name\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x18P\x12\x1d\n\x0b\x64\x65scription\x18\x03 \x01(\tB\x08\xbaH\x05r\x03\x18\xf4\x03\x12\x10\n\x08pingable\x18\x04 \x01(\x08\">\n\x12\x43reateRoleResponse\x12(\n\x04role\x18\x01 \x01(\x0b\x32\x1a.chatto.admin.v1.AdminRole\"\xe8\x01\n\x11UpdateRoleRequest\x12\x15\n\x04name\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\"\n\x0c\x64isplay_name\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x18PH\x00\x88\x01\x01\x12\"\n\x0b\x64\x65scription\x18\x03 \x01(\tB\x08\xbaH\x05r\x03\x18\xf4\x03H\x01\x88\x01\x01\x12\x15\n\x08pingable\x18\x04 \x01(\x08H\x02\x88\x01\x01\x12/\n\x0bupdate_mask\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.FieldMaskB\x0f\n\r_display_nameB\x0e\n\x0c_descriptionB\x0b\n\t_pingable\">\n\x12UpdateRoleResponse\x12(\n\x04role\x18\x01 \x01(\x0b\x32\x1a.chatto.admin.v1.AdminRole\"*\n\x11\x44\x65leteRoleRequest\x12\x15\n\x04name\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"#\n\x12\x44\x65leteRoleResponseJ\x04\x08\x01\x10\x02R\x07\x64\x65leted\":\n\x13ReorderRolesRequest\x12#\n\nrole_names\x18\x01 \x03(\tB\x0f\xbaH\x0c\x92\x01\t\x10\xe8\x07\"\x04r\x02\x10\x01\"A\n\x14ReorderRolesResponse\x12)\n\x05roles\x18\x01 \x03(\x0b\x32\x1a.chatto.admin.v1.AdminRole2\x90\x05\n\x10\x41\x64minRoleService\x12R\n\tListRoles\x12!.chatto.admin.v1.ListRolesRequest\x1a\".chatto.admin.v1.ListRolesResponse\x12L\n\x07GetRole\x12\x1f.chatto.admin.v1.GetRoleRequest\x1a .chatto.admin.v1.GetRoleResponse\x12x\n\x0bListMembers\x12\x33.chatto.admin.v1.AdminRoleServiceListMembersRequest\x1a\x34.chatto.admin.v1.AdminRoleServiceListMembersResponse\x12U\n\nCreateRole\x12\".chatto.admin.v1.CreateRoleRequest\x1a#.chatto.admin.v1.CreateRoleResponse\x12U\n\nUpdateRole\x12\".chatto.admin.v1.UpdateRoleRequest\x1a#.chatto.admin.v1.UpdateRoleResponse\x12U\n\nDeleteRole\x12\".chatto.admin.v1.DeleteRoleRequest\x1a#.chatto.admin.v1.DeleteRoleResponse\x12[\n\x0cReorderRoles\x12$.chatto.admin.v1.ReorderRolesRequest\x1a%.chatto.admin.v1.ReorderRolesResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1b\x63hatto/admin/v1/roles.proto\x12\x0f\x63hatto.admin.v1\x1a google/protobuf/field_mask.proto\x1a\x1b\x62uf/validate/validate.proto\x1a\x19\x63hatto/api/v1/roles.proto\x1a\x19\x63hatto/api/v1/users.proto\x1a\x1e\x63hatto/api/v1/pagination.proto\"\x89\x02\n\tAdminRole\x12!\n\x04role\x18\x01 \x01(\x0b\x32\x13.chatto.api.v1.Role\x12\x19\n\x0cmember_count\x18\x04 \x01(\x04H\x00\x88\x01\x01\x12#\n\x16permission_grant_count\x18\x05 \x01(\x04H\x01\x88\x01\x01\x12$\n\x17permission_denial_count\x18\x06 \x01(\x04H\x02\x88\x01\x01\x42\x0f\n\r_member_countB\x19\n\x17_permission_grant_countB\x1a\n\x18_permission_denial_countJ\x04\x08\x02\x10\x03J\x04\x08\x03\x10\x04R\x0bpermissionsR\x12permission_denials\"\x12\n\x10ListRolesRequest\"\x80\x01\n\x11ListRolesResponse\x12)\n\x05roles\x18\x01 \x03(\x0b\x32\x1a.chatto.admin.v1.AdminRole\x12\x1f\n\x17viewer_can_manage_roles\x18\x02 \x01(\x08\x12\x1f\n\x17viewer_can_assign_roles\x18\x03 \x01(\x08\"\'\n\x0eGetRoleRequest\x12\x15\n\x04name\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"\x8a\x01\n\x0fGetRoleResponse\x12(\n\x04role\x18\x01 \x01(\x0b\x32\x1a.chatto.admin.v1.AdminRole\x12\x1f\n\x17viewer_can_manage_roles\x18\x03 \x01(\x08\x12\x1f\n\x17viewer_can_assign_roles\x18\x04 \x01(\x08J\x04\x08\x02\x10\x03R\x05users\"e\n\"AdminRoleServiceListMembersRequest\x12\x15\n\x04name\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12(\n\x04page\x18\x02 \x01(\x0b\x32\x1a.chatto.api.v1.PageRequest\"r\n#AdminRoleServiceListMembersResponse\x12$\n\x07members\x18\x01 \x03(\x0b\x32\x13.chatto.api.v1.User\x12%\n\x04page\x18\x02 \x01(\x0b\x32\x17.chatto.api.v1.PageInfo\"z\n\x11\x43reateRoleRequest\x12\x15\n\x04name\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\x1d\n\x0c\x64isplay_name\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x18P\x12\x1d\n\x0b\x64\x65scription\x18\x03 \x01(\tB\x08\xbaH\x05r\x03\x18\xf4\x03\x12\x10\n\x08pingable\x18\x04 \x01(\x08\">\n\x12\x43reateRoleResponse\x12(\n\x04role\x18\x01 \x01(\x0b\x32\x1a.chatto.admin.v1.AdminRole\"\xe8\x01\n\x11UpdateRoleRequest\x12\x15\n\x04name\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\x12\"\n\x0c\x64isplay_name\x18\x02 \x01(\tB\x07\xbaH\x04r\x02\x18PH\x00\x88\x01\x01\x12\"\n\x0b\x64\x65scription\x18\x03 \x01(\tB\x08\xbaH\x05r\x03\x18\xf4\x03H\x01\x88\x01\x01\x12\x15\n\x08pingable\x18\x04 \x01(\x08H\x02\x88\x01\x01\x12/\n\x0bupdate_mask\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.FieldMaskB\x0f\n\r_display_nameB\x0e\n\x0c_descriptionB\x0b\n\t_pingable\">\n\x12UpdateRoleResponse\x12(\n\x04role\x18\x01 \x01(\x0b\x32\x1a.chatto.admin.v1.AdminRole\"*\n\x11\x44\x65leteRoleRequest\x12\x15\n\x04name\x18\x01 \x01(\tB\x07\xbaH\x04r\x02\x10\x01\"#\n\x12\x44\x65leteRoleResponseJ\x04\x08\x01\x10\x02R\x07\x64\x65leted\":\n\x13ReorderRolesRequest\x12#\n\nrole_names\x18\x01 \x03(\tB\x0f\xbaH\x0c\x92\x01\t\x10\xe8\x07\"\x04r\x02\x10\x01\"A\n\x14ReorderRolesResponse\x12)\n\x05roles\x18\x01 \x03(\x0b\x32\x1a.chatto.admin.v1.AdminRole2\x90\x05\n\x10\x41\x64minRoleService\x12R\n\tListRoles\x12!.chatto.admin.v1.ListRolesRequest\x1a\".chatto.admin.v1.ListRolesResponse\x12L\n\x07GetRole\x12\x1f.chatto.admin.v1.GetRoleRequest\x1a .chatto.admin.v1.GetRoleResponse\x12x\n\x0bListMembers\x12\x33.chatto.admin.v1.AdminRoleServiceListMembersRequest\x1a\x34.chatto.admin.v1.AdminRoleServiceListMembersResponse\x12U\n\nCreateRole\x12\".chatto.admin.v1.CreateRoleRequest\x1a#.chatto.admin.v1.CreateRoleResponse\x12U\n\nUpdateRole\x12\".chatto.admin.v1.UpdateRoleRequest\x1a#.chatto.admin.v1.UpdateRoleResponse\x12U\n\nDeleteRole\x12\".chatto.admin.v1.DeleteRoleRequest\x1a#.chatto.admin.v1.DeleteRoleResponse\x12[\n\x0cReorderRoles\x12$.chatto.admin.v1.ReorderRolesRequest\x1a%.chatto.admin.v1.ReorderRolesResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -56,36 +56,36 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_DELETEROLEREQUEST'].fields_by_name['name']._serialized_options = b'\272H\004r\002\020\001'
   _globals['_REORDERROLESREQUEST'].fields_by_name['role_names']._loaded_options = None
   _globals['_REORDERROLESREQUEST'].fields_by_name['role_names']._serialized_options = b'\272H\014\222\001\t\020\350\007\"\004r\002\020\001'
-  _globals['_ADMINROLE']._serialized_start=197
-  _globals['_ADMINROLE']._serialized_end=292
-  _globals['_LISTROLESREQUEST']._serialized_start=294
-  _globals['_LISTROLESREQUEST']._serialized_end=312
-  _globals['_LISTROLESRESPONSE']._serialized_start=315
-  _globals['_LISTROLESRESPONSE']._serialized_end=443
-  _globals['_GETROLEREQUEST']._serialized_start=445
-  _globals['_GETROLEREQUEST']._serialized_end=484
-  _globals['_GETROLERESPONSE']._serialized_start=487
-  _globals['_GETROLERESPONSE']._serialized_end=625
-  _globals['_ADMINROLESERVICELISTMEMBERSREQUEST']._serialized_start=627
-  _globals['_ADMINROLESERVICELISTMEMBERSREQUEST']._serialized_end=728
-  _globals['_ADMINROLESERVICELISTMEMBERSRESPONSE']._serialized_start=730
-  _globals['_ADMINROLESERVICELISTMEMBERSRESPONSE']._serialized_end=844
-  _globals['_CREATEROLEREQUEST']._serialized_start=846
-  _globals['_CREATEROLEREQUEST']._serialized_end=968
-  _globals['_CREATEROLERESPONSE']._serialized_start=970
-  _globals['_CREATEROLERESPONSE']._serialized_end=1032
-  _globals['_UPDATEROLEREQUEST']._serialized_start=1035
-  _globals['_UPDATEROLEREQUEST']._serialized_end=1267
-  _globals['_UPDATEROLERESPONSE']._serialized_start=1269
-  _globals['_UPDATEROLERESPONSE']._serialized_end=1331
-  _globals['_DELETEROLEREQUEST']._serialized_start=1333
-  _globals['_DELETEROLEREQUEST']._serialized_end=1375
-  _globals['_DELETEROLERESPONSE']._serialized_start=1377
-  _globals['_DELETEROLERESPONSE']._serialized_end=1412
-  _globals['_REORDERROLESREQUEST']._serialized_start=1414
-  _globals['_REORDERROLESREQUEST']._serialized_end=1472
-  _globals['_REORDERROLESRESPONSE']._serialized_start=1474
-  _globals['_REORDERROLESRESPONSE']._serialized_end=1539
-  _globals['_ADMINROLESERVICE']._serialized_start=1542
-  _globals['_ADMINROLESERVICE']._serialized_end=2198
+  _globals['_ADMINROLE']._serialized_start=198
+  _globals['_ADMINROLE']._serialized_end=463
+  _globals['_LISTROLESREQUEST']._serialized_start=465
+  _globals['_LISTROLESREQUEST']._serialized_end=483
+  _globals['_LISTROLESRESPONSE']._serialized_start=486
+  _globals['_LISTROLESRESPONSE']._serialized_end=614
+  _globals['_GETROLEREQUEST']._serialized_start=616
+  _globals['_GETROLEREQUEST']._serialized_end=655
+  _globals['_GETROLERESPONSE']._serialized_start=658
+  _globals['_GETROLERESPONSE']._serialized_end=796
+  _globals['_ADMINROLESERVICELISTMEMBERSREQUEST']._serialized_start=798
+  _globals['_ADMINROLESERVICELISTMEMBERSREQUEST']._serialized_end=899
+  _globals['_ADMINROLESERVICELISTMEMBERSRESPONSE']._serialized_start=901
+  _globals['_ADMINROLESERVICELISTMEMBERSRESPONSE']._serialized_end=1015
+  _globals['_CREATEROLEREQUEST']._serialized_start=1017
+  _globals['_CREATEROLEREQUEST']._serialized_end=1139
+  _globals['_CREATEROLERESPONSE']._serialized_start=1141
+  _globals['_CREATEROLERESPONSE']._serialized_end=1203
+  _globals['_UPDATEROLEREQUEST']._serialized_start=1206
+  _globals['_UPDATEROLEREQUEST']._serialized_end=1438
+  _globals['_UPDATEROLERESPONSE']._serialized_start=1440
+  _globals['_UPDATEROLERESPONSE']._serialized_end=1502
+  _globals['_DELETEROLEREQUEST']._serialized_start=1504
+  _globals['_DELETEROLEREQUEST']._serialized_end=1546
+  _globals['_DELETEROLERESPONSE']._serialized_start=1548
+  _globals['_DELETEROLERESPONSE']._serialized_end=1583
+  _globals['_REORDERROLESREQUEST']._serialized_start=1585
+  _globals['_REORDERROLESREQUEST']._serialized_end=1643
+  _globals['_REORDERROLESRESPONSE']._serialized_start=1645
+  _globals['_REORDERROLESRESPONSE']._serialized_end=1710
+  _globals['_ADMINROLESERVICE']._serialized_start=1713
+  _globals['_ADMINROLESERVICE']._serialized_end=2369
 # @@protoc_insertion_point(module_scope)

@@ -1709,17 +1709,28 @@ class Role:
 @dataclass
 class AdminRole:
     role: Role | None
-    permissions: list[str] = field(default_factory=list)
-    permission_denials: list[str] = field(default_factory=list)
+    # Optional totals, reported by ListRoles only (callers with role.manage or
+    # role.assign). Permission *decisions* are read through AdminPermissionService
+    # (GetRolePermissionMatrix / ListRolePermissionDecisions) — the old
+    # `permissions` / `permission_denials` arrays were removed at Chatto 0.5.0rc5.
+    member_count: int | None = None
+    permission_grant_count: int | None = None
+    permission_denial_count: int | None = None
 
     @classmethod
     def parse(cls, data: dict[str, Any] | None) -> AdminRole | None:
         if not data:
             return None
+
+        def _count(key: str) -> int | None:
+            value = data.get(key)
+            return None if value is None else int(value)
+
         return cls(
             role=Role.parse(data.get("role")),
-            permissions=list(data.get("permissions") or []),
-            permission_denials=list(data.get("permissionDenials") or []),
+            member_count=_count("memberCount"),
+            permission_grant_count=_count("permissionGrantCount"),
+            permission_denial_count=_count("permissionDenialCount"),
         )
 
 
