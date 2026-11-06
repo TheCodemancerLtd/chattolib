@@ -30,6 +30,9 @@ from chattolib._pb.chatto.admin.v1 import (
     permissions_pb2 as admin_permissions_pb2,
 )
 from chattolib._pb.chatto.admin.v1 import (
+    roles_pb2 as admin_roles_pb2,
+)
+from chattolib._pb.chatto.admin.v1 import (
     server_pb2 as admin_server_pb2,
 )
 from chattolib._pb.chatto.api.v1 import (
@@ -1698,6 +1701,35 @@ async def test_admin_list_oauth_clients(client):
 
     assert clients[0].source.value == "OAUTH_CLIENT_SOURCE_CIMD"
     assert page.total_count == 1
+
+
+# --- Admin: roles (rc5 AdminRole shape) -----------------------------------
+
+
+async def test_admin_list_roles_totals(client):
+    resp = admin_roles_pb2.ListRolesResponse()
+    role = resp.roles.add()
+    role.role.name = "moderators"
+    role.role.display_name = "Moderators"
+    role.member_count = 7
+    role.permission_grant_count = 12
+    role.permission_denial_count = 2
+    bare = resp.roles.add()
+    bare.role.name = "everyone"
+    resp.viewer_can_manage_roles = True
+    _mock_method(client, "admin_roles", "list_roles", resp)
+
+    async with client:
+        roles = await client.admin_list_roles()
+
+    assert roles[0].role.name == "moderators"
+    assert roles[0].member_count == 7
+    assert roles[0].permission_grant_count == 12
+    assert roles[0].permission_denial_count == 2
+    # totals are optional: absent for callers without role.manage/role.assign
+    assert roles[1].member_count is None
+    assert roles[1].permission_grant_count is None
+    assert roles[1].permission_denial_count is None
 
 
 # --- Admin: permission writes ---------------------------------------------
