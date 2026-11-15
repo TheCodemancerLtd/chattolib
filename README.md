@@ -1,17 +1,24 @@
 # chattolib
 
-**Unofficial** async Python client library for the [Chatto](https://chat.chatto.run) webchat API.
+**Unofficial** async Python library for building **bots** for the
+[Chatto](https://chat.chatto.run) webchat server.
 
-> Chattolib versions track the Chatto server version they target. The current
-> release targets Chatto's ConnectRPC API. Request/response traffic uses the
-> official [`connectrpc`](https://pypi.org/project/connectrpc/) Python
-> package; the realtime channel is a binary protobuf WebSocket at
-> `/api/realtime` (needs the ``[realtime]`` extra).
->
+chattolib gives you a typed, Pythonic client for Chatto's protobuf-first
+Connect API (every public, admin, auth and discovery RPC is wrapped, with
+dataclasses for the responses) and a realtime WebSocket client that streams
+server events as they happen. On top of those sits a small bot framework
+(`Bot`) that handles joining rooms, replying, and reacting to events.
+
 > **chattolib is a bot library.** It drives *bot* accounts, which
 > authenticate with a key used directly as a bearer token (no password,
 > no `/auth/login` round-trip). Normal humans use the Chatto web app; you
 > reach the API here as a bot. See the [bot guide](docs/bots.md).
+>
+> Chattolib versions track the Chatto server version they target. The
+> request/response side is a self-contained Connect client over `httpx`
+> with generated protobuf bindings (no `connectrpc` dependency); the
+> realtime channel is a binary protobuf WebSocket at `/api/realtime`
+> (needs the ``[realtime]`` extra).
 
 ## Install
 
@@ -76,7 +83,7 @@ signals; use the corresponding Connect RPC (`GetRoomEventsAround`,
 
 ## Escape hatch
 
-`ChattoClient.services` exposes the underlying `connectrpc` service clients
+`ChattoClient.services` exposes the generated Connect service clients
 directly (one per Chatto service), for anything the Pythonic wrappers don't
 yet cover. For example:
 

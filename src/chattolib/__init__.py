@@ -1,4 +1,4 @@
-"""Async Python client library for the Chatto Connect API."""
+"""Async Python library for building Chatto bots over the Connect API and realtime WebSocket."""
 
 from chattolib.client import ChattoClient
 from chattolib.exceptions import ChattoAuthError, ChattoConnectError, ChattoError

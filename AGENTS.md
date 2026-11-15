@@ -10,7 +10,7 @@ Guidance for AI coding assistants (Claude Code, Cursor, Aider, etc.) working in 
 
 ## Project Overview
 
-**chattolib** is an async Python client library for the [Chatto](https://chat.chatto.run) webchat Connect API (`https://chat.chatto.run/api/connect/…`). Chatto migrated from GraphQL to protobuf-first ConnectRPC in v0.4.x (see [ADR-042](https://github.com/chattocorp/chatto/blob/main/docs/adr/ADR-042-protobuf-first-public-api.md), which supersedes ADR-003). This library speaks Connect JSON over HTTP for all request/response operations.
+**chattolib** is an async Python library for building **bots** for the [Chatto](https://chat.chatto.run) webchat server: a typed client for the Connect API (`https://chat.chatto.run/api/connect/…`), a realtime WebSocket event stream, and a small `Bot` framework on top. Chatto migrated from GraphQL to protobuf-first ConnectRPC in v0.4.x (see [ADR-042](https://github.com/chattocorp/chatto/blob/main/docs/adr/ADR-042-protobuf-first-public-api.md), which supersedes ADR-003). This library speaks Connect JSON over HTTP for all request/response operations.
 
 ## Versioning
 
@@ -38,10 +38,11 @@ mypy src/chattolib
 
 ## Architecture
 
-The library uses the official **`connectrpc` Python package** for the
-request/response API surface: `_transport.build_service_clients(base_url)`
-instantiates one ConnectRPC service client per Chatto service, all sharing the
-same address and the `google.protobuf` binary codec. Realtime events use a
+The request/response API surface is a **self-contained Connect client**
+(`_connect.py`, over `httpx`; the `connectrpc` package is no longer a
+dependency). `_transport.build_service_clients(base_url)` instantiates one
+generated service stub per Chatto service, all sharing the same address and
+the `google.protobuf` binary codec. Realtime events use a
 separate binary-protobuf WebSocket protocol (`chatto.realtime.v1`) served at
 `/api/realtime`, implemented in `realtime.py` on top of `websockets` and
 generated protobuf bindings.
@@ -49,7 +50,7 @@ generated protobuf bindings.
 ### Package layout: `src/chattolib/`
 
 - **client.py** — `ChattoClient` async class. Each method builds a protobuf request, invokes the appropriate generated service stub via `_rpc`, and normalises the response into the library's dataclass types. `services` is a public escape hatch for reaching the raw ConnectRPC service clients directly.
-- **_transport.py** — instantiates the ConnectRPC service clients, translates `connectrpc.errors.ConnectError` into `ChattoConnectError`/`ChattoAuthError`, and exposes `pb_to_dict(message)` for the request/response ↔ dataclass bridge.
+- **_transport.py** — instantiates the generated Connect service clients, translates `_connect.ConnectError` into `ChattoConnectError`/`ChattoAuthError`, and exposes `pb_to_dict(message)` for the request/response ↔ dataclass bridge.
 - **types.py** — Dataclasses and `StrEnum` types mirroring the protobuf messages, with `.parse(dict)` classmethods that consume Connect JSON.
 - **exceptions.py** — `ChattoError`, `ChattoConnectError` (wraps Connect protocol errors), `ChattoAuthError`.
 - **realtime.py** — Protobuf realtime WebSocket client. `stream_events(client)` yields `RealtimeEvent(kind, payload, ...)` values. Errors surface as `ChattoRealtimeError` / `ChattoRealtimeCloseError`.
