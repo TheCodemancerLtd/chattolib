@@ -24,6 +24,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
     "Topic :: Communications :: Chat",
     "Framework :: AsyncIO",
+    "Typing :: Typed",
 ]
 dependencies = [
     "protobuf>=5.28",
@@ -43,10 +44,14 @@ dev = [
     "respx>=0.22",
     "ruff>=0.8",
     "mypy>=1.13",
+    "types-protobuf>=5.28",
 ]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+chattolib = ["py.typed"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -68,14 +73,12 @@ warn_unused_configs = true
 exclude = ["src/chattolib/_pb", "src/chattolib/_codegen"]
 
 [[tool.mypy.overrides]]
-# Generated protobuf modules and third-party libs that ship no type info are
-# treated as untyped: protobuf bundles no .pyi/py.typed, and websockets is only
-# used behind the [realtime] extra. ignore_missing_imports keeps mypy from
-# flagging the `import google.protobuf...` lines in the hand-written transport.
+# Generated protobuf modules and websockets (only used behind the [realtime]
+# extra) are treated as untyped. google.protobuf itself is typed via the
+# types-protobuf dev dependency.
 module = [
     "chattolib._pb.*",
     "chattolib._codegen.*",
-    "google.protobuf.*",
     "websockets.*",
 ]
 follow_imports = "skip"

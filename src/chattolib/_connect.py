@@ -27,7 +27,7 @@ import asyncio
 import enum
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, cast
+from typing import Any
 
 import httpx
 from google.protobuf.message import Message
@@ -118,9 +118,7 @@ class _BinaryCodec:
         return "proto"
 
     def encode(self, message: Message) -> bytes:
-        # SerializeToString returns bytes; the cast documents that (Message is
-        # untyped because protobuf ships no type info, so mypy sees Any).
-        return cast(bytes, message.SerializeToString())
+        return message.SerializeToString()
 
     def decode(self, data: bytes, message_class: type[Message]) -> Message:
         return message_class.FromString(data)
