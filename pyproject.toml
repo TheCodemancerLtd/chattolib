@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "chattolib"
-version = "0.5.0"
+version = "0.5.0.post1"
 description = "Async Python library for building Chatto bots: typed Connect RPC client plus realtime WebSocket events"
 requires-python = ">=3.11"
 license = "MPL-2.0 AND Apache-2.0"
