@@ -28,7 +28,7 @@ The worktree shares `.git`, so commits and pushes from it land on the same branc
 
 ```bash
 ln -s "$main_repo/.venv" .venv
-ln -s "$main_repo/.env.pipy" .env.pipy
+ln -s "$main_repo/.env.pypi" .env.pypi
 ```
 
 If either is missing in the main checkout, stop and ask the requester to set it up before continuing.
@@ -153,12 +153,12 @@ If the remotes have older hashes than local (e.g. because upstream history was r
 ```bash
 source .venv/bin/activate && rm -rf dist/ build/ && python -m build
 source .venv/bin/activate && twine check dist/chattolib-<target>*
-source .venv/bin/activate && TWINE_USERNAME=__token__ TWINE_PASSWORD="$(cat .env.pipy)" \
+source .venv/bin/activate && TWINE_USERNAME=__token__ TWINE_PASSWORD="$(cat .env.pypi)" \
     twine upload dist/chattolib-<target>*
 ```
 
-- `.env.pipy` holds the PyPI API token as a single line beginning with `pypi-`. It is gitignored — never stage or commit it.
-- If `.env.pipy` is missing or the upload rejects the token, stop and ask the requester to refresh it. Do not attempt alternative auth paths.
+- `.env.pypi` holds the PyPI API token as a single line beginning with `pypi-`. It is gitignored — never stage or commit it.
+- If `.env.pypi` is missing or the upload rejects the token, stop and ask the requester to refresh it. Do not attempt alternative auth paths.
 
 ## 9. Close the bean
 
@@ -185,7 +185,7 @@ cd "$main_repo"
 git worktree remove "$work_dir"
 ```
 
-If `git worktree remove` refuses (e.g. residual untracked files), inspect the worktree first — do not `--force` blindly. Only untracked build/upload artefacts (`dist/`, `build/`, `__pycache__`) and the two symlinks (`.venv`, `.env.pipy`) should be there. If that is all, `git worktree remove --force "$work_dir"` is safe.
+If `git worktree remove` refuses (e.g. residual untracked files), inspect the worktree first — do not `--force` blindly. Only untracked build/upload artefacts (`dist/`, `build/`, `__pycache__`) and the two symlinks (`.venv`, `.env.pypi`) should be there. If that is all, `git worktree remove --force "$work_dir"` is safe.
 
 ## 11. Report
 
